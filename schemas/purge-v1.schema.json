@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/skosovsky/memy/schemas/purge-v1.schema.json",
+  "title": "memy purge data v1",
+  "$ref": "document-v1.schema.json#/$defs/purge"
+}

@@ -1,0 +1,48 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Coverage
+*.out
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Serena MCP
+.serena/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build
+bin/
+dist/
+
+# Coverage reports
+coverage.out
+coverage.html
+coverage.xml
+*.coverprofile
+
+# Temporary
+*.tmp
+*.bak
+*.log
+*~
+
+# OS
+.DS_Store
+Thumbs.db

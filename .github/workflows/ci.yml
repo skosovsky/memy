@@ -1,0 +1,22 @@
+name: contracts
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-24.04
+    env:
+      CGO_ENABLED: "1"
+      GOCACHE: /tmp/memy-go-build
+      GOLANGCI_LINT_CACHE: /tmp/memy-golangci-cache
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.27.1"
+          cache: true
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
+      - run: make validate

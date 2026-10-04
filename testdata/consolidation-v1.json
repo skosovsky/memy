@@ -1,0 +1,15 @@
+{
+  "version": "tea/v1",
+  "provider": "script/v1",
+  "resolver": "explicit/v1",
+  "projection": "preference/v1",
+  "records": [
+    {"id": "tea-1", "tenant": "A", "key": "drink", "value": "sometimes prefers tea", "known": true, "from": "2026-06-01T00:00:00Z", "to": "2026-08-01T00:00:00Z"},
+    {"id": "tea-evening", "tenant": "A", "key": "drink", "value": "never drinks tea in the evening", "known": true, "from": "2026-06-01T00:00:00Z", "to": "2026-08-01T00:00:00Z"},
+    {"id": "tea-duplicate", "tenant": "A", "key": "drink", "value": "sometimes prefers tea", "known": true, "from": "2026-06-01T00:00:00Z", "to": "2026-08-01T00:00:00Z"},
+    {"id": "tea-other-scope", "tenant": "B", "key": "drink", "value": "always requires tea", "known": true, "from": "2026-06-01T00:00:00Z", "to": "2026-08-01T00:00:00Z"}
+  ],
+  "expected_unique_A": ["sometimes prefers tea", "never drinks tea in the evening"],
+  "scripted_bad_semantic": "always requires tea",
+  "auto_apply": false
+}

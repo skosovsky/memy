@@ -1,0 +1,277 @@
+// Package sqlite supplies a durable local store using SQLite transactions.
+// It requires CGO and a C compiler. Core and memory do not require this package.
+package sqlite
+
+import (
+	"bytes"
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+	"net/url"
+	"path/filepath"
+	"sync"
+	"time"
+
+	"github.com/mattn/go-sqlite3" // Registers the optional SQLite driver.
+
+	"github.com/skosovsky/memy"
+	"github.com/skosovsky/memy/internal/kv"
+)
+
+// Stage identifies a fault-injection boundary. Hooks execute synchronously.
+type Stage string
+
+const lockWaitLimit = 5 * time.Second
+const lockRetryDelay = 2 * time.Millisecond
+
+const (
+	// BeforeCommit tests rollback of all data and receipts.
+	BeforeCommit Stage = "before_commit"
+	// AfterCommit tests an ambiguous response after a durable transaction.
+	AfterCommit Stage = "after_commit"
+)
+
+// Options configures the reference adapter. Fault must be concurrency-safe.
+type Options struct {
+	Fault func(context.Context, Stage) error
+}
+
+// Store owns a SQLite connection pool. Callbacks are transaction-local.
+type Store struct {
+	db       *sql.DB
+	fault    func(context.Context, Stage) error
+	once     sync.Once
+	closeErr error
+}
+
+// Open initializes or validates schema v1. Path must refer to a real local
+// file; temporary/in-memory databases would violate Durable capabilities.
+func Open(ctx context.Context, path string, options Options) (*Store, error) {
+	if path == "" || path == ":memory:" {
+		return nil, memy.ErrInvalid
+	}
+	absolute, operationErr := filepath.Abs(path)
+	if operationErr != nil {
+		return nil, fmt.Errorf("sqlite path: %w", operationErr)
+	}
+	dsn := (&url.URL{Scheme: "file", Path: absolute}).String() +
+		"?_busy_timeout=25&_journal_mode=WAL&_synchronous=FULL&_txlock=immediate&_foreign_keys=on&_secure_delete=on"
+	db, operationErr := sql.Open("sqlite3", dsn)
+	if operationErr != nil {
+		return nil, fmt.Errorf("sqlite open: %w", errors.Join(memy.ErrUnavailable, operationErr))
+	}
+	db.SetMaxOpenConns(1)
+	db.SetMaxIdleConns(1)
+	store := &Store{db: db, fault: options.Fault, once: sync.Once{}, closeErr: nil}
+	if err := store.initialize(ctx); err != nil {
+		_ = db.Close()
+		return nil, err
+	}
+	return store, nil
+}
+
+func (s *Store) initialize(ctx context.Context) error {
+	tx, operationErr := s.begin(ctx)
+	if operationErr != nil {
+		return storageError(operationErr)
+	}
+	defer func() { _ = tx.Rollback() }()
+	for _, statement := range []string{
+		`CREATE TABLE IF NOT EXISTS memy_schema (singleton INTEGER PRIMARY KEY CHECK(singleton=1), version INTEGER NOT NULL)`,
+		`INSERT OR IGNORE INTO memy_schema(singleton,version) VALUES(1,1)`,
+	} {
+		if _, err := tx.ExecContext(ctx, statement); err != nil {
+			return storageError(err)
+		}
+	}
+	var version int
+	if err := tx.QueryRowContext(ctx, `SELECT version FROM memy_schema WHERE singleton=1`).Scan(&version); err != nil {
+		return storageError(err)
+	}
+	if version != 1 {
+		return memy.ErrSchema
+	}
+	if _, err := tx.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS memy_values (
+		scope TEXT NOT NULL, key TEXT NOT NULL, version INTEGER NOT NULL CHECK(version>0),
+		value BLOB, PRIMARY KEY(scope,key)) WITHOUT ROWID`); err != nil {
+		return storageError(err)
+	}
+	if err := tx.Commit(); err != nil {
+		return storageError(err)
+	}
+	return nil
+}
+
+// Capabilities describes the persistent transactional contract.
+func (*Store) Capabilities() memy.StoreCapabilities {
+	return memy.StoreCapabilities{Atomic: true, ConditionalWrite: true, Durable: true, SchemaVersion: 1}
+}
+
+// View returns a serialized snapshot, rejecting writes in its callback.
+func (s *Store) View(ctx context.Context, scope memy.Scope, fn func(memy.Bucket) error) error {
+	return s.run(ctx, scope, false, fn)
+}
+
+// Update uses BEGIN IMMEDIATE and persists only a successful CAS snapshot.
+func (s *Store) Update(ctx context.Context, scope memy.Scope, fn func(memy.Bucket) error) error {
+	return s.run(ctx, scope, true, fn)
+}
+
+func (s *Store) run(ctx context.Context, scope memy.Scope, writable bool, fn func(memy.Bucket) error) error {
+	if err := scope.Validate(); err != nil {
+		return err
+	}
+	if fn == nil {
+		return memy.ErrInvalid
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	tx, operationErr := s.begin(ctx)
+	if operationErr != nil {
+		return storageError(operationErr)
+	}
+	defer func() { _ = tx.Rollback() }()
+	values, operationErr := load(ctx, tx, scope.Key())
+	if operationErr != nil {
+		return operationErr
+	}
+	original := kv.Clone(values)
+	bucket := kv.New(ctx, values, writable)
+	defer bucket.Seal()
+	if err := fn(bucket); err != nil {
+		return err
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if !writable {
+		return nil
+	} // Deferred rollback releases the read transaction.
+	if err := persist(ctx, tx, scope.Key(), original, values); err != nil {
+		return err
+	}
+	if s.fault != nil {
+		if err := s.fault(ctx, BeforeCommit); err != nil {
+			return err
+		}
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		// Commit errors may not certify absence of external durable effects.
+		return errors.Join(memy.ErrUnknownOutcome, storageError(err))
+	}
+	if s.fault != nil {
+		if err := s.fault(ctx, AfterCommit); err != nil {
+			return errors.Join(memy.ErrUnknownOutcome, err)
+		}
+	}
+	return nil
+}
+
+func load(ctx context.Context, tx *sql.Tx, scope string) (map[string]memy.Value, error) {
+	rows, operationErr := tx.QueryContext(ctx, `SELECT key,version,value FROM memy_values WHERE scope=?`, scope)
+	if operationErr != nil {
+		return nil, storageError(operationErr)
+	}
+	defer func() { _ = rows.Close() }()
+	values := make(map[string]memy.Value)
+	for rows.Next() {
+		var key string
+		var value memy.Value
+		if err := rows.Scan(&key, &value.Version, &value.Data); err != nil {
+			return nil, storageError(err)
+		}
+		if value.Version == 0 || value.Version > memy.MaxVersion || (value.Data != nil && len(value.Data) == 0) {
+			return nil, memy.ErrSchema
+		}
+		values[key] = value
+	}
+	if err := rows.Err(); err != nil {
+		return nil, storageError(err)
+	}
+	return values, nil
+}
+
+func persist(ctx context.Context, tx *sql.Tx, scope string, original, values map[string]memy.Value) error {
+	for key, value := range values {
+		old := original[key]
+		if value.Version == old.Version && bytes.Equal(value.Data, old.Data) {
+			continue
+		}
+		var result sql.Result
+		var err error
+		if old.Version == 0 {
+			result, err = tx.ExecContext(
+				ctx,
+				`INSERT OR IGNORE INTO memy_values(scope,key,version,value) VALUES(?,?,?,?)`,
+				scope,
+				key,
+				value.Version,
+				value.Data,
+			)
+		} else {
+			result, err = tx.ExecContext(
+				ctx,
+				`UPDATE memy_values SET version=?,value=? WHERE scope=? AND key=? AND version=?`,
+				value.Version,
+				value.Data,
+				scope,
+				key,
+				old.Version,
+			)
+		}
+		if err != nil {
+			return storageError(err)
+		}
+		affected, err := result.RowsAffected()
+		if err != nil {
+			return storageError(err)
+		}
+		if affected != 1 {
+			return memy.ErrConflict
+		}
+	}
+	return nil
+}
+
+func storageError(err error) error {
+	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+		return err
+	}
+	return fmt.Errorf("sqlite storage: %w", errors.Join(memy.ErrUnavailable, err))
+}
+
+func (s *Store) begin(ctx context.Context) (*sql.Tx, error) {
+	until := time.Now().Add(lockWaitLimit)
+	for {
+		tx, err := s.db.BeginTx(ctx, nil)
+		if err == nil {
+			return tx, nil
+		}
+		if contextErr := ctx.Err(); contextErr != nil {
+			return nil, contextErr
+		}
+		var busy sqlite3.Error
+		if !errors.As(err, &busy) || (busy.Code != sqlite3.ErrBusy && busy.Code != sqlite3.ErrLocked) ||
+			!time.Now().Before(until) {
+			return nil, storageError(err)
+		}
+		timer := time.NewTimer(lockRetryDelay)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return nil, ctx.Err()
+		case <-timer.C:
+		}
+	}
+}
+
+// Close releases connections. Repeated calls return the first result.
+func (s *Store) Close() error {
+	s.once.Do(func() { s.closeErr = s.db.Close() })
+	return s.closeErr
+}
