@@ -15,7 +15,7 @@ func (e *Engine[P, R, A]) currentRetention(ctx context.Context, scope Scope, p p
 		return Retention{}, errors.Join(ErrSchema, decodeErr)
 	}
 	current, policyErr := e.config.Retention.Evaluate(ctx, scope, payload)
-	if policyErr != nil || current.PolicyVersion == "" {
+	if policyErr != nil || !validIdentifier(current.PolicyVersion) {
 		return Retention{}, errors.Join(ErrPolicyDenied, policyErr)
 	}
 	return current, nil

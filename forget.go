@@ -169,7 +169,7 @@ func (e *Engine[P, R, A]) Forget(
 	if operationErr != nil {
 		return PurgeReceipt{}, operationErr
 	}
-	if request.Reason == "" || request.PolicyVersion == "" {
+	if request.Reason == "" || !validIdentifier(request.PolicyVersion) {
 		return PurgeReceipt{}, ErrPolicyDenied
 	}
 	if err := validateSelector(scope, request.Selector); err != nil {
@@ -191,7 +191,7 @@ func (e *Engine[P, R, A]) Forget(
 func validateSelector(scope Scope, selector Selector) error {
 	switch selector.Kind {
 	case SelectRecord, SelectSource:
-		if selector.ID == "" {
+		if !validIdentifier(selector.ID) {
 			return ErrInvalid
 		}
 	case SelectSubject:

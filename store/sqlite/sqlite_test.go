@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -170,28 +171,32 @@ func faultRecoveryStage(t *testing.T, stage sqlite.Stage) {
 	}
 }
 
-func TestRejectNewerSchema(t *testing.T) {
-	// Arrange.
-	path := filepath.Join(t.TempDir(), "store.db")
-	store := open(t, path, sqlite.Options{})
-	if err := store.Close(); err != nil {
-		t.Fatal(err)
-	}
-	db, operationErr := sql.Open("sqlite3", path)
-	if operationErr != nil {
-		t.Fatal(operationErr)
-	}
-	if _, err := db.Exec(`UPDATE memy_schema SET version=2`); err != nil {
-		t.Fatal(err)
-	}
-	if err := db.Close(); err != nil {
-		t.Fatal(err)
-	}
-	// Act.
-	result, operationErr := sqlite.Open(context.Background(), path, sqlite.Options{})
-	// Assert.
-	if result != nil || !errors.Is(operationErr, memy.ErrSchema) {
-		t.Fatalf("newer schema accepted: %v", operationErr)
+func TestRejectIncompatibleSchema(t *testing.T) {
+	for _, version := range []int{1, 3} {
+		t.Run(strconv.Itoa(version), func(t *testing.T) {
+			// Arrange.
+			path := filepath.Join(t.TempDir(), "store.db")
+			store := open(t, path, sqlite.Options{})
+			if err := store.Close(); err != nil {
+				t.Fatal(err)
+			}
+			db, operationErr := sql.Open("sqlite3", path)
+			if operationErr != nil {
+				t.Fatal(operationErr)
+			}
+			if _, err := db.Exec(`UPDATE memy_schema SET version=?`, version); err != nil {
+				t.Fatal(err)
+			}
+			if err := db.Close(); err != nil {
+				t.Fatal(err)
+			}
+			// Act.
+			result, operationErr := sqlite.Open(context.Background(), path, sqlite.Options{})
+			// Assert.
+			if result != nil || !errors.Is(operationErr, memy.ErrSchema) {
+				t.Fatalf("newer schema accepted: %v", operationErr)
+			}
+		})
 	}
 }
 

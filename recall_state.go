@@ -14,7 +14,7 @@ func recallCoverage[P, R any](found SearchResult, minimum *VisibilityToken) (Rec
 		Complete: true,
 	}
 	for _, coverage := range found.Coverage {
-		if coverage.Backend == "" {
+		if !validIdentifier(coverage.Backend) {
 			return RecallResult[P, R]{}, ErrInvalid
 		}
 		switch coverage.Status {
@@ -38,7 +38,7 @@ func (e *Engine[P, R, A]) recallCandidates(
 	seen := make(map[RevisionRef]bool)
 	records := make([]Ranked[P, R], 0, len(candidates))
 	for _, candidate := range candidates {
-		if candidate.RecordID == "" || candidate.Revision == 0 || candidate.Revision > MaxVersion ||
+		if !validIdentifier(candidate.RecordID) || candidate.Revision == 0 || candidate.Revision > MaxVersion ||
 			!finiteScore(candidate.Score) {
 			return nil, ErrInvalid
 		}

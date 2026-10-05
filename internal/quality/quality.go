@@ -122,7 +122,7 @@ func Run(ctx context.Context, corpus Corpus) (Report, error) {
 	var report Report
 	report.CorpusVersion, report.ExtractorVersion = corpus.Version, corpus.Provider
 	report.ResolverVersion, report.ProjectionVersion = corpus.Resolver, corpus.Projection
-	report.GoVersion, report.StoreConsistency = runtime.Version(), "memory/v1: atomic CAS; nondurable; index visibility acknowledged"
+	report.GoVersion, report.StoreConsistency = runtime.Version(), "memory/v2: atomic CAS; nondurable; index visibility acknowledged"
 	for _, mode := range []string{baselineMode, string(memy.ExactDedup), string(memy.DomainMerge), string(memy.SemanticMerge)} {
 		trial, err := runTrial(ctx, corpus, mode)
 		if err != nil {

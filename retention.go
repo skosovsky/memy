@@ -20,7 +20,7 @@ func (e *Engine[P, R, A]) Sweep(
 	scope Scope,
 	purpose, operationPrefix string,
 ) (SweepResult, error) {
-	if operationPrefix == "" {
+	if !validIdentifier(operationPrefix) {
 		return SweepResult{}, ErrInvalid
 	}
 	decision, authErr := e.authorize(ctx, authority, scope, ActionForget, purpose)
@@ -267,7 +267,7 @@ func (e *Engine[P, R, A]) Reintroduce(
 	if err := validateSelector(scope, request.Selector); err != nil {
 		return EpochFence{}, err
 	}
-	if request.PolicyVersion == "" {
+	if !validIdentifier(request.PolicyVersion) {
 		return EpochFence{}, ErrPolicyDenied
 	}
 	decision, operationErr := e.authorize(ctx, authority, scope, ActionForget, purpose)

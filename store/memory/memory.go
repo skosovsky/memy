@@ -30,7 +30,7 @@ func New() *Store {
 
 // Capabilities describes the in-process guarantees; Durable is false.
 func (*Store) Capabilities() memy.StoreCapabilities {
-	return memy.StoreCapabilities{Atomic: true, ConditionalWrite: true, SchemaVersion: 1, Durable: false}
+	return memy.StoreCapabilities{Atomic: true, ConditionalWrite: true, SchemaVersion: memy.SchemaVersion, Durable: false}
 }
 
 func (s *Store) acquire(ctx context.Context) error {

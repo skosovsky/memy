@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"math"
 	"strings"
+	"unicode/utf8"
 )
 
 // Scope is assigned by the authenticated host, never by payload content.
@@ -17,7 +18,7 @@ type Scope struct {
 // Validate rejects incomplete scopes and oversized identifiers.
 func (s Scope) Validate() error {
 	for _, part := range []string{s.Tenant, s.Namespace, s.Subject} {
-		if strings.TrimSpace(part) == "" || len(part) > 1024 || strings.ContainsRune(part, '\x00') {
+		if !validIdentifier(part) {
 			return ErrInvalid
 		}
 	}
@@ -29,6 +30,16 @@ func (s Scope) Key() string {
 	encoded, _ := json.Marshal(s)
 	return string(encoded)
 }
+
+// SchemaVersion is the only supported persisted envelope and database format.
+const SchemaVersion uint32 = 2
+
+// validIdentifier compares exact text; it never normalizes identity.
+func validIdentifier(value string) bool {
+	return utf8.ValidString(value) && strings.TrimSpace(value) != "" && len(value) <= 1024 && !strings.ContainsRune(value, '\x00')
+}
+
+func validPurpose(value string) bool { return value == "" || validIdentifier(value) }
 
 // Version is a per-key CAS version. Zero denotes a never-written key.
 // Deletion retains its version and subsequent reintroduction increments it.

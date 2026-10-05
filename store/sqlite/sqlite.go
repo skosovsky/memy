@@ -45,7 +45,7 @@ type Store struct {
 	closeErr error
 }
 
-// Open initializes or validates schema v1. Path must refer to a real local
+// Open initializes or validates schema v2. Path must refer to a real local
 // file; temporary/in-memory databases would violate Durable capabilities.
 func Open(ctx context.Context, path string, options Options) (*Store, error) {
 	if path == "" || path == ":memory:" {
@@ -79,7 +79,7 @@ func (s *Store) initialize(ctx context.Context) error {
 	defer func() { _ = tx.Rollback() }()
 	for _, statement := range []string{
 		`CREATE TABLE IF NOT EXISTS memy_schema (singleton INTEGER PRIMARY KEY CHECK(singleton=1), version INTEGER NOT NULL)`,
-		`INSERT OR IGNORE INTO memy_schema(singleton,version) VALUES(1,1)`,
+		`INSERT OR IGNORE INTO memy_schema(singleton,version) VALUES(1,2)`,
 	} {
 		if _, err := tx.ExecContext(ctx, statement); err != nil {
 			return storageError(err)
@@ -89,7 +89,7 @@ func (s *Store) initialize(ctx context.Context) error {
 	if err := tx.QueryRowContext(ctx, `SELECT version FROM memy_schema WHERE singleton=1`).Scan(&version); err != nil {
 		return storageError(err)
 	}
-	if version != 1 {
+	if version != int(memy.SchemaVersion) {
 		return memy.ErrSchema
 	}
 	if _, err := tx.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS memy_values (
@@ -105,7 +105,7 @@ func (s *Store) initialize(ctx context.Context) error {
 
 // Capabilities describes the persistent transactional contract.
 func (*Store) Capabilities() memy.StoreCapabilities {
-	return memy.StoreCapabilities{Atomic: true, ConditionalWrite: true, Durable: true, SchemaVersion: 1}
+	return memy.StoreCapabilities{Atomic: true, ConditionalWrite: true, Durable: true, SchemaVersion: memy.SchemaVersion}
 }
 
 // View returns a serialized snapshot, rejecting writes in its callback.

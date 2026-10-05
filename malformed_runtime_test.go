@@ -49,7 +49,7 @@ func corruptCanonicalHead(b memy.Bucket, field string) error {
 		return decodeErr
 	}
 	if field == "schema" {
-		document[field] = json.RawMessage(`2`)
+		document[field] = json.RawMessage(`3`)
 	} else {
 		changed, mutationErr := corruptCanonicalData(document["data"], field)
 		if mutationErr != nil {
@@ -247,7 +247,7 @@ func corruptHeadSchema(b memy.Bucket, id string) error {
 		if data.ID != id {
 			continue
 		}
-		envelope["schema"] = json.RawMessage(`2`)
+		envelope["schema"] = json.RawMessage(`3`)
 		raw, encodeErr := json.Marshal(envelope)
 		if encodeErr != nil {
 			return encodeErr

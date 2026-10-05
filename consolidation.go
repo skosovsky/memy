@@ -136,7 +136,7 @@ func Consolidate[P, R, A any](
 	request ConsolidationRequest,
 	provider Consolidator[P, R],
 ) ([]Proposal[P, R], error) {
-	if e == nil || request.PolicyVersion == "" || len(request.Inputs) < 2 || len(request.Inputs) > 256 ||
+	if e == nil || !validIdentifier(request.PolicyVersion) || len(request.Inputs) < 2 || len(request.Inputs) > 256 ||
 		request.Budget.InputBytes <= 0 || request.Budget.OutputBytes <= 0 || request.Budget.CostUnits < 0 ||
 		math.IsNaN(request.MinimumUtility) || math.IsInf(request.MinimumUtility, 0) {
 		return nil, ErrInvalid
@@ -456,8 +456,8 @@ func (e *Engine[P, R, A]) budgetRecord(r Record[P, R]) ([]byte, error) {
 	p.Scope, p.Epoch, p.Retention = r.Scope, r.Epoch, r.Retention
 	return encodeDocument("record", recordDisk{
 		ID: r.ID, Revision: r.Revision, Scope: r.Scope, Proposal: p, State: r.State,
-		InitialState: r.State, RecordedAt: r.RecordedAt, PolicyVersion: r.PolicyVersion,
-		Related: r.Related, Lineage: r.Provenance.Lineage, Transitions: nil,
+		InitialState: r.State, RecordedAt: r.RecordedAt, AuthorityPolicyVersion: r.AuthorityPolicyVersion,
+		Reconciliation: cloneReconciliation(r.Reconciliation), Lineage: r.Provenance.Lineage, Transitions: nil,
 	})
 }
 

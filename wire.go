@@ -45,25 +45,23 @@ type proposalDisk struct {
 }
 
 type recordDisk struct {
-	ID            string        `json:"id"`
-	Revision      Version       `json:"revision"`
-	Scope         Scope         `json:"scope"`
-	Proposal      proposalDisk  `json:"proposal"`
-	State         RecordState   `json:"state"`
-	InitialState  RecordState   `json:"initial_state"`
-	RecordedAt    time.Time     `json:"recorded_at"`
-	PolicyVersion string        `json:"policy_version"`
-	Related       []RevisionRef `json:"related"`
-	Lineage       []RevisionRef `json:"lineage"`
-	Transitions   []transition  `json:"transitions"`
+	ID                     string          `json:"id"`
+	Revision               Version         `json:"revision"`
+	Scope                  Scope           `json:"scope"`
+	Proposal               proposalDisk    `json:"proposal"`
+	State                  RecordState     `json:"state"`
+	InitialState           RecordState     `json:"initial_state"`
+	RecordedAt             time.Time       `json:"recorded_at"`
+	AuthorityPolicyVersion string          `json:"authority_policy_version"`
+	Reconciliation         *Reconciliation `json:"reconciliation"`
+	Lineage                []RevisionRef   `json:"lineage"`
+	Transitions            []transition    `json:"transitions"`
 }
 
 type transition struct {
-	At            time.Time     `json:"at"`
-	State         RecordState   `json:"state"`
-	PolicyVersion string        `json:"policy_version"`
-	Basis         string        `json:"basis"`
-	Related       []RevisionRef `json:"related"`
+	At       time.Time   `json:"at"`
+	State    RecordState `json:"state"`
+	Decision RevisionRef `json:"decision"`
 }
 
 type operationDisk struct {
@@ -80,14 +78,20 @@ type epochDisk struct {
 }
 
 func encodeDocument(kind string, value any) ([]byte, error) {
+	if !metadataStringsValid(value) {
+		return nil, ErrInvalid
+	}
 	raw, operationErr := json.Marshal(value)
 	if operationErr != nil {
 		return nil, errors.Join(ErrInvalid, operationErr)
 	}
-	return json.Marshal(document{Schema: 1, Kind: kind, Data: raw})
+	return json.Marshal(document{Schema: SchemaVersion, Kind: kind, Data: raw})
 }
 
 func decodeDocument(raw []byte, kind string, value any) error {
+	if !strictWireText(raw) {
+		return ErrSchema
+	}
 	canonical, operationErr := canonicalJSON(raw)
 	if operationErr != nil {
 		return errors.Join(ErrSchema, operationErr)
@@ -101,7 +105,7 @@ func decodeDocument(raw []byte, kind string, value any) error {
 	if err := decoder.Decode(&doc); err != nil {
 		return errors.Join(ErrSchema, err)
 	}
-	if doc.Schema != 1 || doc.Kind != kind || len(doc.Data) == 0 || doc.Data[0] != '{' {
+	if doc.Schema != SchemaVersion || doc.Kind != kind || len(doc.Data) == 0 || doc.Data[0] != '{' {
 		return ErrSchema
 	}
 	decoder = json.NewDecoder(bytes.NewReader(doc.Data))
@@ -112,7 +116,7 @@ func decodeDocument(raw []byte, kind string, value any) error {
 	if err := decoder.Decode(value); err != nil {
 		return errors.Join(ErrSchema, err)
 	}
-	if !validDocument(value) {
+	if !metadataStringsValid(value) || !validDocument(value) {
 		return ErrSchema
 	}
 	return nil
@@ -142,7 +146,7 @@ func writeDocument(b Bucket, key, kind string, expected Version, value any) erro
 }
 
 func objectKey(kind, id string) string {
-	hash, _ := digest(id) // A string always has a valid deterministic JSON encoding.
+	hash, _ := digest(id) // Public identity validation precedes key construction.
 	return kind + "/" + hash
 }
 
@@ -172,7 +176,7 @@ func currentEpoch(b Bucket) (epochDisk, Version, error) {
 }
 
 func operation(b Bucket, id, action, requestDigest string) (operationDisk, Version, bool, error) {
-	if id == "" || len(id) > 1024 {
+	if !validIdentifier(id) {
 		return operationDisk{}, 0, false, ErrInvalid
 	}
 	var existing operationDisk
@@ -190,6 +194,9 @@ func operation(b Bucket, id, action, requestDigest string) (operationDisk, Versi
 }
 
 func operationDigest(scope Scope, actor, purpose string, input any) (string, error) {
+	if scope.Validate() != nil || !validIdentifier(actor) || !validPurpose(purpose) || !metadataStringsValid(input) {
+		return "", ErrInvalid
+	}
 	return digest(struct {
 		Scope   Scope
 		Actor   string

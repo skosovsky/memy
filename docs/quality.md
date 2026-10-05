@@ -3,7 +3,7 @@
 Corpus: `testdata/consolidation-v1.json`, tea/v1. Reproduce:
 `go run ./examples/quality -out docs/quality-report.json`. This is a consumer
 experiment; core has no dependency on it or evaly. Every trial starts with
-isolated memory/v1 atomic/CAS state. SQLite durability has separate lifecycle
+isolated memory/v2 atomic/CAS state. SQLite durability has separate lifecycle
 tests. The report records toolchain, extractor, resolver and projection versions.
 
 ## Comparison

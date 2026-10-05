@@ -1,4 +1,4 @@
-# memy design — contract v1
+# memy design — contract v2
 
 Status: implementation contract. No automatic consolidation,
 network calls, scheduler, prompt execution, or permission escalation is part of
@@ -42,7 +42,7 @@ at its check's linearization point, and a host requiring atomic cross-system
 revocation must provide a decision lease covering the operation. There is no
 distributed transaction with arbitrary IAM.
 
-Record scope limits every read, source, derived artifact and query. The v1
+Record scope limits every read, source, derived artifact and query. The v2
 reference profile rejects field-restricted records/requests as unsupported;
 the consumer can split records. A future safe field-projection adapter must
 authorize the input before extraction, ranking, summarization or export;
@@ -89,7 +89,7 @@ SQLite journals, filesystem snapshots, or unmanaged backups.
 Engine.Capabilities reports the store profile and engine-owned ValidTime,
 RecordedTime and FieldProjection capabilities. Both temporal predicates are
 implemented over canonical revision history for every admitted transactional
-store. FieldProjection is false in v1; field-restricted authority decisions
+store. FieldProjection is false in v2; field-restricted authority decisions
 are rejected before consumer policies see content. Search visibility remains
 a separately advertised Search capability.
 
@@ -265,7 +265,7 @@ Domain merge uses an injected typed deterministic provider. Semantic merge
 uses an injected typed provider and returns loss/uncertainty annotations.
 All outputs are proposals and pass normal acceptance/reconciliation. Originals
 are retained. Scope is no broader than the intersection of input permissions;
-v1 exact-scope restriction rejects incompatible inputs. Source revocation or
+v2 exact-scope restriction rejects incompatible inputs. Source revocation or
 revision change invalidates proposal and existing dependent summaries until
 rebuild. Budget exhaustion leaves originals untouched.
 
@@ -297,7 +297,7 @@ interval ordering, scope binding, lineage, policy and state transitions.
 The executable schema checks use a pinned test-only validator; core runtime
 continues to use the standard library only.
 
-Storage schema v1 has an explicit metadata version. Unsupported newer versions
+Storage schema v2 has an explicit metadata version. Unsupported newer versions
 fail on open. Future migrations are explicit and transactional; never reinterpret
 unknown valid-time as always or updated-at as valid-from. Payload/reference
 codec migration is consumer-controlled, with recorded source mapping and host
@@ -423,3 +423,40 @@ the callback is not invoked and ErrStaleInput is returned. Canonical View still
 excludes concurrent revocation during a started callback. Time passing or an
 external effect after callback entry is not rolled back by a timeout; callbacks
 remain responsible for context and their declared external-effect boundaries.
+
+## Identity and reconciliation contract v2
+
+Framework-owned identifiers (scope components, record/proposal/operation/source
+IDs and revisions, actor, codec/provider/policy/sink versions and names) are
+nonempty valid UTF-8, at most 1024 bytes, contain no NUL, and are not entirely
+whitespace. Values compare exactly: no trim, case folding or Unicode normalization
+is performed. Purpose may be empty but otherwise uses the same byte/text limits.
+Free-text evidence, rationale and uncertainty annotations must be valid UTF-8;
+they are not identifiers. Consumer payload/reference representations remain owned
+by their codecs. JSON wire rejects malformed UTF-8 and unpaired escaped UTF-16
+surrogates before decoding can replace them with U+FFFD. Literal U+FFFD is valid.
+
+Each non-revoked canonical revision stores its immutable Reconciliation decision:
+mode, resolver policy version, sensitive basis and exact related revisions.
+AuthorityPolicyVersion is separate. The decision is returned with authorized
+Record reads, including recorded-as-of reads of that revision; future transitions
+change state as-of but never overwrite the initial decision. Transitions keep
+only a content-free exact decision revision reference, not a second copy of
+sensitive Basis or resolver policy. A forgotten decision leaves its historical
+state transition intact but makes its rationale unavailable. There is no second
+public Related list or ambiguous PolicyVersion field on Record. Decision slices
+are detached before injected callbacks. Projection carries the same initial
+decision as data. Basis is content-bearing and is purged with historical payload;
+tombstones have a null decision and no authority policy content. The permanent
+operation ledger continues to store content-free receipts, never CommitRequest.
+
+Persisted envelopes and database metadata use schema version 2. Only v2 is read;
+v1 databases and envelopes are explicitly rejected, never silently reset or
+migrated. A consumer can provision a fresh database and import reviewed facts
+through normal host-controlled lifecycle, maintaining its current revocations.
+
+The executable schema validator registers the custom `memy-identifier` format
+with format assertions enabled: valid UTF-8, 1–1024 bytes, no NUL and not all
+Unicode whitespace. JSON Schema maxLength alone counts codepoints, not bytes.
+Consumers validating these schemas must implement this documented format; an
+unconfigured validator checking shape alone is not identity conformance.

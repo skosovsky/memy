@@ -16,9 +16,16 @@ import (
 func compileSchemas(t *testing.T) map[string]*jsonschema.Schema {
 	t.Helper()
 	compiler := jsonschema.NewCompiler()
+	compiler.RegisterFormat(&jsonschema.Format{Name: "memy-identifier", Validate: func(value any) error {
+		text, ok := value.(string)
+		if !ok {
+			return nil
+		}
+		return (memy.Scope{Tenant: text, Namespace: "schema", Subject: "identifier"}).Validate()
+	}})
 	compiler.AssertFormat()
 	compiler.AssertContent()
-	paths, operationErr := filepath.Glob("schemas/*-v1.schema.json")
+	paths, operationErr := filepath.Glob("schemas/*-v2.schema.json")
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
@@ -37,7 +44,7 @@ func compileSchemas(t *testing.T) map[string]*jsonschema.Schema {
 	}
 	compiled := make(map[string]*jsonschema.Schema)
 	for _, kind := range []string{"document", "proposal", "record", "acceptance", "operation", "epoch", "revocation", "purge"} {
-		schema, err := compiler.Compile("https://github.com/skosovsky/memy/schemas/" + kind + "-v1.schema.json")
+		schema, err := compiler.Compile("https://github.com/skosovsky/memy/schemas/" + kind + "-v2.schema.json")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -120,11 +127,12 @@ func TestWireSchemaRejectsMalformedEnvelope(t *testing.T) {
 	// Act / Assert: these never become success/zero-valued documents.
 	for _, input := range []string{
 		`{"kind":"epoch","data":{"value":1,"recorded_at":"2026-01-01T00:00:00Z"}}`,
-		`{"schema":2,"kind":"epoch","data":{"value":1,"recorded_at":"2026-01-01T00:00:00Z"}}`,
-		`{"schema":1,"kind":"epoch","data":{"value":1}}`,
-		`{"schema":1,"kind":"epoch","data":{"value":-1,"recorded_at":"2026-01-01T00:00:00Z"}}`,
-		`{"schema":1,"kind":"epoch","data":{"value":1,"recorded_at":"bad"}}`,
-		`{"schema":1,"kind":"epoch","data":{"value":1,"recorded_at":"2026-01-01T00:00:00Z","unknown":true}}`,
+		`{"schema":1,"kind":"epoch","data":{"value":1,"recorded_at":"2026-01-01T00:00:00Z"}}`,
+		`{"schema":3,"kind":"epoch","data":{"value":1,"recorded_at":"2026-01-01T00:00:00Z"}}`,
+		`{"schema":2,"kind":"epoch","data":{"value":1}}`,
+		`{"schema":2,"kind":"epoch","data":{"value":-1,"recorded_at":"2026-01-01T00:00:00Z"}}`,
+		`{"schema":2,"kind":"epoch","data":{"value":1,"recorded_at":"bad"}}`,
+		`{"schema":2,"kind":"epoch","data":{"value":1,"recorded_at":"2026-01-01T00:00:00Z","unknown":true}}`,
 	} {
 		var instance any
 		if err := json.Unmarshal([]byte(input), &instance); err != nil {

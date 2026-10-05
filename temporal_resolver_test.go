@@ -136,7 +136,7 @@ func TestConflictHistoryAndExplicitResolution(t *testing.T) {
 		previous.State != memy.Active ||
 		historicalConflict.State != memy.Conflicted ||
 		resolved.State != memy.Active ||
-		len(resolved.Related) != 2 {
+		len(resolved.Reconciliation.Related) != 2 {
 		t.Fatalf(
 			"conflicted=%+v previous=%+v historical=%+v resolved=%+v",
 			conflicted,

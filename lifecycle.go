@@ -174,20 +174,20 @@ type Provenance[R any] struct {
 
 // Record is a detached typed canonical revision. Knowledge is always data.
 type Record[P, R any] struct {
-	ID            string        `json:"id"`
-	Revision      Version       `json:"revision"`
-	Scope         Scope         `json:"scope"`
-	Payload       P             `json:"payload"`
-	State         RecordState   `json:"state"`
-	Provenance    Provenance[R] `json:"provenance"`
-	ObservedAt    time.Time     `json:"observed_at"`
-	RecordedAt    time.Time     `json:"recorded_at"`
-	Valid         Interval      `json:"valid"`
-	Retention     Retention     `json:"retention"`
-	ExpiresAt     time.Time     `json:"expires_at"`
-	PolicyVersion string        `json:"policy_version"`
-	Epoch         Version       `json:"epoch"`
-	Related       []RevisionRef `json:"related"`
+	ID                     string          `json:"id"`
+	Revision               Version         `json:"revision"`
+	Scope                  Scope           `json:"scope"`
+	Payload                P               `json:"payload"`
+	State                  RecordState     `json:"state"`
+	Provenance             Provenance[R]   `json:"provenance"`
+	ObservedAt             time.Time       `json:"observed_at"`
+	RecordedAt             time.Time       `json:"recorded_at"`
+	Valid                  Interval        `json:"valid"`
+	Retention              Retention       `json:"retention"`
+	ExpiresAt              time.Time       `json:"expires_at"`
+	AuthorityPolicyVersion string          `json:"authority_policy_version"`
+	Epoch                  Version         `json:"epoch"`
+	Reconciliation         *Reconciliation `json:"reconciliation"`
 }
 
 // VisibilityToken identifies an exact committed revision for index visibility.
@@ -218,10 +218,10 @@ const (
 
 // Reconciliation binds related revisions and a versioned resolution basis.
 type Reconciliation struct {
-	Mode          ReconcileMode
-	Related       []RevisionRef
-	PolicyVersion string
-	Basis         string
+	Mode          ReconcileMode `json:"mode"`
+	Related       []RevisionRef `json:"related"`
+	PolicyVersion string        `json:"policy_version"`
+	Basis         string        `json:"basis"`
 }
 
 // CommitRequest links an accepted proposal to a conditional canonical write.

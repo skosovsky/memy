@@ -28,6 +28,9 @@ func (e *Engine[P, R, A]) Revise(
 	if operationErr != nil {
 		return Proposal[P, R]{}, operationErr
 	}
+	if !validIdentifier(id) {
+		return Proposal[P, R]{}, ErrInvalid
+	}
 	encoded, operationErr := e.encodeSuggestion(suggestion)
 	if operationErr != nil {
 		return Proposal[P, R]{}, operationErr
@@ -107,7 +110,7 @@ func Extract[I, P, R, A any](
 	codec Codec[I],
 	provider Extractor[I, P, R],
 ) ([]Proposal[P, R], error) {
-	if e == nil || nilPort(codec) || nilPort(provider) || job.ProviderVersion == "" {
+	if e == nil || nilPort(codec) || nilPort(provider) || !validIdentifier(job.ProviderVersion) || !validIdentifier(job.OperationID) {
 		return nil, ErrInvalid
 	}
 	decision, authErr := e.authorize(ctx, authority, scope, ActionPropose, job.Purpose)
@@ -146,7 +149,7 @@ func extractionRequestDigest[I any](
 	input I,
 	codec Codec[I],
 ) (string, error) {
-	if codec.Version() == "" {
+	if !validIdentifier(codec.Version()) {
 		return "", ErrSchema
 	}
 	encoded, encodeErr := codec.Encode(input)

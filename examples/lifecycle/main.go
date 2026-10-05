@@ -157,6 +157,10 @@ func demonstrateRecallAndForget(
 	if record.Revision != 2 || record.Payload.Value != "UTC+7" {
 		return errors.New("reopened canonical correction mismatch")
 	}
+	if record.Reconciliation == nil || record.Reconciliation.Mode != memy.Supersede || record.AuthorityPolicyVersion == "" {
+		return errors.New("reopened reconciliation decision mismatch")
+	}
+	fmt.Printf("Decision: %s, resolver=%s, authority=%s, basis=%s.\n", record.Reconciliation.Mode, record.Reconciliation.PolicyVersion, record.AuthorityPolicyVersion, record.Reconciliation.Basis)
 	fmt.Printf(
 		"New session, no transcript: %s=%s, revision %d.\n",
 		record.Payload.Key,

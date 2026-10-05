@@ -16,19 +16,19 @@ func validDigest(value string) bool {
 }
 
 func validRef(ref RevisionRef) bool {
-	return ref.RecordID != "" && ref.Revision > 0 && ref.Revision <= MaxVersion
+	return validIdentifier(ref.RecordID) && ref.Revision > 0 && ref.Revision <= MaxVersion
 }
 
 func validProposal(p *proposalDisk) bool {
-	if p.ID == "" || p.Revision == 0 || p.Revision > MaxVersion || p.Scope.Validate() != nil ||
+	if !validIdentifier(p.ID) || p.Revision == 0 || p.Revision > MaxVersion || p.Scope.Validate() != nil ||
 		!validDigest(p.Digest) ||
 		len(p.Payload) == 0 ||
-		p.PayloadCodec == "" ||
-		p.ReferenceCodec == "" ||
+		!validIdentifier(p.PayloadCodec) ||
+		!validIdentifier(p.ReferenceCodec) ||
 		p.Evidence == "" ||
-		p.Extractor == "" ||
+		!validIdentifier(p.Extractor) ||
 		p.CreatedAt.IsZero() ||
-		p.Retention.PolicyVersion == "" ||
+		!validIdentifier(p.Retention.PolicyVersion) ||
 		p.Valid.Validate() != nil ||
 		len(p.Sources) == 0 {
 		return false
@@ -39,7 +39,7 @@ func validProposal(p *proposalDisk) bool {
 		return false
 	}
 	for _, source := range p.Sources {
-		if source.ID == "" || source.Revision == "" || len(source.Reference) == 0 {
+		if !validIdentifier(source.ID) || !validIdentifier(source.Revision) || len(source.Reference) == 0 {
 			return false
 		}
 	}
@@ -53,13 +53,13 @@ func validProposal(p *proposalDisk) bool {
 }
 
 func validRecord(r *recordDisk) bool {
-	if r.ID == "" || r.Revision == 0 || r.Revision > MaxVersion || r.Scope.Validate() != nil || r.RecordedAt.IsZero() ||
-		r.PolicyVersion == "" {
+	if !validIdentifier(r.ID) || r.Revision == 0 || r.Revision > MaxVersion || r.Scope.Validate() != nil || r.RecordedAt.IsZero() ||
+		(r.State != Revoked && !validIdentifier(r.AuthorityPolicyVersion)) {
 		return false
 	}
 	if r.State == Revoked {
 		return r.InitialState == Revoked && reflect.ValueOf(r.Proposal).IsZero() &&
-			len(r.Lineage) == 0 && len(r.Related) == 0 && len(r.Transitions) == 0
+			len(r.Lineage) == 0 && r.Reconciliation == nil && r.AuthorityPolicyVersion == "" && len(r.Transitions) == 0
 	}
 	if r.InitialState != Active && r.InitialState != Conflicted {
 		return false
@@ -67,7 +67,7 @@ func validRecord(r *recordDisk) bool {
 	if !validProposal(&r.Proposal) || r.Proposal.Scope != r.Scope || r.Proposal.State != Accepted {
 		return false
 	}
-	return validTransitions(r) && validRevisionRefs(r.Related) && validRevisionRefs(r.Lineage) &&
+	return r.Reconciliation != nil && (r.InitialState == Conflicted) == (r.Reconciliation.Mode == Conflict) && validReconciliation(*r.Reconciliation) == nil && validTransitions(r) && validRevisionRefs(r.Lineage) &&
 		containsReviewedLineage(r)
 }
 
@@ -92,8 +92,8 @@ func validRevisionRefs(refs []RevisionRef) bool {
 func validTransitions(r *recordDisk) bool {
 	state, previous := r.InitialState, r.RecordedAt
 	for _, change := range r.Transitions {
-		if change.At.Before(previous) || change.PolicyVersion == "" || change.Basis == "" ||
-			(change.State != Superseded && change.State != Conflicted) || !validRevisionRefs(change.Related) {
+		if change.At.Before(previous) ||
+			(change.State != Superseded && change.State != Conflicted) || !validRef(change.Decision) {
 			return false
 		}
 		state, previous = change.State, change.At
@@ -129,7 +129,7 @@ func validOperation(op *operationDisk) bool {
 
 func validProposalRefs(refs []ProposalRef) bool {
 	for _, ref := range refs {
-		if ref.ID == "" || ref.Revision == 0 || ref.Revision > MaxVersion {
+		if !validIdentifier(ref.ID) || ref.Revision == 0 || ref.Revision > MaxVersion {
 			return false
 		}
 	}
@@ -137,17 +137,22 @@ func validProposalRefs(refs []ProposalRef) bool {
 }
 
 func validCommitReceipt(receipt *CommitReceipt) bool {
-	return receipt != nil && receipt.CanonicalCommitted && receipt.OperationID != "" && receipt.RecordID != "" &&
+	return receipt != nil && receipt.CanonicalCommitted && validIdentifier(receipt.OperationID) && validIdentifier(receipt.RecordID) &&
 		receipt.Revision > 0 && receipt.Revision <= MaxVersion && receipt.Visibility.Scope.Validate() == nil &&
 		receipt.Visibility.RecordID == receipt.RecordID && receipt.Visibility.Revision == receipt.Revision
 }
 
 func validPurge(p *PurgeReceipt) bool {
-	if p.Batch.OperationID == "" || p.Batch.Scope.Validate() != nil || p.Batch.Epoch == 0 ||
+	if !validIdentifier(p.Batch.OperationID) || p.Batch.Scope.Validate() != nil || p.Batch.Epoch == 0 ||
 		p.Batch.Epoch > MaxVersion ||
 		p.RevokedAt.IsZero() ||
 		validateSelector(p.Batch.Scope, p.Batch.Selector) != nil {
 		return false
+	}
+	for _, id := range p.Batch.Records {
+		if !validIdentifier(id) {
+			return false
+		}
 	}
 	switch p.State {
 	case RevocationCommitted, PurgePending, PurgeComplete, PurgeFailed:
@@ -156,7 +161,7 @@ func validPurge(p *PurgeReceipt) bool {
 	}
 	seen := make(map[string]bool)
 	for _, result := range p.Sinks {
-		if result.Name == "" || seen[result.Name] || (result.Acknowledged && result.ErrorCode != "") ||
+		if !validIdentifier(result.Name) || seen[result.Name] || (result.Acknowledged && result.ErrorCode != "") ||
 			(p.State == PurgeComplete && !result.Acknowledged) {
 			return false
 		}
@@ -174,15 +179,15 @@ func validDocument(value any) bool {
 	case *operationDisk:
 		return validOperation(data)
 	case *Acceptance:
-		return data.ProposalID != "" && data.ProposalRevision > 0 && data.ProposalRevision <= MaxVersion &&
+		return validIdentifier(data.ProposalID) && data.ProposalRevision > 0 && data.ProposalRevision <= MaxVersion &&
 			validDigest(data.Digest) &&
-			data.Actor != "" &&
-			data.PolicyVersion != "" &&
+			validIdentifier(data.Actor) &&
+			validIdentifier(data.PolicyVersion) &&
 			data.Scope.Validate() == nil
 	case *epochDisk:
 		return data.Value <= MaxVersion && !data.RecordedAt.IsZero()
 	case *revocationDisk:
-		return data.Epoch > 0 && data.Epoch <= MaxVersion && data.PolicyVersion != "" &&
+		return data.Epoch > 0 && data.Epoch <= MaxVersion && validIdentifier(data.PolicyVersion) &&
 			validDigest(data.ReasonDigest) &&
 			(data.Selector.Kind == SelectScope || data.Selector.ID != "") &&
 			validateSelector(Scope{Subject: data.Selector.ID, Tenant: "", Namespace: ""}, data.Selector) == nil

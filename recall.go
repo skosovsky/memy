@@ -91,6 +91,9 @@ func Recall[P, R, Q, A any](
 	if !caps.Scoped || (options.Search.Minimum != nil && !caps.Visibility) {
 		return RecallResult[P, R]{}, ErrUnsupported
 	}
+	if options.Search.Minimum != nil && !validRef(RevisionRef{RecordID: options.Search.Minimum.RecordID, Revision: options.Search.Minimum.Revision}) {
+		return RecallResult[P, R]{}, ErrInvalid
+	}
 	if options.Search.Minimum != nil && options.Search.Minimum.Scope != scope {
 		return RecallResult[P, R]{}, ErrScopeViolation
 	}
@@ -165,15 +168,17 @@ func (ScoreRanker[P, R]) Rank(ctx context.Context, records []Ranked[P, R]) ([]Ra
 
 // Projection carries consumer output plus access/provenance annotations as data.
 type Projection[O, R any] struct {
-	Output     O             `json:"output"`
-	Provenance Provenance[R] `json:"provenance"`
-	Scope      Scope         `json:"scope"`
-	RecordID   string        `json:"record_id"`
-	Revision   Version       `json:"revision"`
-	State      RecordState   `json:"state"`
-	ExpiresAt  time.Time     `json:"expires_at"`
-	Trust      string        `json:"trust"`
-	CacheKey   string        `json:"cache_key"`
+	Output                 O               `json:"output"`
+	Provenance             Provenance[R]   `json:"provenance"`
+	Scope                  Scope           `json:"scope"`
+	RecordID               string          `json:"record_id"`
+	Revision               Version         `json:"revision"`
+	State                  RecordState     `json:"state"`
+	ExpiresAt              time.Time       `json:"expires_at"`
+	Trust                  string          `json:"trust"`
+	CacheKey               string          `json:"cache_key"`
+	Reconciliation         *Reconciliation `json:"reconciliation"`
+	AuthorityPolicyVersion string          `json:"authority_policy_version"`
 }
 
 // Projector turns an authorized typed record into a consumer context/export type.
@@ -193,7 +198,7 @@ func Project[P, R, A, O any](
 	options ReadOptions,
 	projector Projector[P, R, O],
 ) (Projection[O, R], error) {
-	if e == nil || nilPort(projector) || projector.Version() == "" {
+	if e == nil || nilPort(projector) || !validIdentifier(projector.Version()) || !validIdentifier(id) {
 		return Projection[O, R]{}, ErrInvalid
 	}
 	decision, operationErr := e.authorize(ctx, authority, scope, ActionRead, options.Purpose)
@@ -248,15 +253,17 @@ func Project[P, R, A, O any](
 			return transactionErr
 		}
 		result = Projection[O, R]{
-			Output:     output,
-			Provenance: record.Provenance,
-			Scope:      scope,
-			RecordID:   id,
-			Revision:   record.Revision,
-			State:      record.State,
-			ExpiresAt:  proposalDeadline(current.Proposal),
-			Trust:      "data",
-			CacheKey:   cacheKey,
+			Output:                 output,
+			Provenance:             record.Provenance,
+			Scope:                  scope,
+			RecordID:               id,
+			Revision:               record.Revision,
+			State:                  record.State,
+			ExpiresAt:              proposalDeadline(current.Proposal),
+			Trust:                  "data",
+			CacheKey:               cacheKey,
+			Reconciliation:         cloneReconciliation(record.Reconciliation),
+			AuthorityPolicyVersion: record.AuthorityPolicyVersion,
 		}
 		return nil
 	})

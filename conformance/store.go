@@ -27,6 +27,7 @@ func StoreSuite(t *testing.T, factory Factory) {
 	}{
 		{"capabilities", capabilities},
 		{"scope_isolation", scopeIsolation},
+		{"malformed_scope_identity", malformedScopeIdentity},
 		{"rollback", rollback},
 		{"panic_rollback", panicRollback},
 		{"cancel_rollback", cancelRollback},
@@ -83,7 +84,7 @@ func capabilities(t *testing.T, store memy.Store) {
 	// Arrange / Act.
 	caps := store.Capabilities()
 	// Assert.
-	if !caps.Atomic || !caps.ConditionalWrite || caps.SchemaVersion != 1 {
+	if !caps.Atomic || !caps.ConditionalWrite || caps.SchemaVersion != memy.SchemaVersion {
 		t.Fatalf("capabilities: %+v", caps)
 	}
 }
@@ -330,4 +331,35 @@ func closed(t *testing.T, store memy.Store) {
 		t.Fatal("closed store accepted operation")
 	}
 	must(t, store.Close())
+}
+
+func malformedScopeIdentity(t *testing.T, store memy.Store) {
+	// Arrange: a valid replacement rune must remain distinct from malformed bytes.
+	good := memy.Scope{Tenant: "\ufffd", Namespace: "имя", Subject: "👩"}
+	writeRecord(t, store, good, 0, "original")
+	for _, component := range []string{"tenant", "namespace", "subject"} {
+		for _, malformed := range []string{string([]byte{0xff}), string([]byte{0xfe}), "x\x00y"} {
+			bad := good
+			switch component {
+			case "tenant":
+				bad.Tenant = malformed
+			case "namespace":
+				bad.Namespace = malformed
+			case "subject":
+				bad.Subject = malformed
+			}
+			// Act: neither read nor write may enter the bucket.
+			calls := 0
+			callback := func(memy.Bucket) error { calls++; return nil }
+			readErr := store.View(t.Context(), bad, callback)
+			writeErr := store.Update(t.Context(), bad, callback)
+			// Assert: invalid scope is rejected, existing state is unchanged.
+			if !errors.Is(readErr, memy.ErrInvalid) || !errors.Is(writeErr, memy.ErrInvalid) || calls != 0 {
+				t.Fatalf("%s: read=%v write=%v calls=%d", component, readErr, writeErr, calls)
+			}
+		}
+	}
+	if value := get(t, store, good, "record"); string(value.Data) != "original" || value.Version != 1 {
+		t.Fatal("invalid scope mutated valid state")
+	}
 }

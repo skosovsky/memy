@@ -49,12 +49,12 @@ func New[P, R, A any](config Config[P, R, A]) (*Engine[P, R, A], error) {
 	if !caps.Atomic || !caps.ConditionalWrite {
 		return nil, ErrUnsupported
 	}
-	if caps.SchemaVersion != 1 || config.PayloadCodec.Version() == "" || config.ReferenceCodec.Version() == "" {
+	if caps.SchemaVersion != SchemaVersion || !validIdentifier(config.PayloadCodec.Version()) || !validIdentifier(config.ReferenceCodec.Version()) {
 		return nil, ErrSchema
 	}
 	names := make(map[string]bool)
 	for _, sink := range config.Sinks {
-		if nilPort(sink) || sink.Name() == "" || names[sink.Name()] {
+		if nilPort(sink) || !validIdentifier(sink.Name()) || names[sink.Name()] {
 			return nil, ErrInvalid
 		}
 		names[sink.Name()] = true
@@ -89,6 +89,9 @@ func (e *Engine[P, R, A]) authorize(
 	if err := scope.Validate(); err != nil {
 		return Decision{}, err
 	}
+	if !validPurpose(purpose) {
+		return Decision{}, ErrInvalid
+	}
 	decision, operationErr := e.config.Authority.Check(
 		ctx,
 		authority,
@@ -97,7 +100,7 @@ func (e *Engine[P, R, A]) authorize(
 	if operationErr != nil {
 		return Decision{}, errors.Join(ErrUnavailable, operationErr)
 	}
-	if !decision.Allowed || decision.Actor == "" || decision.PolicyVersion == "" || decision.Scope != scope ||
+	if !decision.Allowed || !validIdentifier(decision.Actor) || !validIdentifier(decision.PolicyVersion) || decision.Scope != scope ||
 		(!decision.ExpiresAt.IsZero() && !e.config.Clock.Now().Before(decision.ExpiresAt)) {
 		return Decision{}, ErrUnauthorized
 	}
@@ -126,10 +129,14 @@ func (e *Engine[P, R, A]) reauthorize(
 }
 
 func (e *Engine[P, R, A]) encodeSuggestion(s Suggestion[P, R]) (proposalDisk, error) {
+	if !validRevisionRefs(s.Lineage) {
+		return proposalDisk{}, ErrInvalid
+	}
+
 	if err := s.Valid.Validate(); err != nil {
 		return proposalDisk{}, err
 	}
-	if len(s.Sources) == 0 || s.Evidence == "" || s.Extractor == "" {
+	if len(s.Sources) == 0 || s.Evidence == "" || !validIdentifier(s.Extractor) {
 		return proposalDisk{}, ErrMissingEvidence
 	}
 	payload, operationErr := e.config.PayloadCodec.Encode(s.Payload)
@@ -141,7 +148,7 @@ func (e *Engine[P, R, A]) encodeSuggestion(s Suggestion[P, R]) (proposalDisk, er
 	}
 	sources := make([]sourceDisk, 0, len(s.Sources))
 	for _, source := range s.Sources {
-		if source.ID == "" || source.Revision == "" {
+		if !validIdentifier(source.ID) || !validIdentifier(source.Revision) {
 			return proposalDisk{}, ErrMissingEvidence
 		}
 		reference, err := e.config.ReferenceCodec.Encode(source.Reference)
@@ -189,7 +196,7 @@ func (e *Engine[P, R, A]) decodeProposal(p proposalDisk) (Proposal[P, R], error)
 	if err := p.Valid.Validate(); err != nil {
 		return result, errors.Join(ErrSchema, err)
 	}
-	if p.ID == "" || p.Revision == 0 || p.Scope.Validate() != nil {
+	if !validIdentifier(p.ID) || p.Revision == 0 || p.Scope.Validate() != nil {
 		return result, ErrSchema
 	}
 	wantDigest, operationErr := proposalContentDigest(p)
@@ -381,6 +388,9 @@ func (e *Engine[P, R, A]) Proposal(
 	if operationErr != nil {
 		return Proposal[P, R]{}, operationErr
 	}
+	if !validIdentifier(id) {
+		return Proposal[P, R]{}, ErrInvalid
+	}
 	var result Proposal[P, R]
 	operationErr = e.config.Store.View(ctx, scope, func(b Bucket) error {
 		var stored proposalDisk
@@ -422,6 +432,9 @@ func (e *Engine[P, R, A]) Accept(
 	decision, operationErr := e.authorize(ctx, authority, scope, ActionAccept, purpose)
 	if operationErr != nil {
 		return Acceptance{}, operationErr
+	}
+	if !validIdentifier(id) {
+		return Acceptance{}, ErrInvalid
 	}
 	var result Acceptance
 	operationErr = e.config.Store.Update(ctx, scope, func(b Bucket) error {
@@ -471,6 +484,9 @@ func (e *Engine[P, R, A]) Reject(
 	if operationErr != nil {
 		return operationErr
 	}
+	if !validIdentifier(id) {
+		return ErrInvalid
+	}
 	return e.config.Store.Update(ctx, scope, func(b Bucket) error {
 		var p proposalDisk
 		version, transactionErr := readDocument(b, objectKey("proposal", id), "proposal", &p)
@@ -505,7 +521,7 @@ func (e *Engine[P, R, A]) Commit(
 	if operationErr != nil {
 		return CommitReceipt{}, operationErr
 	}
-	if request.RecordID == "" || request.ProposalID == "" || request.Expected >= MaxVersion {
+	if !validIdentifier(request.RecordID) || !validIdentifier(request.ProposalID) || request.Expected >= MaxVersion {
 		return CommitReceipt{}, ErrInvalid
 	}
 	requestDigest, operationErr := operationDigest(scope, decision.Actor, purpose, request)
@@ -546,14 +562,14 @@ func (e *Engine[P, R, A]) typedRecord(stored recordDisk, state RecordState) (Rec
 			Losses:        s.Losses,
 			Uncertainties: s.Uncertainties,
 		},
-		ObservedAt:    s.ObservedAt,
-		RecordedAt:    stored.RecordedAt,
-		Valid:         s.Valid,
-		Retention:     stored.Proposal.Retention,
-		ExpiresAt:     proposalDeadline(stored.Proposal),
-		PolicyVersion: stored.PolicyVersion,
-		Epoch:         stored.Proposal.Epoch,
-		Related:       slices.Clone(stored.Related),
+		ObservedAt:             s.ObservedAt,
+		RecordedAt:             stored.RecordedAt,
+		Valid:                  s.Valid,
+		Retention:              stored.Proposal.Retention,
+		ExpiresAt:              proposalDeadline(stored.Proposal),
+		AuthorityPolicyVersion: stored.AuthorityPolicyVersion,
+		Epoch:                  stored.Proposal.Epoch,
+		Reconciliation:         cloneReconciliation(stored.Reconciliation),
 	}, nil
 }
 
@@ -569,6 +585,9 @@ func (e *Engine[P, R, A]) Get(
 	decision, operationErr := e.authorize(ctx, authority, scope, ActionRead, options.Purpose)
 	if operationErr != nil {
 		return Record[P, R]{}, operationErr
+	}
+	if !validIdentifier(id) {
+		return Record[P, R]{}, ErrInvalid
 	}
 	var result Record[P, R]
 	operationErr = e.config.Store.View(ctx, scope, func(b Bucket) error {
@@ -695,6 +714,9 @@ func readable(r recordDisk, options ReadOptions, now time.Time) (RecordState, bo
 }
 
 func (e *Engine[P, R, A]) validateReadLineage(ctx context.Context, b Bucket, refs []RevisionRef, scope Scope) error {
+	if !validRevisionRefs(refs) {
+		return ErrInvalid
+	}
 	pending := slices.Clone(refs)
 	seen := make(map[RevisionRef]bool)
 	for len(pending) != 0 {

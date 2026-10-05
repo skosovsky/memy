@@ -87,7 +87,7 @@ projection scripts. Это reference adapters, не vendor integrations.
 ## Границы
 
 Host отвечает за authentication, provisioning, scheduler, backup restore и
-deployment. Field-restricted profiles в v1 отклоняются как unsupported;
+deployment. Field-restricted profiles в v2 отклоняются как unsupported;
 потребитель может разделить запись. Это предотвращает использование private
 поля при создании публичного summary.
 

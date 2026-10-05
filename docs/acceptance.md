@@ -23,7 +23,7 @@ for finding closure and command provenance.
 | BOOT-03 | BYOT payload/reference/input/query/projection/authority | Config[P,R,A]; Extract[I]; Search[Q]; Project[O]; Resolver[K] | TestTypedDomainResolverMapsClaimWithoutInferringScope; TestTypedProjectionAndExportAuthority | Example; ExampleJSONCodec; examples/lifecycle; examples/quality | verified independently |
 | BOOT-04 | Core offline, no ai-libs/telemetry/network dependency | doc.go; go.mod; root dependency graph | go list -deps .: root is only nonstandard package; offline full fixtures | examples/lifecycle; examples/quality require no credentials | verified independently |
 | BOOT-05 | Versioned deterministic codecs/digests; map-order independence | codec.go; proposalContentDigest; versioned codecs | TestJSONCodecCanonicalMapOrder; TestJSONCodecRejectMalformed; FuzzJSONCodec | Example; schemas and docs/design.md | verified independently |
-| BOOT-06 | Wire schemas/version checks/migration/import policy | wire.go; wire_shape.go; validation.go; schemas/*-v1.schema.json; docs/migration.md | TestPersistedLifecycleMatchesWireSchemas; TestWireSchemaRejectsMalformedEnvelope; TestMalformedCanonicalDocumentsFailClosed; TestCanonicalCannotDropOrReplaceReviewedLineage; TestNullRevocationEpochCannotResetFence; TestByteWireRepresentationFailsClosed; TestTimestampWireFormatMatchesExecutableSchema; TestRejectNewerSchema | examples/lifecycle; docs/migration.md host-approved import | verified independently |
+| BOOT-06 | Wire schemas/version checks/migration/import policy | wire.go; wire_shape.go; validation.go; schemas/*-v2.schema.json; docs/migration.md | TestPersistedLifecycleMatchesWireSchemas; TestWireSchemaRejectsMalformedEnvelope; TestMalformedCanonicalDocumentsFailClosed; TestCanonicalCannotDropOrReplaceReviewedLineage; TestNullRevocationEpochCannotResetFence; TestByteWireRepresentationFailsClosed; TestTimestampWireFormatMatchesExecutableSchema; TestRejectIncompatibleSchema | examples/lifecycle; docs/migration.md host-approved import | verified independently |
 | BOOT-07 | Bounded concurrency, context/cancel, resource cleanup | Store; Engine synchronous callbacks; reference Index deadline wait | StoreSuite/context_aware_wait,cancel_rollback,closed; TestIndependentWriterCancellationAndRecovery; TestVisibilityCancellationAndBackendFailure; TestCancellationDuringVisibilityWaitPreservesCanonicalCommit | examples/lifecycle temporary resource cleanup | verified independently |
 | BOOT-08 | In-memory reference and common conformance | store/memory; conformance.StoreSuite | store/memory.TestConformance: 12 shared invariant cases | Example | verified independently |
 | BOOT-09 | Persistent atomic/CAS/idempotent backend | store/sqlite; operation ledger; Commit/Forget atomic updates | TestConcurrentCommitAndDurableIdempotency; TestDurableCommitFaultAndOperationRecovery; TestDurableForgetFaultPendingReceiptAndReopen | examples/lifecycle | verified independently |
@@ -193,3 +193,15 @@ The independent acceptance above records the original implementation snapshot.
 Subsequent Go/dependency/configuration changes and their fresh verification are
 recorded in maintenance.md. Historical snapshots/reviewer conclusions remain
 historical evidence rather than claims about unchanged current hashes.
+
+## Iteration 01 — identity and decisions (v2)
+
+| Requirement | Evidence required |
+| --- | --- |
+| ID-01 | Both stores reject malformed scopes without mutations; exact UTF-8 identity round-trip/property tests |
+| ID-02 | Engine inputs and stored documents reject malformed framework identities before normalization |
+| ID-03 | All four reconciliation modes persist exact initial decisions across SQLite reopen |
+| ID-04 | Exact replay preserves decision; changed request conflicts |
+| ID-05 | Authorized historical reads expose only initial decision and state known as-of |
+| ID-06 | Forget removes sensitive basis from history and managed projections; receipts remain content-free |
+| ID-07 | v2 schema/runtime agree and old database/envelopes fail closed |

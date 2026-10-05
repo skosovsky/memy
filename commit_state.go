@@ -188,17 +188,17 @@ func (e *Engine[P, R, A]) prepareCommit(
 		state = Conflicted
 	}
 	record := recordDisk{
-		ID:            request.RecordID,
-		Revision:      request.Expected + 1,
-		Scope:         scope,
-		Proposal:      p,
-		State:         state,
-		InitialState:  state,
-		RecordedAt:    recordedAt,
-		PolicyVersion: decision.PolicyVersion,
-		Related:       slices.Clone(request.Reconcile.Related),
-		Lineage:       lineage,
-		Transitions:   nil,
+		ID:                     request.RecordID,
+		Revision:               request.Expected + 1,
+		Scope:                  scope,
+		Proposal:               p,
+		State:                  state,
+		InitialState:           state,
+		RecordedAt:             recordedAt,
+		AuthorityPolicyVersion: decision.PolicyVersion,
+		Reconciliation:         cloneReconciliation(&request.Reconcile),
+		Lineage:                lineage,
+		Transitions:            nil,
 	}
 	epoch.RecordedAt = recordedAt
 	return preparedCommit{Record: record, HeadVersion: headVersion, Epoch: epoch, EpochVersion: epochVersion}, nil

@@ -96,8 +96,8 @@ func revokeRecord(b Bucket, record recordDisk, headVersion Version, now time.Tim
 	var emptyProposal proposalDisk
 	tombstone := recordDisk{
 		ID: record.ID, Revision: record.Revision + 1, Scope: record.Scope,
-		State: Revoked, InitialState: Revoked, RecordedAt: now, PolicyVersion: policy,
-		Proposal: emptyProposal, Related: nil, Lineage: nil, Transitions: nil,
+		State: Revoked, InitialState: Revoked, RecordedAt: now, AuthorityPolicyVersion: "",
+		Proposal: emptyProposal, Reconciliation: nil, Lineage: nil, Transitions: nil,
 	}
 	return writeDocument(b, objectKey("head", record.ID), "record", headVersion, tombstone)
 }

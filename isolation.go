@@ -13,7 +13,7 @@ func (e *Engine[P, R, A]) cloneRecord(record Record[P, R]) (Record[P, R], error)
 	if operationErr != nil {
 		return Record[P, R]{}, operationErr
 	}
-	record.Related = slices.Clone(record.Related)
+	record.Reconciliation = cloneReconciliation(record.Reconciliation)
 	record.Provenance.Lineage = slices.Clone(record.Provenance.Lineage)
 	record.Provenance.Losses = slices.Clone(record.Provenance.Losses)
 	record.Provenance.Uncertainties = slices.Clone(record.Provenance.Uncertainties)
@@ -30,4 +30,13 @@ func (e *Engine[P, R, A]) cloneRecord(record Record[P, R]) (Record[P, R], error)
 		record.Provenance.Sources[i].Reference = reference
 	}
 	return record, nil
+}
+
+func cloneReconciliation(decision *Reconciliation) *Reconciliation {
+	if decision == nil {
+		return nil
+	}
+	cloned := *decision
+	cloned.Related = slices.Clone(decision.Related)
+	return &cloned
 }

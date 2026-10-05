@@ -11,7 +11,7 @@ func reconcile(b Bucket, scope Scope, newRef RevisionRef, policy Reconciliation,
 	}
 	seen := make(map[string]bool)
 	for _, ref := range policy.Related {
-		if ref.RecordID == "" || ref.Revision == 0 || seen[ref.RecordID] {
+		if !validRef(ref) || seen[ref.RecordID] {
 			return ErrInvalid
 		}
 		seen[ref.RecordID] = true
@@ -28,8 +28,21 @@ func validReconciliation(policy Reconciliation) error {
 	default:
 		return ErrInvalid
 	}
-	if policy.PolicyVersion == "" || policy.Basis == "" {
+	if !validIdentifier(policy.PolicyVersion) || policy.Basis == "" {
 		return ErrPolicyDenied
+	}
+	if !metadataStringsValid(policy) {
+		return ErrInvalid
+	}
+	if !validRevisionRefs(policy.Related) {
+		return ErrInvalid
+	}
+	seen := make(map[string]bool)
+	for _, ref := range policy.Related {
+		if seen[ref.RecordID] {
+			return ErrInvalid
+		}
+		seen[ref.RecordID] = true
 	}
 	if policy.Mode != Append && len(policy.Related) == 0 {
 		return ErrIncomparable
@@ -58,7 +71,7 @@ func reconcileRelated(
 	}
 	related.State = state
 	related.Transitions = append(related.Transitions, transition{
-		At: now, State: state, PolicyVersion: policy.PolicyVersion, Basis: policy.Basis, Related: []RevisionRef{newRef},
+		At: now, State: state, Decision: newRef,
 	})
 	var history recordDisk
 	historyVersion, historyErr := readDocument(b, revisionKey(ref.RecordID, ref.Revision), "record", &history)
