@@ -757,6 +757,16 @@ MaxBytes}`. Limit is 1–1024 work entries or sink calls per invocation; MaxByte
 bounds each storage page. Each result contains only the current bounded receipts,
 this call's proposal count, work counters and Complete. Hosts repeat the same
 operation identity. Results never accumulate all receipts inside the library.
+Each Update stages an independent result delta, merged only after confirmed commit.
+On a later error, the response preserves earlier confirmed Work, proposal deletions
+and purge receipts, including pending sink receipts; Complete remains false.
+Rollback and ErrUnknownOutcome exclude that transaction from confirmed counters.
+Hosts must consume result alongside error and retry the same operation identity.
+A lost response or unknown commit outcome cannot guarantee exactly-once metrics.
+Work is charged budget: a successful sink continuation conservatively charges its
+supplied callback allowance. On a failed continuation, only sink callback steps
+with confirmed acknowledgement transactions are charged, alongside earlier storage
+progress; attempted callbacks do not fabricate durable acknowledgements.
 Actor, purpose, scope and operation identity bind the durable pass; transport
 budgets may change on resume. Each call requires current ActionForget permission
 and fresh reauthorization under that call's authority policy. A host authority

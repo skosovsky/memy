@@ -156,3 +156,15 @@ old host cache keys on upgrade; cached output never replaces current canonical
 checks. State changes during projection or packing return ErrStaleInput without
 output or implicit callback retries. Unchanged RecordedAsOf snapshots remain
 stable through later current-state transitions. Persisted schema remains 3.
+
+Sweep now returns confirmed partial progress alongside late errors. Consume both
+result and error: earlier committed proposal counts, charged Work and pending
+purge receipts remain available. A rolled-back or unknown transaction contributes
+no confirmed delta; retry the same OperationID to recover durable state. Complete
+is false on interruption. This does not promise exactly-once aggregate counters
+after a lost response, or change the persisted pass schema.
+
+A purge receipt may be complete even while Sweep.Complete is false: the purge
+acknowledgements committed before a later final authority/cancellation error.
+On continuation failure, Work includes confirmed callback acknowledgement steps;
+on success it retains the conservative supplied callback budget charge.

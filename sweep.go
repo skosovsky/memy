@@ -11,7 +11,8 @@ type SweepRequest struct {
 	Limit, MaxBytes int
 }
 
-// SweepResult reports this call only; the host owns aggregate progress.
+// SweepResult reports confirmed progress for this call, including on error.
+// The host owns aggregate progress; unknown outcomes cannot guarantee exactly-once counts.
 type SweepResult struct {
 	Records          []PurgeReceipt
 	ExpiredProposals int
@@ -80,12 +81,16 @@ func (e *Engine[P, R, A]) Sweep(
 	var result SweepResult
 	for result.Work < request.Limit && !result.Complete {
 		var pending string
+		var delta SweepResult
 		err = e.raw.Update(ctx, scope, func(b Bucket) error {
-			return e.sweepStep(ctx, b, authority, scope, purpose, request, decision, plan, &result, &pending)
+			return e.sweepStep(ctx, b, authority, scope, purpose, request, decision, plan, &delta, &pending)
 		})
 		if err != nil {
-			return SweepResult{}, err
+			return result, err
 		}
+		result.Work += delta.Work
+		result.ExpiredProposals += delta.ExpiredProposals
+		result.Complete = delta.Complete
 		if pending != "" {
 			stop, continuationErr := e.continueSweepPurge(ctx, authority, scope, purpose, request, &result, pending)
 			if continuationErr != nil {
@@ -520,10 +525,16 @@ func (e *Engine[P, R, A]) continueSweepPurge(
 	result.Work += used
 	if receipt.State != RevocationCommitted {
 		budget := request.Limit - result.Work
-		receipt, err = e.finishPurge(ctx, authority, scope, purpose, pending, budget)
-		if err != nil {
-			return false, err
+		finished, confirmed, finishErr := e.finishPurge(ctx, authority, scope, purpose, pending, budget)
+		if finishErr != nil {
+			result.Work += confirmed
+			if finished.Batch.OperationID != "" {
+				receipt = finished
+			}
+			result.Records = append(result.Records, receipt)
+			return false, finishErr
 		}
+		receipt = finished
 		// Conservatively charge the supplied callback budget; no hidden retry loop.
 		result.Work += budget
 	}

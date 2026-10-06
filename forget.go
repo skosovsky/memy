@@ -210,7 +210,8 @@ func (e *Engine[P, R, A]) Forget(
 	if receipt.State == RevocationCommitted {
 		return receipt, nil
 	}
-	return e.finishPurge(ctx, authority, scope, purpose, request.OperationID, request.Limit-used)
+	finished, _, finishErr := e.finishPurge(ctx, authority, scope, purpose, request.OperationID, request.Limit-used)
+	return finished, finishErr
 }
 
 func validateSelector(scope Scope, selector Selector) error {
@@ -274,22 +275,23 @@ func selectedProposal(p proposalDisk, selector Selector, records map[string]bool
 
 func (e *Engine[P, R, A]) finishPurge(
 	ctx context.Context, authority A, scope Scope, purpose, operationID string, limit int,
-) (PurgeReceipt, error) {
+) (PurgeReceipt, int, error) {
 	original, authErr := e.authorize(ctx, authority, scope, ActionForget, purpose)
 	if authErr != nil {
-		return PurgeReceipt{}, authErr
+		return PurgeReceipt{}, 0, authErr
 	}
 	receipt, readErr := e.readPurge(ctx, scope, operationID)
 	if readErr != nil {
-		return PurgeReceipt{}, readErr
+		return PurgeReceipt{}, 0, readErr
 	}
 	if receipt.State == PurgeComplete || receipt.State == RevocationCommitted {
 		if finalAuthErr := e.reauthorize(ctx, authority, scope, ActionForget, purpose, original); finalAuthErr != nil {
-			return PurgeReceipt{}, finalAuthErr
+			return receipt, 0, finalAuthErr
 		}
-		return receipt, nil
+		return receipt, 0, nil
 	}
 	attempts := 0
+	confirmed := 0
 	for _, result := range receipt.Sinks {
 		if result.Acknowledged {
 			continue
@@ -299,7 +301,7 @@ func (e *Engine[P, R, A]) finishPurge(
 		}
 		attempts++
 		if cancellationErr := ctx.Err(); cancellationErr != nil {
-			return receipt, cancellationErr
+			return receipt, confirmed, cancellationErr
 		}
 		status := e.purgeSink(ctx, receipt.Batch, result.Name)
 		updated, updateErr := e.persistSinkResult(
@@ -312,9 +314,10 @@ func (e *Engine[P, R, A]) finishPurge(
 			status,
 		)
 		if updateErr != nil {
-			return receipt, updateErr
+			return receipt, confirmed, updateErr
 		}
 		receipt = updated
+		confirmed++
 	}
 	if len(receipt.Sinks) == 0 {
 		updated, updateErr := e.persistSinkResult(
@@ -327,14 +330,14 @@ func (e *Engine[P, R, A]) finishPurge(
 			SinkResult{Name: "", Acknowledged: false, ErrorCode: ""},
 		)
 		if updateErr != nil {
-			return receipt, updateErr
+			return receipt, confirmed, updateErr
 		}
 		receipt = updated
 	}
 	if finalAuthErr := e.reauthorize(ctx, authority, scope, ActionForget, purpose, original); finalAuthErr != nil {
-		return PurgeReceipt{}, finalAuthErr
+		return receipt, confirmed, finalAuthErr
 	}
-	return receipt, nil
+	return receipt, confirmed, nil
 }
 
 func expectedForgetRevisions(b Bucket, scope Scope, expectedRefs []RevisionRef) error {
