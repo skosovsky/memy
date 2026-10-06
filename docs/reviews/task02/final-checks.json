@@ -1,0 +1,35 @@
+{
+  "source": "final-corrected-source.json",
+  "commands": {
+    "vet": {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "output": "final-vet.txt",
+      "source": "final-corrected-source.json after graph cutoff change"
+    },
+    "lifecycle": {
+      "command": "go run ./examples/lifecycle",
+      "exit_code": 0,
+      "output": "final-lifecycle.txt"
+    },
+    "quality": {
+      "command": "go run ./examples/quality",
+      "exit_code": 0,
+      "output": "final-quality.txt"
+    },
+    "format": {
+      "command": "gofmt -l all repository Go files",
+      "exit_code": 0,
+      "output": "final-format.txt",
+      "source": "final-corrected-source.json after graph cutoff change"
+    },
+    "race": {
+      "command": "go test -race -count=1 -timeout=20m ./...",
+      "exit_code": 0,
+      "output": "final-race.txt",
+      "prior_timeout_evidence": "final-race-timeout-stage.txt"
+    }
+  },
+  "example_provenance": "Only purge_graph_test.go changed after successful example runs; example and production paths are byte-identical to the measured/verified snapshot.",
+  "source_drift": []
+}

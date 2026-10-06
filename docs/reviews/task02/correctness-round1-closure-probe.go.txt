@@ -1,0 +1,15 @@
+package memy_test
+import("testing";"errors";"github.com/skosovsky/memy")
+func TestReviewClosurePolicyAndReplay(t *testing.T){
+ f:=newFixture(t,nil);q:=memy.SweepRequest{OperationID:"old-pass",Limit:1,MaxBytes:1<<20}
+ if _,e:=f.engine.Sweep(t.Context(),f.actor,f.scope,"assist",q);e!=nil{t.Fatal(e)}
+ f.policy.Grant("alice",f.scope,"authority/v2",memy.ActionRead)
+ if _,e:=f.engine.Sweep(t.Context(),f.actor,f.scope,"assist",q);!errors.Is(e,memy.ErrUnauthorized){t.Fatal(e)}
+ f.policy.Grant("alice",f.scope,"authority/v3",memy.ActionRead,memy.ActionForget)
+ p,e:=f.engine.Sweep(t.Context(),f.actor,f.scope,"assist",q);if e!=nil||!p.Complete{t.Fatal(p,e)}
+ if _,e=f.engine.Fence(t.Context(),f.actor,f.scope,"assist");e!=nil{t.Fatal(e)}
+ newer:=q;newer.OperationID="new-pass";p,e=f.engine.Sweep(t.Context(),f.actor,f.scope,"assist",newer);if e!=nil||p.Complete{t.Fatal(p,e)}
+ p,e=f.engine.Sweep(t.Context(),f.actor,f.scope,"assist",q);if e!=nil||!p.Complete{t.Fatal(p,e)}
+ if _,e=f.engine.Fence(t.Context(),f.actor,f.scope,"assist");!errors.Is(e,memy.ErrRevoked){t.Fatal(e)}
+ t.Log("denied continuation rejected; currently authorized continuation completes; old completed replay does not disturb newer fence")
+}

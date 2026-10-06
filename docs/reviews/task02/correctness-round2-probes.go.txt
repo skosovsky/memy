@@ -1,0 +1,43 @@
+package memy_test
+import("testing";"github.com/skosovsky/memy/store/sqlite";"context";"errors";"strings";"encoding/json";"github.com/skosovsky/memy")
+func TestReviewPrematureFinalAckResume(t *testing.T){
+ f:=newFixture(t,nil); sink:=&reviewCountingSink{};f.config.Sinks=[]memy.Sink{sink};var e error;f.engine,e=memy.New(f.config);if e!=nil{t.Fatal(e)};seedCostCorpus(t,f,2)
+ q:=memy.ForgetRequest{OperationID:"r2",Selector:memy.Selector{Kind:memy.SelectScope},Reason:"review",PolicyVersion:"v1",Limit:1,MaxBytes:1<<20}
+ var a memy.PurgeReceipt
+ for i:=0;i<100;i++{a,e=f.engine.Forget(t.Context(),f.actor,f.scope,"assist",q);if e!=nil{t.Fatal(e)};if a.State==memy.PurgePending{break}}
+ if a.State!=memy.PurgePending||len(a.Batch.Records)!=1{t.Fatal(a)}
+ e=f.config.Store.Update(t.Context(),f.scope,func(b memy.Bucket)error{p,e:=b.Scan(memy.ScanOptions{Prefix:"purge_job/",Limit:1,MaxBytes:1<<20});if e!=nil{return e};v:=p.Entries[0];var x map[string]any;if e=json.Unmarshal(v.Value.Data,&x);e!=nil{return e};j:=x["data"].(map[string]any);t.Logf("before: phase=%v resume=%v clean=%v next=%v queued=%v",j["phase"],j["resume"],j["clean"],j["next"],j["queued"]);j["resume"]="done";raw,_:=json.Marshal(x);_,e=b.Put(v.Key,v.Value.Version,raw);return e});if e!=nil{t.Fatal(e)}
+ a,e=f.engine.Forget(t.Context(),f.actor,f.scope,"assist",q);if !errors.Is(e,memy.ErrSchema)||a.State==memy.PurgeComplete||sink.calls!=0{t.Fatal(a,e,sink.calls)}
+ if _,e=f.engine.Fence(t.Context(),f.actor,f.scope,"assist");!errors.Is(e,memy.ErrRevoked){t.Fatal(e)}
+ t.Log("Premature final resume rejected before sink effect; durable fence retained")
+}
+func TestReviewProofCorruptionFailsClosed(t *testing.T){
+ for _,mode:=range []string{"edge_proof","cached_root","cached_scope"}{t.Run(mode,func(t *testing.T){
+ f:=newFixture(t,nil);seedCostLineage(t,f,4)
+ q:=memy.ForgetRequest{OperationID:"proof-review",Selector:memy.Selector{Kind:memy.SelectSource,ID:f.source.ID},Reason:"review",PolicyVersion:"v1",Limit:1,MaxBytes:1<<20}
+ if mode!="edge_proof" {for i:=0;i<20;i++{if _,e:=f.engine.Forget(t.Context(),f.actor,f.scope,"assist",q);e!=nil{t.Fatal(e)};found:=false;_ = f.config.Store.View(t.Context(),f.scope,func(b memy.Bucket)error{xs,e:=listEntries(b,"purge_work/");if e!=nil{return e};for _,v:=range xs{var x map[string]any;_ = json.Unmarshal(v.Value.Data,&x);if x["kind"]=="purge-evidence"&&x["data"].(map[string]any)["ref"].(map[string]any)["record_id"]=="cost-0"{found=true}};return nil});if found{break};if i==19{t.Fatal("no child evidence")}}}
+ var before int
+ e:=f.config.Store.Update(t.Context(),f.scope,func(b memy.Bucket)error{r,e:=listEntries(b,"record/");if e!=nil{return e};before=len(r);prefix:="edge/source/";if mode!="edge_proof"{prefix="purge_work/"};p,e:=listEntries(b,prefix);if e!=nil{return e};var entry memy.Entry;var x map[string]any
+ for _,v:=range p{if e=json.Unmarshal(v.Value.Data,&x);e!=nil{return e};if mode=="edge_proof"||(x["kind"]=="purge-evidence"&&x["data"].(map[string]any)["ref"].(map[string]any)["record_id"]=="cost-0"){entry=v;break}}
+ if entry.Key==""{t.Fatal("no target")};j:=x["data"].(map[string]any)
+ switch mode{case "edge_proof":j["proof"]=map[string]any{"index":0,"count":2,"siblings":[]string{strings.Repeat("0",64)}};case "cached_root":j["root"]=strings.Repeat("0",64);case "cached_scope":j["scope"].(map[string]any)["tenant"]="foreign"}
+ raw,_:=json.Marshal(x);_,e=b.Put(entry.Key,entry.Value.Version,raw);return e});if e!=nil{t.Fatal(e)}
+ var rejected bool
+ for i:=0;i<100;i++{_,e=f.engine.Forget(t.Context(),f.actor,f.scope,"assist",q);if errors.Is(e,memy.ErrSchema){rejected=true;break};if e!=nil{t.Fatal(e)}}
+ if !rejected{t.Fatal("corruption was accepted")};e=f.config.Store.View(t.Context(),f.scope,func(b memy.Bucket)error{r,e:=listEntries(b,"record/");if e!=nil{return e};if len(r)!=before{t.Fatal("history changed")};return nil});if e!=nil{t.Fatal(e)}
+ })}
+}
+
+type reviewCountingSink struct{calls int}
+func (*reviewCountingSink) Name()string{return "counted"}
+func (s *reviewCountingSink) Purge(_ context.Context,b memy.PurgeBatch)(memy.PurgeAck,error){s.calls++;return memy.PurgeAck{Sink:s.Name(),OperationID:b.OperationID,Epoch:b.Epoch,Chunk:b.Chunk},nil}
+func TestReviewProofEvidenceSurvivesReopen(t *testing.T){
+ raw,path:=costAdapter(t,"sqlite");f:=newFixture(t,raw);seedCostLineage(t,f,10)
+ q:=memy.ForgetRequest{OperationID:"proof-reopen",Selector:memy.Selector{Kind:memy.SelectSource,ID:f.source.ID},Reason:"review",PolicyVersion:"v1",Limit:1,MaxBytes:1<<20}
+ found:=false
+ for i:=0;i<20&&!found;i++{if _,e:=f.engine.Forget(t.Context(),f.actor,f.scope,"assist",q);e!=nil{t.Fatal(e)};e:=raw.View(t.Context(),f.scope,func(b memy.Bucket)error{xs,e:=listEntries(b,"purge_work/");if e!=nil{return e};for _,v:=range xs{var x map[string]any;_ = json.Unmarshal(v.Value.Data,&x);if x["kind"]=="purge-evidence"&&x["data"].(map[string]any)["ref"].(map[string]any)["record_id"]=="cost-0"{found=true}};return nil});if e!=nil{t.Fatal(e)}}
+ if !found{t.Fatal("no child cache")};if e:=raw.Close();e!=nil{t.Fatal(e)}
+ reopened,e:=sqlite.Open(t.Context(),path,sqlite.Options{});if e!=nil{t.Fatal(e)};t.Cleanup(func(){_ = reopened.Close()});f.config.Store=reopened;f.engine,e=memy.New(f.config);if e!=nil{t.Fatal(e)}
+ r,e:=fullForget(f.engine,t.Context(),f.actor,f.scope,"assist",q);if e!=nil||r.State!=memy.PurgeComplete||len(r.Batch.Records)!=12{t.Fatal(r,e)}
+ t.Log("canonical proof root persisted and validates later fan-in edges after SQLite reopen")
+}

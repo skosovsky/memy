@@ -32,7 +32,7 @@ func (s Scope) Key() string {
 }
 
 // SchemaVersion is the only supported persisted envelope and database format.
-const SchemaVersion uint32 = 2
+const SchemaVersion uint32 = 3
 
 // validIdentifier compares exact text; it never normalizes identity.
 func validIdentifier(value string) bool {
@@ -65,7 +65,7 @@ type Entry struct {
 // is detached; retaining or modifying it does not change stored values.
 type Bucket interface {
 	Get(key string) (Value, error)
-	List(prefix string) ([]Entry, error)
+	Scan(ScanOptions) (ScanPage, error)
 	Put(key string, expected Version, data []byte) (Version, error)
 	Delete(key string, expected Version) (Version, error)
 }
@@ -74,17 +74,22 @@ type Bucket interface {
 type StoreCapabilities struct {
 	Atomic           bool
 	ConditionalWrite bool
+	FencedView       bool
 	Durable          bool
 	SchemaVersion    uint32
 }
 
-// Store serializes scoped atomic updates. Callback errors and panics roll back;
+// Store provides consistent reads, scoped atomic updates and explicit scoped
+// exclusion. FencedView excludes Update in its scope until callback completion;
+// independent scopes do not wait for that read callback. View need not exclude
+// mutation. Callback errors and panics roll back;
 // panics propagate. Cancellation observed before commit rolls back. A failure
 // after durable commit can return ErrUnknownOutcome. Callbacks must not recurse
 // into this store. Direct use is privileged: authority is enforced by Engine.
 type Store interface {
 	Capabilities() StoreCapabilities
 	View(context.Context, Scope, func(Bucket) error) error
+	FencedView(context.Context, Scope, func(Bucket) error) error
 	Update(context.Context, Scope, func(Bucket) error) error
 	Close() error
 }

@@ -1,0 +1,17 @@
+=== RUN   TestPurgeRejectsCompletedReceiptDuringSinkCallback
+--- PASS: TestPurgeRejectsCompletedReceiptDuringSinkCallback (0.05s)
+=== RUN   TestReviewCompletedReceiptDuringAckClosed
+    review_final_correctness_test.go:14: inconsistent concurrent completion rejected; active fence retained
+--- PASS: TestReviewCompletedReceiptDuringAckClosed (0.05s)
+=== RUN   TestReviewLateAckDoesNotAcceptNextChunk
+=== RUN   TestReviewLateAckDoesNotAcceptNextChunk/memory
+    review_final_correctness_test.go:33: late chunk1 acknowledgement leaves chunk2 pending; exact chunk2 ack completes
+=== RUN   TestReviewLateAckDoesNotAcceptNextChunk/sqlite
+    review_final_correctness_test.go:33: late chunk1 acknowledgement leaves chunk2 pending; exact chunk2 ack completes
+--- PASS: TestReviewLateAckDoesNotAcceptNextChunk (0.21s)
+    --- PASS: TestReviewLateAckDoesNotAcceptNextChunk/memory (0.08s)
+    --- PASS: TestReviewLateAckDoesNotAcceptNextChunk/sqlite (0.13s)
+=== RUN   TestSweepRejectsCompletedReceiptForUnfinishedPurge
+--- PASS: TestSweepRejectsCompletedReceiptForUnfinishedPurge (0.02s)
+PASS
+ok  	github.com/skosovsky/memy	1.782s

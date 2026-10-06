@@ -85,7 +85,7 @@ func (e *Engine[P, R, A]) recallCandidate(
 	return e.snapshotCandidate(ctx, b, scope, Entry{Key: key, Value: value}, options)
 }
 
-// Ranking holds the canonical transaction and receives detached consumer data.
+// Ranking runs outside canonical transactions and receives detached consumer data.
 func (e *Engine[P, R, A]) rankRecall(
 	ctx context.Context, candidates []Ranked[P, R], ranker Ranker[P, R], limit int,
 ) ([]Ranked[P, R], error) {

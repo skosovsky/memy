@@ -70,7 +70,7 @@ func TestEngineRejectsMalformedIdentityBeforeMutation(t *testing.T) {
 				t.Fatal("malformed identity admitted")
 			}
 			if err := f.config.Store.View(t.Context(), f.scope, func(b memy.Bucket) error {
-				entries, err := b.List("")
+				entries, err := listEntries(b, "")
 				if len(entries) != 0 {
 					t.Fatal("invalid input changed state")
 				}
@@ -203,14 +203,14 @@ func TestForgetPurgesDecisionAndManagedProjection(t *testing.T) {
 				t.Fatal(writeErr)
 			}
 			// Act.
-			purged, err := f.engine.Forget(t.Context(), f.actor, f.scope, "assist", memy.ForgetRequest{OperationID: "forget", Selector: memy.Selector{Kind: memy.SelectRecord, ID: "fact"}, Reason: "withdraw", PolicyVersion: "deletion/v1"})
+			purged, err := fullForget(f.engine, t.Context(), f.actor, f.scope, "assist", memy.ForgetRequest{OperationID: "forget", Selector: memy.Selector{Kind: memy.SelectRecord, ID: "fact"}, Reason: "withdraw", PolicyVersion: "deletion/v1"})
 			_, getErr := f.engine.Get(t.Context(), f.actor, f.scope, "fact", memy.ReadOptions{})
 			// Assert: history, tombstones, receipts and managed sink contain no basis.
 			if err != nil || purged.State != memy.PurgeComplete || summary.Contains("decision") || !errors.Is(getErr, memy.ErrNotFound) {
 				t.Fatalf("purge=%+v err=%v get=%v", purged, err, getErr)
 			}
 			if err := f.config.Store.View(t.Context(), f.scope, func(b memy.Bucket) error {
-				entries, err := b.List("")
+				entries, err := listEntries(b, "")
 				for _, entry := range entries {
 					if bytes.Contains(entry.Value.Data, []byte(request.Reconcile.Basis)) {
 						t.Fatal("basis survived forget")
@@ -232,7 +232,7 @@ func TestPersistedIdentityRejectsNormalization(t *testing.T) {
 			p := f.propose(t, "p", "value", memy.Interval{})
 			f.commit(t, f.acceptedRequest(t, "c", "fact", 0, p, memy.Append))
 			if err := f.config.Store.Update(t.Context(), f.scope, func(b memy.Bucket) error {
-				entries, err := b.List("head/")
+				entries, err := listEntries(b, "head/")
 				if err != nil {
 					return err
 				}
@@ -261,11 +261,11 @@ func TestPurgeReceiptRejectsMalformedRecordIdentity(t *testing.T) {
 			p := f.propose(t, "p", "value", memy.Interval{})
 			f.commit(t, f.acceptedRequest(t, "c", "fact", 0, p, memy.Append))
 			request := memy.ForgetRequest{OperationID: "forget", Selector: memy.Selector{Kind: memy.SelectRecord, ID: "fact"}, Reason: "withdraw", PolicyVersion: "deletion/v1"}
-			if _, err := f.engine.Forget(t.Context(), f.actor, f.scope, "assist", request); err != nil {
+			if _, err := fullForget(f.engine, t.Context(), f.actor, f.scope, "assist", request); err != nil {
 				t.Fatal(err)
 			}
 			if err := f.config.Store.Update(t.Context(), f.scope, func(b memy.Bucket) error {
-				entries, err := b.List("purge/")
+				entries, err := listEntries(b, "purge/")
 				if err != nil {
 					return err
 				}
@@ -293,7 +293,7 @@ func TestPurgeReceiptRejectsMalformedRecordIdentity(t *testing.T) {
 				t.Fatal(err)
 			}
 			// Act.
-			_, err := f.engine.Forget(t.Context(), f.actor, f.scope, "assist", request)
+			_, err := fullForget(f.engine, t.Context(), f.actor, f.scope, "assist", request)
 			// Assert: replay never certifies malformed receipts as complete.
 			if !errors.Is(err, memy.ErrSchema) {
 				t.Fatalf("malformed receipt: %v", err)
@@ -309,8 +309,8 @@ func TestExecutableSchemaIdentityAssertions(t *testing.T) {
 		// Act / Assert: scope and revision identity reject the same forbidden text.
 		scope := map[string]any{"tenant": id, "namespace": "n", "subject": "s"}
 		for _, instance := range []map[string]any{
-			{"schema": 2, "kind": "acceptance", "data": map[string]any{"proposal_id": "p", "proposal_revision": 1, "digest": strings.Repeat("a", 64), "actor": "actor", "scope": scope, "policy_version": "v2", "expires_at": "0001-01-01T00:00:00Z"}},
-			{"schema": 2, "kind": "acceptance", "data": map[string]any{"proposal_id": id, "proposal_revision": 1, "digest": strings.Repeat("a", 64), "actor": "actor", "scope": map[string]any{"tenant": "t", "namespace": "n", "subject": "s"}, "policy_version": "v2", "expires_at": "0001-01-01T00:00:00Z"}},
+			{"schema": memy.SchemaVersion, "kind": "acceptance", "data": map[string]any{"proposal_id": "p", "proposal_revision": 1, "digest": strings.Repeat("a", 64), "actor": "actor", "scope": scope, "policy_version": "v2", "expires_at": "0001-01-01T00:00:00Z"}},
+			{"schema": memy.SchemaVersion, "kind": "acceptance", "data": map[string]any{"proposal_id": id, "proposal_revision": 1, "digest": strings.Repeat("a", 64), "actor": "actor", "scope": map[string]any{"tenant": "t", "namespace": "n", "subject": "s"}, "policy_version": "v2", "expires_at": "0001-01-01T00:00:00Z"}},
 		} {
 			if err := schemas["document"].Validate(instance); err == nil {
 				t.Fatalf("schema accepted invalid identity of %d bytes", len(id))

@@ -108,17 +108,36 @@ func Recall[P, R, Q, A any](
 	if coverageErr != nil {
 		return result, coverageErr
 	}
-	operationErr = e.config.Store.View(ctx, scope, func(b Bucket) error {
-		candidates, candidateErr := e.recallCandidates(ctx, b, scope, found.Candidates, options.Read)
-		if candidateErr != nil {
-			return candidateErr
+	var candidates []Ranked[P, R]
+	operationErr = e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
+		var err error
+		candidates, err = e.recallCandidates(ctx, b, scope, found.Candidates, options.Read)
+		if err != nil {
+			return err
 		}
-		selected, rankingErr := e.rankRecall(ctx, candidates, ranker, options.Limit)
-		if rankingErr != nil {
-			return rankingErr
+		return e.completeRecall(ctx, b, authority, scope, options.Read.Purpose, decision, candidates)
+	})
+	if operationErr != nil {
+		return RecallResult[P, R]{}, operationErr
+	}
+	selected, operationErr := e.rankRecall(ctx, candidates, ranker, options.Limit)
+	if operationErr != nil {
+		return RecallResult[P, R]{}, operationErr
+	}
+	operationErr = e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
+		for i := range selected {
+			ref := selected[i].Record
+			record, eligible, err := e.recallCandidate(ctx, b, scope, Candidate{RecordID: ref.ID, Revision: ref.Revision}, options.Read)
+			if err != nil {
+				return err
+			}
+			if !eligible {
+				return ErrStaleInput
+			}
+			selected[i].Record = record
 		}
-		if retentionErr := e.validateRankedRetention(ctx, b, scope, selected); retentionErr != nil {
-			return retentionErr
+		if err := e.validateRankedRetention(ctx, b, scope, selected); err != nil {
+			return err
 		}
 		result.Records = selected
 		return e.completeRecall(ctx, b, authority, scope, options.Read.Purpose, decision, selected)
@@ -209,18 +228,19 @@ func Project[P, R, A, O any](
 	if operationErr != nil {
 		return Projection[O, R]{}, operationErr
 	}
-	// Reread under a transaction so projection cannot race a canonical revoke.
+	projectionInput, operationErr := e.cloneRecord(initial)
+	if operationErr != nil {
+		return Projection[O, R]{}, operationErr
+	}
+	output, operationErr := projector.Project(ctx, projectionInput)
+	if operationErr != nil {
+		return Projection[O, R]{}, operationErr
+	}
+	// Final fresh canonical revalidation defines the delivery boundary after the
+	// trusted projector has already received its initially permitted input.
 	var result Projection[O, R]
-	operationErr = e.config.Store.View(ctx, scope, func(b Bucket) error {
+	operationErr = e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
 		current, record, transactionErr := e.projectionRecord(ctx, b, scope, id, initial.Revision, options)
-		if transactionErr != nil {
-			return transactionErr
-		}
-		projectionInput, transactionErr := e.cloneRecord(record)
-		if transactionErr != nil {
-			return transactionErr
-		}
-		output, transactionErr := projector.Project(ctx, projectionInput)
 		if transactionErr != nil {
 			return transactionErr
 		}

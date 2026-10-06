@@ -229,6 +229,9 @@ func persistCommit(
 	prepared preparedCommit,
 ) (CommitReceipt, error) {
 	record := prepared.Record
+	if err := persistMemberships(b, record); err != nil {
+		return CommitReceipt{}, err
+	}
 	if saveErr := writeDocument(b, revisionKey(record.ID, record.Revision), "record", 0, record); saveErr != nil {
 		return CommitReceipt{}, saveErr
 	}

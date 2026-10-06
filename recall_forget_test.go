@@ -181,7 +181,7 @@ func TestForgetPartialPurgeRetryAndLateJobs(t *testing.T) {
 		PolicyVersion: "deletion/v1",
 	}
 	// Act.
-	pending, operationErr := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", request)
+	pending, operationErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
@@ -203,8 +203,8 @@ func TestForgetPartialPurgeRetryAndLateJobs(t *testing.T) {
 		},
 	)
 	summary.FailPurge(nil)
-	complete, completeErr := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", request)
-	repeated, repeatErr := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", request)
+	complete, completeErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
+	repeated, repeatErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
 	// A privileged stale index restoration still cannot expose canonical payload.
 	if err := index.Stage(
 		context.Background(),
@@ -255,7 +255,7 @@ func assertForgottenBytes(t *testing.T, f fixture) {
 		t.Fatal(operationErr)
 	}
 	operationErr = f.config.Store.View(context.Background(), f.scope, func(b memy.Bucket) error {
-		entries, transactionErr := b.List("")
+		entries, transactionErr := listEntries(b, "")
 		if transactionErr != nil {
 			return transactionErr
 		}
@@ -297,7 +297,7 @@ func TestSourceForgetPurgesHistoricalPayloadAfterCorrection(t *testing.T) {
 		),
 	)
 	// Act.
-	receipt, operationErr := f.engine.Forget(
+	receipt, operationErr := fullForget(f.engine,
 		context.Background(),
 		f.actor,
 		f.scope,
@@ -318,7 +318,7 @@ func TestSourceForgetPurgesHistoricalPayloadAfterCorrection(t *testing.T) {
 	}
 	var leaked bool
 	operationErr = f.config.Store.View(context.Background(), f.scope, func(b memy.Bucket) error {
-		entries, transactionErr := b.List("")
+		entries, transactionErr := listEntries(b, "")
 		if transactionErr != nil {
 			return transactionErr
 		}
@@ -363,7 +363,7 @@ func TestLateExtractionFencedByForget(t *testing.T) {
 		result <- transactionErr
 	}()
 	<-entered
-	_, operationErr := f.engine.Forget(
+	_, operationErr := fullForget(f.engine,
 		context.Background(),
 		f.actor,
 		f.scope,

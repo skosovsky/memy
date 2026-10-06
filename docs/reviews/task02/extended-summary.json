@@ -1,0 +1,1538 @@
+{
+  "BenchmarkGrowingLineage/memory/10/Get": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      6681500.0,
+      6290667.0,
+      6435792.0
+    ],
+    "complete_median": {
+      "B/op": 6116232.0,
+      "allocs/op": 67769.0,
+      "decoded-bytes/op": 46516.0,
+      "decoded-docs/op": 32.0,
+      "index-nodes/op": 7.0,
+      "ns/op": 6435792.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 6681500.0,
+        "decoded-bytes/op": 46516.0,
+        "decoded-docs/op": 32.0,
+        "index-nodes/op": 7.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 6122440.0,
+        "allocs/op": 67821.0
+      },
+      {
+        "ns/op": 6290667.0,
+        "decoded-bytes/op": 46516.0,
+        "decoded-docs/op": 32.0,
+        "index-nodes/op": 7.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 6109936.0,
+        "allocs/op": 67741.0
+      },
+      {
+        "ns/op": 6435792.0,
+        "decoded-bytes/op": 46516.0,
+        "decoded-docs/op": 32.0,
+        "index-nodes/op": 7.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 6116232.0,
+        "allocs/op": 67769.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/10/Recall": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      29836041.0,
+      30635625.0,
+      31373001.0
+    ],
+    "complete_median": {
+      "B/op": 29114312.0,
+      "allocs/op": 323723.0,
+      "decoded-bytes/op": 218268.0,
+      "decoded-docs/op": 150.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 30635625.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 29836041.0,
+        "decoded-bytes/op": 218268.0,
+        "decoded-docs/op": 150.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 29090192.0,
+        "allocs/op": 323518.0
+      },
+      {
+        "ns/op": 30635625.0,
+        "decoded-bytes/op": 218268.0,
+        "decoded-docs/op": 150.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 29155208.0,
+        "allocs/op": 323839.0
+      },
+      {
+        "ns/op": 31373001.0,
+        "decoded-bytes/op": 218268.0,
+        "decoded-docs/op": 150.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 29114312.0,
+        "allocs/op": 323723.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/10/Consolidate": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      18924624.0,
+      18785333.0,
+      19786083.0
+    ],
+    "complete_median": {
+      "B/op": 18200640.0,
+      "allocs/op": 202283.0,
+      "decoded-bytes/op": 137487.0,
+      "decoded-docs/op": 97.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 18924624.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 18924624.0,
+        "decoded-bytes/op": 137487.0,
+        "decoded-docs/op": 97.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 18201040.0,
+        "allocs/op": 202436.0
+      },
+      {
+        "ns/op": 18785333.0,
+        "decoded-bytes/op": 137487.0,
+        "decoded-docs/op": 97.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 18181600.0,
+        "allocs/op": 202193.0
+      },
+      {
+        "ns/op": 19786083.0,
+        "decoded-bytes/op": 137487.0,
+        "decoded-docs/op": 97.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 18200640.0,
+        "allocs/op": 202283.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/10/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      13316124.0,
+      12639459.0,
+      12328000.0
+    ],
+    "complete_median": {
+      "B/op": 11005744.0,
+      "allocs/op": 129217.0,
+      "decoded-bytes/op": 99224.0,
+      "decoded-docs/op": 183.0,
+      "index-nodes/op": 380.0,
+      "ns/op": 12639459.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 13316124.0,
+        "decoded-bytes/op": 99224.0,
+        "decoded-docs/op": 183.0,
+        "index-nodes/op": 380.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 11038280.0,
+        "allocs/op": 129573.0
+      },
+      {
+        "ns/op": 12639459.0,
+        "decoded-bytes/op": 99224.0,
+        "decoded-docs/op": 183.0,
+        "index-nodes/op": 380.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 11005744.0,
+        "allocs/op": 129217.0
+      },
+      {
+        "ns/op": 12328000.0,
+        "decoded-bytes/op": 99224.0,
+        "decoded-docs/op": 183.0,
+        "index-nodes/op": 380.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 10980696.0,
+        "allocs/op": 129056.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/10/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      3234001.0,
+      4123209.0,
+      3150750.0
+    ],
+    "complete_median": {
+      "B/op": 2756128.0,
+      "allocs/op": 31088.0,
+      "decoded-bytes/op": 26468.0,
+      "decoded-docs/op": 43.0,
+      "index-nodes/op": 101.0,
+      "ns/op": 3234001.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 3234001.0,
+        "decoded-bytes/op": 26468.0,
+        "decoded-docs/op": 43.0,
+        "index-nodes/op": 101.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 2764448.0,
+        "allocs/op": 31208.0
+      },
+      {
+        "ns/op": 4123209.0,
+        "decoded-bytes/op": 26468.0,
+        "decoded-docs/op": 43.0,
+        "index-nodes/op": 101.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 2756128.0,
+        "allocs/op": 31088.0
+      },
+      {
+        "ns/op": 3150750.0,
+        "decoded-bytes/op": 26468.0,
+        "decoded-docs/op": 43.0,
+        "index-nodes/op": 101.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 2755976.0,
+        "allocs/op": 31087.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/100/Get": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      67496041.0,
+      68559250.0,
+      72865375.0
+    ],
+    "complete_median": {
+      "B/op": 58043912.0,
+      "allocs/op": 637679.0,
+      "decoded-bytes/op": 439826.0,
+      "decoded-docs/op": 302.0,
+      "index-nodes/op": 13.0,
+      "ns/op": 68559250.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 67496041.0,
+        "decoded-bytes/op": 439826.0,
+        "decoded-docs/op": 302.0,
+        "index-nodes/op": 13.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 58090376.0,
+        "allocs/op": 637942.0
+      },
+      {
+        "ns/op": 68559250.0,
+        "decoded-bytes/op": 439826.0,
+        "decoded-docs/op": 302.0,
+        "index-nodes/op": 13.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 57941184.0,
+        "allocs/op": 637348.0
+      },
+      {
+        "ns/op": 72865375.0,
+        "decoded-bytes/op": 439826.0,
+        "decoded-docs/op": 302.0,
+        "index-nodes/op": 13.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 58043912.0,
+        "allocs/op": 637679.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/100/Recall": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      319776001.0,
+      312092125.0,
+      318270083.0
+    ],
+    "complete_median": {
+      "B/op": 274159984.0,
+      "allocs/op": 3029693.0,
+      "decoded-bytes/op": 2055936.0,
+      "decoded-docs/op": 1410.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 318270083.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 319776001.0,
+        "decoded-bytes/op": 2055936.0,
+        "decoded-docs/op": 1410.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 273952352.0,
+        "allocs/op": 3029042.0
+      },
+      {
+        "ns/op": 312092125.0,
+        "decoded-bytes/op": 2055936.0,
+        "decoded-docs/op": 1410.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 274159984.0,
+        "allocs/op": 3029693.0
+      },
+      {
+        "ns/op": 318270083.0,
+        "decoded-bytes/op": 2055936.0,
+        "decoded-docs/op": 1410.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 274362608.0,
+        "allocs/op": 3030519.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/100/Consolidate": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      189091750.0,
+      180684042.0,
+      183983125.0
+    ],
+    "complete_median": {
+      "B/op": 158520344.0,
+      "allocs/op": 1747071.0,
+      "decoded-bytes/op": 1208527.0,
+      "decoded-docs/op": 817.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 183983125.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 189091750.0,
+        "decoded-bytes/op": 1208527.0,
+        "decoded-docs/op": 817.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 158559808.0,
+        "allocs/op": 1747363.0
+      },
+      {
+        "ns/op": 180684042.0,
+        "decoded-bytes/op": 1208527.0,
+        "decoded-docs/op": 817.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 158520344.0,
+        "allocs/op": 1747071.0
+      },
+      {
+        "ns/op": 183983125.0,
+        "decoded-bytes/op": 1208527.0,
+        "decoded-docs/op": 817.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 158482592.0,
+        "allocs/op": 1747064.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/100/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      119144916.0,
+      121962625.0,
+      119631458.0
+    ],
+    "complete_median": {
+      "B/op": 92622088.0,
+      "allocs/op": 1084371.0,
+      "decoded-bytes/op": 843547.0,
+      "decoded-docs/op": 1549.0,
+      "index-nodes/op": 4318.0,
+      "ns/op": 119631458.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 119144916.0,
+        "decoded-bytes/op": 843547.0,
+        "decoded-docs/op": 1549.0,
+        "index-nodes/op": 4318.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 92620624.0,
+        "allocs/op": 1084378.0
+      },
+      {
+        "ns/op": 121962625.0,
+        "decoded-bytes/op": 843547.0,
+        "decoded-docs/op": 1549.0,
+        "index-nodes/op": 4318.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 92624952.0,
+        "allocs/op": 1084218.0
+      },
+      {
+        "ns/op": 119631458.0,
+        "decoded-bytes/op": 843547.0,
+        "decoded-docs/op": 1549.0,
+        "index-nodes/op": 4318.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 92622088.0,
+        "allocs/op": 1084371.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/100/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      27681041.0,
+      27078084.0,
+      28018583.0
+    ],
+    "complete_median": {
+      "B/op": 21958240.0,
+      "allocs/op": 244243.0,
+      "decoded-bytes/op": 209444.0,
+      "decoded-docs/op": 313.0,
+      "index-nodes/op": 1138.0,
+      "ns/op": 27681041.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 27681041.0,
+        "decoded-bytes/op": 209444.0,
+        "decoded-docs/op": 313.0,
+        "index-nodes/op": 1138.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 21927016.0,
+        "allocs/op": 244166.0
+      },
+      {
+        "ns/op": 27078084.0,
+        "decoded-bytes/op": 209444.0,
+        "decoded-docs/op": 313.0,
+        "index-nodes/op": 1138.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 21958240.0,
+        "allocs/op": 244243.0
+      },
+      {
+        "ns/op": 28018583.0,
+        "decoded-bytes/op": 209444.0,
+        "decoded-docs/op": 313.0,
+        "index-nodes/op": 1138.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 21996920.0,
+        "allocs/op": 244459.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/1000/Get": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      528815458.0,
+      528472916.0,
+      534870375.0
+    ],
+    "complete_median": {
+      "B/op": 571599304.0,
+      "allocs/op": 6313446.0,
+      "decoded-bytes/op": 4377336.0,
+      "decoded-docs/op": 3002.0,
+      "index-nodes/op": 19.0,
+      "ns/op": 528815458.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 528815458.0,
+        "decoded-bytes/op": 4377336.0,
+        "decoded-docs/op": 3002.0,
+        "index-nodes/op": 19.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 571599304.0,
+        "allocs/op": 6313222.0
+      },
+      {
+        "ns/op": 528472916.0,
+        "decoded-bytes/op": 4377336.0,
+        "decoded-docs/op": 3002.0,
+        "index-nodes/op": 19.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 571617888.0,
+        "allocs/op": 6313446.0
+      },
+      {
+        "ns/op": 534870375.0,
+        "decoded-bytes/op": 4377336.0,
+        "decoded-docs/op": 3002.0,
+        "index-nodes/op": 19.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 571595008.0,
+        "allocs/op": 6313465.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/1000/Recall": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      2544488791.0,
+      2555767792.0,
+      2545646625.0
+    ],
+    "complete_median": {
+      "B/op": 2701942032.0,
+      "allocs/op": 29999651.0,
+      "decoded-bytes/op": 20453784.0,
+      "decoded-docs/op": 14010.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 2545646625.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 2544488791.0,
+        "decoded-bytes/op": 20453784.0,
+        "decoded-docs/op": 14010.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 2701964232.0,
+        "allocs/op": 29999651.0
+      },
+      {
+        "ns/op": 2555767792.0,
+        "decoded-bytes/op": 20453784.0,
+        "decoded-docs/op": 14010.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 2701850232.0,
+        "allocs/op": 29999894.0
+      },
+      {
+        "ns/op": 2545646625.0,
+        "decoded-bytes/op": 20453784.0,
+        "decoded-docs/op": 14010.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 2701942032.0,
+        "allocs/op": 29999416.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/1000/Consolidate": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      1449501750.0,
+      1476743875.0,
+      1458671833.0
+    ],
+    "complete_median": {
+      "B/op": 1547788448.0,
+      "allocs/op": 17138011.0,
+      "decoded-bytes/op": 11936567.0,
+      "decoded-docs/op": 8017.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 1458671833.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 1449501750.0,
+        "decoded-bytes/op": 11936567.0,
+        "decoded-docs/op": 8017.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 1548218600.0,
+        "allocs/op": 17140581.0
+      },
+      {
+        "ns/op": 1476743875.0,
+        "decoded-bytes/op": 11936567.0,
+        "decoded-docs/op": 8017.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 1547788448.0,
+        "allocs/op": 17138011.0
+      },
+      {
+        "ns/op": 1458671833.0,
+        "decoded-bytes/op": 11936567.0,
+        "decoded-docs/op": 8017.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 1547620704.0,
+        "allocs/op": 17137509.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/1000/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      1038620042.0,
+      1011454417.0,
+      974022334.0
+    ],
+    "complete_median": {
+      "B/op": 929359336.0,
+      "allocs/op": 10972791.0,
+      "decoded-bytes/op": 8878324.0,
+      "decoded-docs/op": 15219.0,
+      "index-nodes/op": 56956.0,
+      "ns/op": 1011454417.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 1038620042.0,
+        "decoded-bytes/op": 8878324.0,
+        "decoded-docs/op": 15219.0,
+        "index-nodes/op": 56956.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 929018080.0,
+        "allocs/op": 10971329.0
+      },
+      {
+        "ns/op": 1011454417.0,
+        "decoded-bytes/op": 8878324.0,
+        "decoded-docs/op": 15219.0,
+        "index-nodes/op": 56956.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 929396760.0,
+        "allocs/op": 10972791.0
+      },
+      {
+        "ns/op": 974022334.0,
+        "decoded-bytes/op": 8878324.0,
+        "decoded-docs/op": 15219.0,
+        "index-nodes/op": 56956.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 929359336.0,
+        "allocs/op": 10972825.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/1000/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      216573874.0,
+      221326333.0,
+      215930916.0
+    ],
+    "complete_median": {
+      "B/op": 211847096.0,
+      "allocs/op": 2370125.0,
+      "decoded-bytes/op": 2041850.0,
+      "decoded-docs/op": 3013.0,
+      "index-nodes/op": 13936.0,
+      "ns/op": 216573874.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 216573874.0,
+        "decoded-bytes/op": 2041850.0,
+        "decoded-docs/op": 3013.0,
+        "index-nodes/op": 13936.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 211909408.0,
+        "allocs/op": 2370557.0
+      },
+      {
+        "ns/op": 221326333.0,
+        "decoded-bytes/op": 2041850.0,
+        "decoded-docs/op": 3013.0,
+        "index-nodes/op": 13936.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 211803688.0,
+        "allocs/op": 2369973.0
+      },
+      {
+        "ns/op": 215930916.0,
+        "decoded-bytes/op": 2041850.0,
+        "decoded-docs/op": 3013.0,
+        "index-nodes/op": 13936.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 211847096.0,
+        "allocs/op": 2370125.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/10/Get": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      8010500.0,
+      7965000.0,
+      8218583.0
+    ],
+    "complete_median": {
+      "B/op": 6330360.0,
+      "allocs/op": 70396.0,
+      "decoded-bytes/op": 46516.0,
+      "decoded-docs/op": 32.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 8010500.0,
+      "sql-returned-rows/op": 33.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 8010500.0,
+        "decoded-bytes/op": 46516.0,
+        "decoded-docs/op": 32.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 33.0,
+        "B/op": 6330360.0,
+        "allocs/op": 70423.0
+      },
+      {
+        "ns/op": 7965000.0,
+        "decoded-bytes/op": 46516.0,
+        "decoded-docs/op": 32.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 33.0,
+        "B/op": 6332416.0,
+        "allocs/op": 70396.0
+      },
+      {
+        "ns/op": 8218583.0,
+        "decoded-bytes/op": 46516.0,
+        "decoded-docs/op": 32.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 33.0,
+        "B/op": 6305792.0,
+        "allocs/op": 70325.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/10/Recall": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      39728000.0,
+      41824959.0,
+      42516293.0
+    ],
+    "complete_median": {
+      "B/op": 29916104.0,
+      "allocs/op": 336058.0,
+      "decoded-bytes/op": 218268.0,
+      "decoded-docs/op": 150.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 41824959.0,
+      "sql-returned-rows/op": 150.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 39728000.0,
+        "decoded-bytes/op": 218268.0,
+        "decoded-docs/op": 150.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 150.0,
+        "B/op": 29916104.0,
+        "allocs/op": 336058.0
+      },
+      {
+        "ns/op": 41824959.0,
+        "decoded-bytes/op": 218268.0,
+        "decoded-docs/op": 150.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 150.0,
+        "B/op": 30002408.0,
+        "allocs/op": 336466.0
+      },
+      {
+        "ns/op": 42516293.0,
+        "decoded-bytes/op": 218268.0,
+        "decoded-docs/op": 150.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 150.0,
+        "B/op": 29883096.0,
+        "allocs/op": 336016.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/10/Consolidate": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      27879708.0,
+      26762584.0,
+      26000625.0
+    ],
+    "complete_median": {
+      "B/op": 18707832.0,
+      "allocs/op": 210052.0,
+      "decoded-bytes/op": 137487.0,
+      "decoded-docs/op": 97.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 26762584.0,
+      "sql-returned-rows/op": 97.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 27879708.0,
+        "decoded-bytes/op": 137487.0,
+        "decoded-docs/op": 97.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 97.0,
+        "B/op": 18715576.0,
+        "allocs/op": 210158.0
+      },
+      {
+        "ns/op": 26762584.0,
+        "decoded-bytes/op": 137487.0,
+        "decoded-docs/op": 97.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 97.0,
+        "B/op": 18707832.0,
+        "allocs/op": 210052.0
+      },
+      {
+        "ns/op": 26000625.0,
+        "decoded-bytes/op": 137487.0,
+        "decoded-docs/op": 97.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 97.0,
+        "B/op": 18682184.0,
+        "allocs/op": 209898.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/10/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      21472334.0,
+      22154709.0,
+      22805584.0
+    ],
+    "complete_median": {
+      "B/op": 11547768.0,
+      "allocs/op": 140171.0,
+      "decoded-bytes/op": 99224.0,
+      "decoded-docs/op": 183.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 22154709.0,
+      "sql-returned-rows/op": 329.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 21472334.0,
+        "decoded-bytes/op": 99224.0,
+        "decoded-docs/op": 183.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 329.0,
+        "B/op": 11547768.0,
+        "allocs/op": 140171.0
+      },
+      {
+        "ns/op": 22154709.0,
+        "decoded-bytes/op": 99224.0,
+        "decoded-docs/op": 183.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 329.0,
+        "B/op": 11572216.0,
+        "allocs/op": 140291.0
+      },
+      {
+        "ns/op": 22805584.0,
+        "decoded-bytes/op": 99224.0,
+        "decoded-docs/op": 183.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 329.0,
+        "B/op": 11520080.0,
+        "allocs/op": 139977.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/10/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      9477166.0,
+      10597543.0,
+      9293375.0
+    ],
+    "complete_median": {
+      "B/op": 2930616.0,
+      "allocs/op": 34671.0,
+      "decoded-bytes/op": 26468.0,
+      "decoded-docs/op": 43.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 9477166.0,
+      "sql-returned-rows/op": 67.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 9477166.0,
+        "decoded-bytes/op": 26468.0,
+        "decoded-docs/op": 43.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 67.0,
+        "B/op": 2937328.0,
+        "allocs/op": 34682.0
+      },
+      {
+        "ns/op": 10597543.0,
+        "decoded-bytes/op": 26468.0,
+        "decoded-docs/op": 43.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 67.0,
+        "B/op": 2926720.0,
+        "allocs/op": 34660.0
+      },
+      {
+        "ns/op": 9293375.0,
+        "decoded-bytes/op": 26468.0,
+        "decoded-docs/op": 43.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 67.0,
+        "B/op": 2930616.0,
+        "allocs/op": 34671.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/100/Get": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      80015417.0,
+      77370709.0,
+      76274542.0
+    ],
+    "complete_median": {
+      "B/op": 59340656.0,
+      "allocs/op": 658519.0,
+      "decoded-bytes/op": 439826.0,
+      "decoded-docs/op": 302.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 77370709.0,
+      "sql-returned-rows/op": 303.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 80015417.0,
+        "decoded-bytes/op": 439826.0,
+        "decoded-docs/op": 302.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 303.0,
+        "B/op": 59340656.0,
+        "allocs/op": 658519.0
+      },
+      {
+        "ns/op": 77370709.0,
+        "decoded-bytes/op": 439826.0,
+        "decoded-docs/op": 302.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 303.0,
+        "B/op": 59285552.0,
+        "allocs/op": 658325.0
+      },
+      {
+        "ns/op": 76274542.0,
+        "decoded-bytes/op": 439826.0,
+        "decoded-docs/op": 302.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 303.0,
+        "B/op": 59344392.0,
+        "allocs/op": 658532.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/100/Recall": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      377966500.0,
+      387797125.0,
+      373565458.0
+    ],
+    "complete_median": {
+      "B/op": 280859976.0,
+      "allocs/op": 3142322.0,
+      "decoded-bytes/op": 2055936.0,
+      "decoded-docs/op": 1410.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 377966500.0,
+      "sql-returned-rows/op": 1410.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 377966500.0,
+        "decoded-bytes/op": 2055936.0,
+        "decoded-docs/op": 1410.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 1410.0,
+        "B/op": 280734048.0,
+        "allocs/op": 3141752.0
+      },
+      {
+        "ns/op": 387797125.0,
+        "decoded-bytes/op": 2055936.0,
+        "decoded-docs/op": 1410.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 1410.0,
+        "B/op": 280859976.0,
+        "allocs/op": 3142652.0
+      },
+      {
+        "ns/op": 373565458.0,
+        "decoded-bytes/op": 2055936.0,
+        "decoded-docs/op": 1410.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 1410.0,
+        "B/op": 280969800.0,
+        "allocs/op": 3142322.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/100/Consolidate": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      219277875.0,
+      218228292.0,
+      214717457.0
+    ],
+    "complete_median": {
+      "B/op": 162261568.0,
+      "allocs/op": 1807500.0,
+      "decoded-bytes/op": 1208527.0,
+      "decoded-docs/op": 817.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 218228292.0,
+      "sql-returned-rows/op": 817.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 219277875.0,
+        "decoded-bytes/op": 1208527.0,
+        "decoded-docs/op": 817.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 817.0,
+        "B/op": 162297968.0,
+        "allocs/op": 1807762.0
+      },
+      {
+        "ns/op": 218228292.0,
+        "decoded-bytes/op": 1208527.0,
+        "decoded-docs/op": 817.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 817.0,
+        "B/op": 162249656.0,
+        "allocs/op": 1807500.0
+      },
+      {
+        "ns/op": 214717457.0,
+        "decoded-bytes/op": 1208527.0,
+        "decoded-docs/op": 817.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 817.0,
+        "B/op": 162261568.0,
+        "allocs/op": 1807405.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/100/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      177159542.0,
+      175433333.0,
+      179492958.0
+    ],
+    "complete_median": {
+      "B/op": 96544424.0,
+      "allocs/op": 1168911.0,
+      "decoded-bytes/op": 843547.0,
+      "decoded-docs/op": 1549.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 177159542.0,
+      "sql-returned-rows/op": 2867.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 177159542.0,
+        "decoded-bytes/op": 843547.0,
+        "decoded-docs/op": 1549.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 2867.0,
+        "B/op": 96604400.0,
+        "allocs/op": 1169361.0
+      },
+      {
+        "ns/op": 175433333.0,
+        "decoded-bytes/op": 843547.0,
+        "decoded-docs/op": 1549.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 2867.0,
+        "B/op": 96494992.0,
+        "allocs/op": 1168712.0
+      },
+      {
+        "ns/op": 179492958.0,
+        "decoded-bytes/op": 843547.0,
+        "decoded-docs/op": 1549.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 2867.0,
+        "B/op": 96544424.0,
+        "allocs/op": 1168911.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/100/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      70488083.0,
+      71004166.0,
+      68945917.0
+    ],
+    "complete_median": {
+      "B/op": 23195216.0,
+      "allocs/op": 269424.0,
+      "decoded-bytes/op": 209444.0,
+      "decoded-docs/op": 313.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 70488083.0,
+      "sql-returned-rows/op": 517.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 70488083.0,
+        "decoded-bytes/op": 209444.0,
+        "decoded-docs/op": 313.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 517.0,
+        "B/op": 23195216.0,
+        "allocs/op": 269424.0
+      },
+      {
+        "ns/op": 71004166.0,
+        "decoded-bytes/op": 209444.0,
+        "decoded-docs/op": 313.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 517.0,
+        "B/op": 23170072.0,
+        "allocs/op": 269196.0
+      },
+      {
+        "ns/op": 68945917.0,
+        "decoded-bytes/op": 209444.0,
+        "decoded-docs/op": 313.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 517.0,
+        "B/op": 23227376.0,
+        "allocs/op": 269551.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/1000/Get": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      887195750.0,
+      872194709.0,
+      891907500.0
+    ],
+    "complete_median": {
+      "B/op": 590332248.0,
+      "allocs/op": 6544792.0,
+      "decoded-bytes/op": 4377336.0,
+      "decoded-docs/op": 3002.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 887195750.0,
+      "sql-returned-rows/op": 3003.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 887195750.0,
+        "decoded-bytes/op": 4377336.0,
+        "decoded-docs/op": 3002.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 3003.0,
+        "B/op": 590332248.0,
+        "allocs/op": 6544792.0
+      },
+      {
+        "ns/op": 872194709.0,
+        "decoded-bytes/op": 4377336.0,
+        "decoded-docs/op": 3002.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 3003.0,
+        "B/op": 590422128.0,
+        "allocs/op": 6545309.0
+      },
+      {
+        "ns/op": 891907500.0,
+        "decoded-bytes/op": 4377336.0,
+        "decoded-docs/op": 3002.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 3003.0,
+        "B/op": 590141256.0,
+        "allocs/op": 6544255.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/1000/Recall": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      4312096291.0,
+      4285837166.0,
+      4290510834.0
+    ],
+    "complete_median": {
+      "B/op": 2797002488.0,
+      "allocs/op": 31240476.0,
+      "decoded-bytes/op": 20453784.0,
+      "decoded-docs/op": 14010.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 4290510834.0,
+      "sql-returned-rows/op": 14010.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 4312096291.0,
+        "decoded-bytes/op": 20453784.0,
+        "decoded-docs/op": 14010.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 14010.0,
+        "B/op": 2796967104.0,
+        "allocs/op": 31239399.0
+      },
+      {
+        "ns/op": 4285837166.0,
+        "decoded-bytes/op": 20453784.0,
+        "decoded-docs/op": 14010.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 14010.0,
+        "B/op": 2797481792.0,
+        "allocs/op": 31241992.0
+      },
+      {
+        "ns/op": 4290510834.0,
+        "decoded-bytes/op": 20453784.0,
+        "decoded-docs/op": 14010.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 14010.0,
+        "B/op": 2797002488.0,
+        "allocs/op": 31240476.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/1000/Consolidate": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      2467400876.0,
+      2461557041.0,
+      3076664542.0
+    ],
+    "complete_median": {
+      "B/op": 1599765336.0,
+      "allocs/op": 17796630.0,
+      "decoded-bytes/op": 11936567.0,
+      "decoded-docs/op": 8017.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 2467400876.0,
+      "sql-returned-rows/op": 8017.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 2467400876.0,
+        "decoded-bytes/op": 11936567.0,
+        "decoded-docs/op": 8017.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 8017.0,
+        "B/op": 1599765336.0,
+        "allocs/op": 17796630.0
+      },
+      {
+        "ns/op": 2461557041.0,
+        "decoded-bytes/op": 11936567.0,
+        "decoded-docs/op": 8017.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 8017.0,
+        "B/op": 1599910136.0,
+        "allocs/op": 17797224.0
+      },
+      {
+        "ns/op": 3076664542.0,
+        "decoded-bytes/op": 11936567.0,
+        "decoded-docs/op": 8017.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 8017.0,
+        "B/op": 1597369688.0,
+        "allocs/op": 17784386.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/1000/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      1903288167.0,
+      1857542417.0,
+      1862700749.0
+    ],
+    "complete_median": {
+      "B/op": 977311568.0,
+      "allocs/op": 11811675.0,
+      "decoded-bytes/op": 8878324.0,
+      "decoded-docs/op": 15219.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 1862700749.0,
+      "sql-returned-rows/op": 28251.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 1903288167.0,
+        "decoded-bytes/op": 8878324.0,
+        "decoded-docs/op": 15219.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 28251.0,
+        "B/op": 976790712.0,
+        "allocs/op": 11809318.0
+      },
+      {
+        "ns/op": 1857542417.0,
+        "decoded-bytes/op": 8878324.0,
+        "decoded-docs/op": 15219.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 28251.0,
+        "B/op": 977311568.0,
+        "allocs/op": 11811675.0
+      },
+      {
+        "ns/op": 1862700749.0,
+        "decoded-bytes/op": 8878324.0,
+        "decoded-docs/op": 15219.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 28251.0,
+        "B/op": 977454128.0,
+        "allocs/op": 11812472.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/1000/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      1240709208.0,
+      1228930792.0,
+      1310480875.0
+    ],
+    "complete_median": {
+      "B/op": 225588896.0,
+      "allocs/op": 2621069.0,
+      "decoded-bytes/op": 2041850.0,
+      "decoded-docs/op": 3013.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 1240709208.0,
+      "sql-returned-rows/op": 5017.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 1240709208.0,
+        "decoded-bytes/op": 2041850.0,
+        "decoded-docs/op": 3013.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 5017.0,
+        "B/op": 225588896.0,
+        "allocs/op": 2621069.0
+      },
+      {
+        "ns/op": 1228930792.0,
+        "decoded-bytes/op": 2041850.0,
+        "decoded-docs/op": 3013.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 5017.0,
+        "B/op": 225637608.0,
+        "allocs/op": 2621174.0
+      },
+      {
+        "ns/op": 1310480875.0,
+        "decoded-bytes/op": 2041850.0,
+        "decoded-docs/op": 3013.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 5017.0,
+        "B/op": 225540552.0,
+        "allocs/op": 2620873.0
+      }
+    ]
+  },
+  "BenchmarkSQLiteReopenGet/1000": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      1496167.0,
+      1322917.0,
+      1178625.0
+    ],
+    "complete_median": {
+      "B/op": 440832.0,
+      "allocs/op": 5064.0,
+      "ns/op": 1322917.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 1496167.0,
+        "B/op": 440832.0,
+        "allocs/op": 5064.0
+      },
+      {
+        "ns/op": 1322917.0,
+        "B/op": 441056.0,
+        "allocs/op": 5064.0
+      },
+      {
+        "ns/op": 1178625.0,
+        "B/op": 435384.0,
+        "allocs/op": 5050.0
+      }
+    ]
+  },
+  "BenchmarkSQLiteReopenGet/10000": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      1197999.0,
+      1335000.0,
+      1239458.0
+    ],
+    "complete_median": {
+      "B/op": 441392.0,
+      "allocs/op": 5067.0,
+      "ns/op": 1239458.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 1197999.0,
+        "B/op": 435160.0,
+        "allocs/op": 5048.0
+      },
+      {
+        "ns/op": 1335000.0,
+        "B/op": 441392.0,
+        "allocs/op": 5067.0
+      },
+      {
+        "ns/op": 1239458.0,
+        "B/op": 441504.0,
+        "allocs/op": 5068.0
+      }
+    ]
+  },
+  "BenchmarkSQLiteReopenGet/100000": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      1188584.0,
+      4534751.0,
+      2022833.0
+    ],
+    "complete_median": {
+      "B/op": 435272.0,
+      "allocs/op": 5049.0,
+      "ns/op": 2022833.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 1188584.0,
+        "B/op": 435272.0,
+        "allocs/op": 5049.0
+      },
+      {
+        "ns/op": 4534751.0,
+        "B/op": 443792.0,
+        "allocs/op": 5069.0
+      },
+      {
+        "ns/op": 2022833.0,
+        "B/op": 433896.0,
+        "allocs/op": 5029.0
+      }
+    ]
+  }
+}

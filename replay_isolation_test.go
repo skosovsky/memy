@@ -97,7 +97,7 @@ func TestDuplicateLineageRevokesTransitiveDependents(t *testing.T) {
 		t.Fatal(operationErr)
 	}
 	// Act.
-	receipt, operationErr := f.engine.Forget(
+	receipt, operationErr := fullForget(f.engine,
 		context.Background(),
 		f.actor,
 		f.scope,
@@ -320,7 +320,7 @@ func TestExtractionAbstainsWithoutEvidence(t *testing.T) {
 	proposals, operationErr := memy.Extract(context.Background(), f.engine, f.actor, f.scope,
 		memy.ExtractionJob{OperationID: "abstain", ProviderVersion: "scripted/v1", Purpose: "assist"},
 		"uncertain observation", memy.JSONCodec[string]{}, provider)
-	records, readErr := f.engine.Snapshot(
+	records, readErr := fullSnapshot(f.engine,
 		context.Background(),
 		f.actor,
 		f.scope,
@@ -349,11 +349,11 @@ func TestCanonicalProposalExpiryClosesReadsAndPurges(t *testing.T) {
 	f.clock.Advance(time.Hour)
 	// Act.
 	_, readErr := f.engine.Get(context.Background(), f.actor, f.scope, "temporary", memy.ReadOptions{})
-	swept, sweepErr := f.engine.Sweep(context.Background(), f.actor, f.scope, "assist", "expire")
+	swept, sweepErr := fullSweep(f.engine, context.Background(), f.actor, f.scope, "assist", "expire")
 	var contentEntries []memy.Entry
 	inspectErr := f.config.Store.View(context.Background(), f.scope, func(b memy.Bucket) error {
 		var listErr error
-		contentEntries, listErr = b.List("record/")
+		contentEntries, listErr = listEntries(b, "record/")
 		return listErr
 	})
 	// Assert: expiry is a deletion lifecycle, not only a search filter.
@@ -399,7 +399,7 @@ func TestZeroClockCannotPersistMalformedProposal(t *testing.T) {
 			}
 			var stored []memy.Entry
 			inspectErr := f.config.Store.View(context.Background(), f.scope, func(b memy.Bucket) error {
-				entries, listErr := b.List("")
+				entries, listErr := listEntries(b, "")
 				stored = entries
 				return listErr
 			})
@@ -423,7 +423,7 @@ func TestZeroClockCannotPersistMalformedCommit(t *testing.T) {
 	var epoch memy.Value
 	inspectErr := f.config.Store.View(context.Background(), f.scope, func(b memy.Bucket) error {
 		var listErr error
-		histories, listErr = b.List("record/")
+		histories, listErr = listEntries(b, "record/")
 		if listErr != nil {
 			return listErr
 		}

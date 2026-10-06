@@ -172,7 +172,7 @@ func faultRecoveryStage(t *testing.T, stage sqlite.Stage) {
 }
 
 func TestRejectIncompatibleSchema(t *testing.T) {
-	for _, version := range []int{1, 3} {
+	for _, version := range []int{1, 2, 4} {
 		t.Run(strconv.Itoa(version), func(t *testing.T) {
 			// Arrange.
 			path := filepath.Join(t.TempDir(), "store.db")

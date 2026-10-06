@@ -1,0 +1,90 @@
+{
+  "BenchmarkCallbackContention/memory": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      15415.0,
+      14292.0,
+      14379.0
+    ],
+    "complete_median": {
+      "B/op": 3927.0,
+      "allocs/op": 50.0,
+      "held-callback-ns": 50000000.0,
+      "ns/op": 14379.0,
+      "write-p50-ns": 13292.0,
+      "write-p95-ns": 22542.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 15415.0,
+        "held-callback-ns": 50000000.0,
+        "write-p50-ns": 13292.0,
+        "write-p95-ns": 23916.0,
+        "B/op": 3927.0,
+        "allocs/op": 50.0
+      },
+      {
+        "ns/op": 14292.0,
+        "held-callback-ns": 50000000.0,
+        "write-p50-ns": 13541.0,
+        "write-p95-ns": 22208.0,
+        "B/op": 3927.0,
+        "allocs/op": 50.0
+      },
+      {
+        "ns/op": 14379.0,
+        "held-callback-ns": 50000000.0,
+        "write-p50-ns": 10417.0,
+        "write-p95-ns": 22542.0,
+        "B/op": 3999.0,
+        "allocs/op": 50.0
+      }
+    ]
+  },
+  "BenchmarkCallbackContention/sqlite": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      684258.0,
+      779908.0,
+      757398.0
+    ],
+    "complete_median": {
+      "B/op": 9906.0,
+      "allocs/op": 203.0,
+      "held-callback-ns": 50000000.0,
+      "ns/op": 757398.0,
+      "write-p50-ns": 746250.0,
+      "write-p95-ns": 880792.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 684258.0,
+        "held-callback-ns": 50000000.0,
+        "write-p50-ns": 701958.0,
+        "write-p95-ns": 852959.0,
+        "B/op": 10040.0,
+        "allocs/op": 204.0
+      },
+      {
+        "ns/op": 779908.0,
+        "held-callback-ns": 50000000.0,
+        "write-p50-ns": 821250.0,
+        "write-p95-ns": 953375.0,
+        "B/op": 9776.0,
+        "allocs/op": 203.0
+      },
+      {
+        "ns/op": 757398.0,
+        "held-callback-ns": 50000000.0,
+        "write-p50-ns": 746250.0,
+        "write-p95-ns": 880792.0,
+        "B/op": 9906.0,
+        "allocs/op": 203.0
+      }
+    ]
+  }
+}

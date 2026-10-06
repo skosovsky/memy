@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/skosovsky/memy/schemas/proposal-v3.schema.json",
+  "title": "memy proposal data v2",
+  "$ref": "document-v3.schema.json#/$defs/proposal"
+}

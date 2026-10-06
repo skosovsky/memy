@@ -1,0 +1,90 @@
+{
+  "BenchmarkCallbackContention/memory": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      51544848.0,
+      51469998.0,
+      52250494.0
+    ],
+    "complete_median": {
+      "B/op": 416000.0,
+      "allocs/op": 4649.0,
+      "held-callback-ns": 50000000.0,
+      "ns/op": 51544848.0,
+      "write-p50-ns": 51572000.0,
+      "write-p95-ns": 52284666.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 51544848.0,
+        "held-callback-ns": 50000000.0,
+        "write-p50-ns": 51572000.0,
+        "write-p95-ns": 52263291.0,
+        "B/op": 416000.0,
+        "allocs/op": 4649.0
+      },
+      {
+        "ns/op": 51469998.0,
+        "held-callback-ns": 50000000.0,
+        "write-p50-ns": 51386583.0,
+        "write-p95-ns": 52284666.0,
+        "B/op": 417174.0,
+        "allocs/op": 4653.0
+      },
+      {
+        "ns/op": 52250494.0,
+        "held-callback-ns": 50000000.0,
+        "write-p50-ns": 52236250.0,
+        "write-p95-ns": 53448792.0,
+        "B/op": 414682.0,
+        "allocs/op": 4645.0
+      }
+    ]
+  },
+  "BenchmarkCallbackContention/sqlite": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      56766500.0,
+      55849871.0,
+      57485417.0
+    ],
+    "complete_median": {
+      "B/op": 418355.0,
+      "allocs/op": 4756.0,
+      "held-callback-ns": 50000000.0,
+      "ns/op": 56766500.0,
+      "write-p50-ns": 55169333.0,
+      "write-p95-ns": 59818958.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 56766500.0,
+        "held-callback-ns": 50000000.0,
+        "write-p50-ns": 56600625.0,
+        "write-p95-ns": 60083167.0,
+        "B/op": 418355.0,
+        "allocs/op": 4756.0
+      },
+      {
+        "ns/op": 55849871.0,
+        "held-callback-ns": 50000000.0,
+        "write-p50-ns": 55169333.0,
+        "write-p95-ns": 59818958.0,
+        "B/op": 419559.0,
+        "allocs/op": 4761.0
+      },
+      {
+        "ns/op": 57485417.0,
+        "held-callback-ns": 50000000.0,
+        "write-p50-ns": 55063167.0,
+        "write-p95-ns": 58353208.0,
+        "B/op": 416118.0,
+        "allocs/op": 4746.0
+      }
+    ]
+  }
+}

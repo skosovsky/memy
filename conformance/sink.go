@@ -37,7 +37,7 @@ func SinkSuite(t *testing.T, factory func(*testing.T) SinkFixture) {
 		for range 2 {
 			ack, err := f.Adapter.Purge(t.Context(), batch)
 			must(t, err)
-			if ack.Sink != f.Adapter.Name() || ack.OperationID != batch.OperationID || ack.Epoch != batch.Epoch {
+			if ack.Sink != f.Adapter.Name() || ack.OperationID != batch.OperationID || ack.Epoch != batch.Epoch || ack.Chunk != batch.Chunk {
 				t.Fatalf("unbound acknowledgement: %+v", ack)
 			}
 		}
@@ -76,6 +76,7 @@ func sinkBatch(sc memy.Scope) memy.PurgeBatch {
 		OperationID: "purge",
 		Scope:       sc,
 		Epoch:       1,
+		Chunk:       7,
 		Selector:    memy.Selector{Kind: memy.SelectRecord, ID: selectedRecord},
 		Records:     []string{selectedRecord},
 	}

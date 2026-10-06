@@ -1,0 +1,24 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/skosovsky/memy
+cpu: Apple M1 Max
+BenchmarkLifecycleCost/memory/1000/Get-10         	       1	    966791 ns/op	         0 censored/op	         6.000 get-requests/op	         1.000 listed-entries/op	      2862 returned-bytes/op	  414304 B/op	    4655 allocs/op
+BenchmarkLifecycleCost/memory/1000/Recall-10      	       1	   1373001 ns/op	         0 censored/op	        18.00 get-requests/op	         0 listed-entries/op	      8586 returned-bytes/op	 1238376 B/op	   14027 allocs/op
+BenchmarkLifecycleCost/memory/1000/Consolidate-10 	       1	   6324417 ns/op	         0 censored/op	        44.00 get-requests/op	         0 listed-entries/op	     18683 returned-bytes/op	 2756896 B/op	   30951 allocs/op
+BenchmarkLifecycleCost/memory/10000/Get-10        	       1	    556167 ns/op	         0 censored/op	         6.000 get-requests/op	         1.000 listed-entries/op	      2862 returned-bytes/op	  414304 B/op	    4655 allocs/op
+BenchmarkLifecycleCost/memory/10000/Recall-10     	       1	   1686166 ns/op	         0 censored/op	        18.00 get-requests/op	         0 listed-entries/op	      8586 returned-bytes/op	 1238312 B/op	   14026 allocs/op
+BenchmarkLifecycleCost/memory/10000/Consolidate-10         	       1	   2593917 ns/op	         0 censored/op	        44.00 get-requests/op	         0 listed-entries/op	     18683 returned-bytes/op	 2721680 B/op	   30592 allocs/op
+BenchmarkLifecycleCost/memory/100000/Get-10                	       1	    610709 ns/op	         0 censored/op	         6.000 get-requests/op	         1.000 listed-entries/op	      2862 returned-bytes/op	  414304 B/op	    4655 allocs/op
+BenchmarkLifecycleCost/memory/100000/Recall-10             	       1	   3304959 ns/op	         0 censored/op	        18.00 get-requests/op	         0 listed-entries/op	      8586 returned-bytes/op	 1238112 B/op	   14024 allocs/op
+BenchmarkLifecycleCost/memory/100000/Consolidate-10        	       1	   2541125 ns/op	         0 censored/op	        44.00 get-requests/op	         0 listed-entries/op	     18683 returned-bytes/op	 2715880 B/op	   30579 allocs/op
+BenchmarkLifecycleCost/sqlite/1000/Get-10                  	       1	   1182083 ns/op	         0 censored/op	         6.000 get-requests/op	         1.000 listed-entries/op	      2862 returned-bytes/op	  431384 B/op	    4873 allocs/op
+BenchmarkLifecycleCost/sqlite/1000/Recall-10               	       1	   2381333 ns/op	         0 censored/op	        18.00 get-requests/op	         0 listed-entries/op	      8586 returned-bytes/op	 1273376 B/op	   14497 allocs/op
+BenchmarkLifecycleCost/sqlite/1000/Consolidate-10          	       1	  12559541 ns/op	         0 censored/op	        44.00 get-requests/op	         0 listed-entries/op	     18683 returned-bytes/op	 2803776 B/op	   31921 allocs/op
+BenchmarkLifecycleCost/sqlite/10000/Get-10                 	       1	   1767958 ns/op	         0 censored/op	         6.000 get-requests/op	         1.000 listed-entries/op	      2862 returned-bytes/op	  433488 B/op	    4874 allocs/op
+BenchmarkLifecycleCost/sqlite/10000/Recall-10              	       1	   2086792 ns/op	         0 censored/op	        18.00 get-requests/op	         0 listed-entries/op	      8586 returned-bytes/op	 1268208 B/op	   14511 allocs/op
+BenchmarkLifecycleCost/sqlite/10000/Consolidate-10         	       1	  89946126 ns/op	         0 censored/op	        44.00 get-requests/op	         0 listed-entries/op	     18683 returned-bytes/op	 2808680 B/op	   31952 allocs/op
+BenchmarkLifecycleCost/sqlite/100000/Get-10                	       1	 137255209 ns/op	         0 censored/op	         6.000 get-requests/op	         1.000 listed-entries/op	      2862 returned-bytes/op	  432280 B/op	    4871 allocs/op
+BenchmarkLifecycleCost/sqlite/100000/Recall-10             	       1	  10777833 ns/op	         0 censored/op	        18.00 get-requests/op	         0 listed-entries/op	      8586 returned-bytes/op	 1268368 B/op	   14514 allocs/op
+BenchmarkLifecycleCost/sqlite/100000/Consolidate-10        	       1	  21613917 ns/op	         0 censored/op	        44.00 get-requests/op	         0 listed-entries/op	     18683 returned-bytes/op	 2826160 B/op	   32007 allocs/op
+PASS
+ok  	github.com/skosovsky/memy	124.162s

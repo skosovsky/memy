@@ -222,5 +222,5 @@ func (i *Index[Q]) Purge(ctx context.Context, batch memy.PurgeBatch) (memy.Purge
 	}
 	close(i.changed)
 	i.changed = make(chan struct{})
-	return memy.PurgeAck{Sink: i.name, OperationID: batch.OperationID, Epoch: batch.Epoch}, nil
+	return memy.PurgeAck{Sink: i.name, OperationID: batch.OperationID, Epoch: batch.Epoch, Chunk: batch.Chunk}, nil
 }

@@ -184,7 +184,7 @@ func (e *Engine[P, R, A]) extractionReplay(
 	decision Decision,
 ) (extractionSnapshot[P, R], error) {
 	var snapshot extractionSnapshot[P, R]
-	viewErr := e.config.Store.View(ctx, scope, func(b Bucket) error {
+	viewErr := e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
 		op, _, exists, ledgerErr := operation(b, job.OperationID, "extract", requestDigest)
 		if ledgerErr != nil {
 			return ledgerErr

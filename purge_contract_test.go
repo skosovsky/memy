@@ -11,22 +11,26 @@ import (
 )
 
 type purgeAdapter struct {
-	failure  error
-	wrongAck bool
+	failure    error
+	wrongAck   bool
+	wrongChunk bool
 }
 
 func (*purgeAdapter) Name() string { return "required-sink" }
 
 func (s *purgeAdapter) Purge(_ context.Context, batch memy.PurgeBatch) (memy.PurgeAck, error) {
-	ack := memy.PurgeAck{Sink: s.Name(), OperationID: batch.OperationID, Epoch: batch.Epoch}
+	ack := memy.PurgeAck{Sink: s.Name(), OperationID: batch.OperationID, Epoch: batch.Epoch, Chunk: batch.Chunk}
 	if s.wrongAck {
 		ack.OperationID = "another-operation"
+	}
+	if s.wrongChunk {
+		ack.Chunk++
 	}
 	return ack, s.failure
 }
 
 func TestFailedPurgeRemainsFencedAndCanRecoverAcrossReopen(t *testing.T) {
-	for _, failure := range []string{"missing", "unsupported", "invalid_ack"} {
+	for _, failure := range []string{"missing", "unsupported", "invalid_ack", "invalid_chunk"} {
 		t.Run(failure, func(t *testing.T) { failedPurgeCase(t, failure) })
 	}
 }
@@ -54,16 +58,16 @@ func failedPurgeCase(t *testing.T, failure string) {
 		Reason:        "user requested deletion",
 		PolicyVersion: "deletion/v1",
 	}
-	pending, pendingErr := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", request)
+	pending, pendingErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
 	if pendingErr != nil || pending.State != memy.PurgePending {
 		t.Fatalf("pending=%+v err=%v", pending, pendingErr)
 	}
 	configurePurgeFailure(&f, sink, failure)
 	f = reopenFixture(t, f, path)
 	// Act: unsupported/invalid/missing acknowledgement must be a durable failure.
-	failed, failedErr := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", request)
+	failed, failedErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
 	f = reopenFixture(t, f, path)
-	replayed, replayErr := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", request)
+	replayed, replayErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
 	_, deniedRead := f.engine.Get(context.Background(), f.actor, f.scope, "private", memy.ReadOptions{})
 	// Assert: neither failure nor reopen permits reads or falsely completes deletion.
 	if failedErr != nil || replayErr != nil || failed.State != memy.PurgeFailed || replayed.State != memy.PurgeFailed ||
@@ -71,10 +75,10 @@ func failedPurgeCase(t *testing.T, failure string) {
 		t.Fatalf("failed=%+v err=%v replay=%+v err=%v read=%v", failed, failedErr, replayed, replayErr, deniedRead)
 	}
 	// Repair the actual participant and retry the same operation; no new revoke.
-	sink.failure, sink.wrongAck = nil, false
+	sink.failure, sink.wrongAck, sink.wrongChunk = nil, false, false
 	f.config.Sinks = []memy.Sink{sink}
 	f = reopenFixture(t, f, path)
-	complete, completionErr := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", request)
+	complete, completionErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
 	if completionErr != nil || complete.State != memy.PurgeComplete || complete.Batch.Epoch != pending.Batch.Epoch {
 		t.Fatalf("complete=%+v err=%v", complete, completionErr)
 	}
@@ -88,6 +92,8 @@ func configurePurgeFailure(f *fixture, sink *purgeAdapter, failure string) {
 		sink.failure = memy.ErrUnsupported
 	case "invalid_ack":
 		sink.failure, sink.wrongAck = nil, true
+	case "invalid_chunk":
+		sink.failure, sink.wrongChunk = nil, true
 	}
 }
 

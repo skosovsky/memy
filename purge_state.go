@@ -10,12 +10,19 @@ const purgeUnsupported = "unsupported"
 
 func (e *Engine[P, R, A]) readPurge(ctx context.Context, scope Scope, operationID string) (PurgeReceipt, error) {
 	var receipt PurgeReceipt
-	readErr := e.config.Store.View(ctx, scope, func(b Bucket) error {
+	readErr := e.raw.FencedView(ctx, scope, func(b Bucket) error {
 		_, documentErr := readDocument(b, objectKey("purge", operationID), "purge", &receipt)
 		if documentErr != nil {
 			return documentErr
 		}
-		return validatePurgeBinding(receipt, scope, operationID)
+		if err := validatePurgeBinding(receipt, scope, operationID); err != nil {
+			return err
+		}
+		var job purgeJobDisk
+		if _, err := readDocument(b, objectKey("purge_job", operationID), "purge-job", &job); err != nil {
+			return err
+		}
+		return validateStoredPurge(b, job, receipt)
 	})
 	if readErr != nil {
 		return PurgeReceipt{}, readErr
@@ -41,7 +48,7 @@ func (e *Engine[P, R, A]) purgeSink(ctx context.Context, batch PurgeBatch, name 
 		ack, purgeErr := sink.Purge(ctx, input)
 		result.ErrorCode = "unavailable"
 		result.Acknowledged = purgeErr == nil && ack.Sink == name && ack.OperationID == batch.OperationID &&
-			ack.Epoch == batch.Epoch
+			ack.Epoch == batch.Epoch && ack.Chunk == batch.Chunk
 		switch {
 		case result.Acknowledged:
 			result.ErrorCode = ""
@@ -58,14 +65,14 @@ func (e *Engine[P, R, A]) purgeSink(ctx context.Context, batch PurgeBatch, name 
 // Reloading and merging acknowledgements preserves concurrent retries. External
 // error strings are deliberately excluded from the durable content-free receipt.
 func (e *Engine[P, R, A]) persistSinkResult(
-	ctx context.Context, authority A, scope Scope, purpose, operationID string, status SinkResult,
+	ctx context.Context, authority A, scope Scope, purpose, operationID string, chunk uint64, status SinkResult,
 ) (PurgeReceipt, error) {
 	decision, authErr := e.authorize(ctx, authority, scope, ActionForget, purpose)
 	if authErr != nil {
 		return PurgeReceipt{}, authErr
 	}
 	var receipt PurgeReceipt
-	updateErr := e.config.Store.Update(ctx, scope, func(b Bucket) error {
+	updateErr := e.raw.Update(ctx, scope, func(b Bucket) error {
 		version, readErr := readDocument(b, objectKey("purge", operationID), "purge", &receipt)
 		if readErr != nil {
 			return readErr
@@ -73,7 +80,22 @@ func (e *Engine[P, R, A]) persistSinkResult(
 		if bindingErr := validatePurgeBinding(receipt, scope, operationID); bindingErr != nil {
 			return bindingErr
 		}
+		var job purgeJobDisk
+		if _, err := readDocument(b, objectKey("purge_job", operationID), "purge-job", &job); err != nil {
+			return err
+		}
+		if err := validateStoredPurge(b, job, receipt); err != nil {
+			return err
+		}
+		if receipt.Batch.Chunk != chunk || receipt.State == PurgeComplete || receipt.State == RevocationCommitted {
+			return nil
+		}
 		mergeSinkResult(&receipt, status)
+		if receipt.State == PurgeComplete {
+			if err := finishPurgeJob(b, &receipt); err != nil {
+				return err
+			}
+		}
 		if reauthErr := e.reauthorize(ctx, authority, scope, ActionForget, purpose, decision); reauthErr != nil {
 			return reauthErr
 		}
@@ -100,4 +122,27 @@ func mergeSinkResult(receipt *PurgeReceipt, status SinkResult) {
 			}
 		}
 	}
+}
+
+// validateStoredPurge correlates progress and active ownership before exposing a receipt.
+func validateStoredPurge(b Bucket, job purgeJobDisk, receipt PurgeReceipt) error {
+	if err := validatePurgeStage(job, receipt); err != nil {
+		return err
+	}
+	if receipt.State != PurgeComplete {
+		_, err := boundActivePurge(b, job)
+		return err
+	}
+	var active activePurgeDisk
+	_, err := readDocument(b, "active_purge", "purge-active", &active)
+	if errors.Is(err, ErrNotFound) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if active.Scope != job.Scope || active.OperationID == job.OperationID {
+		return ErrSchema
+	}
+	return nil
 }

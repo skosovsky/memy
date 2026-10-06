@@ -1,0 +1,7 @@
+=== RUN   TestReviewFanInPurgeCost
+    review_overlay_test.go:27: n=100 edges=200 decoded=6097 bytes=2118113 copied=2345218
+    review_overlay_test.go:27: n=200 edges=400 decoded=12097 bytes=4260180 copied=4738319
+    review_overlay_test.go:27: n=400 edges=800 decoded=24097 bytes=8597846 copied=9604719
+--- PASS: TestReviewFanInPurgeCost (1.91s)
+PASS
+ok  	github.com/skosovsky/memy	2.640s

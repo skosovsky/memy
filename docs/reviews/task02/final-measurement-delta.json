@@ -1,0 +1,10 @@
+{
+  "changed_previous_go_files": [
+    "purge_state.go"
+  ],
+  "added_go_files": [
+    "purge_callback_corruption_test.go"
+  ],
+  "retained_case_rationale": "Only purge_state.go production code changed. readPurge/persistSinkResult are called from finishPurge in forget.go, reached by Forget/Sweep. All24 SourceForget/Sweep cases are replaced. Remaining39 Get/Recall/Consolidate/reopen cases do not execute either changed function; harnesses unchanged. Added permanent test is excluded by -run ^$.",
+  "unmeasured_test_only_adjustment": "purge_graph_test.go completion context only; excluded by -run ^$; final race rerun required"
+}

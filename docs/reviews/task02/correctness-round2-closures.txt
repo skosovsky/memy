@@ -1,0 +1,17 @@
+=== RUN   TestReviewPrematureFinalAckResume
+    review_round2_test.go:9: before: phase=ack resume=emit clean=3 next=2 queued=2
+    review_round2_test.go:12: Premature final resume rejected before sink effect; durable fence retained
+--- PASS: TestReviewPrematureFinalAckResume (0.08s)
+=== RUN   TestReviewProofCorruptionFailsClosed
+=== RUN   TestReviewProofCorruptionFailsClosed/edge_proof
+=== RUN   TestReviewProofCorruptionFailsClosed/cached_root
+=== RUN   TestReviewProofCorruptionFailsClosed/cached_scope
+--- PASS: TestReviewProofCorruptionFailsClosed (0.16s)
+    --- PASS: TestReviewProofCorruptionFailsClosed/edge_proof (0.02s)
+    --- PASS: TestReviewProofCorruptionFailsClosed/cached_root (0.07s)
+    --- PASS: TestReviewProofCorruptionFailsClosed/cached_scope (0.07s)
+=== RUN   TestReviewProofEvidenceSurvivesReopen
+    review_round2_test.go:42: canonical proof root persisted and validates later fan-in edges after SQLite reopen
+--- PASS: TestReviewProofEvidenceSurvivesReopen (0.70s)
+PASS
+ok  	github.com/skosovsky/memy	2.400s

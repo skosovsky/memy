@@ -3,8 +3,8 @@ package memy
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"github.com/skosovsky/memy/internal/membershipproof"
 	"reflect"
-	"slices"
 )
 
 func validDigest(value string) bool {
@@ -72,8 +72,12 @@ func validRecord(r *recordDisk) bool {
 }
 
 func containsReviewedLineage(r *recordDisk) bool {
+	canonical := make(map[RevisionRef]bool, len(r.Lineage))
+	for _, ref := range r.Lineage {
+		canonical[ref] = true
+	}
 	for _, ref := range r.Proposal.Lineage {
-		if !slices.Contains(r.Lineage, ref) {
+		if !canonical[ref] {
 			return false
 		}
 	}
@@ -144,7 +148,8 @@ func validCommitReceipt(receipt *CommitReceipt) bool {
 
 func validPurge(p *PurgeReceipt) bool {
 	if !validIdentifier(p.Batch.OperationID) || p.Batch.Scope.Validate() != nil || p.Batch.Epoch == 0 ||
-		p.Batch.Epoch > MaxVersion ||
+		p.Batch.Epoch > MaxVersion || p.Batch.Chunk > uint64(MaxVersion) || (p.State == PurgeComplete && !p.CanonicalComplete) ||
+		len(p.Batch.Records) > 1024 || (p.State != RevocationCommitted && (p.Batch.Chunk == 0 || !p.CanonicalComplete)) ||
 		p.RevokedAt.IsZero() ||
 		validateSelector(p.Batch.Scope, p.Batch.Selector) != nil {
 		return false
@@ -193,7 +198,59 @@ func validDocument(value any) bool {
 			validateSelector(Scope{Subject: data.Selector.ID, Tenant: "", Namespace: ""}, data.Selector) == nil
 	case *PurgeReceipt:
 		return validPurge(data)
+	case *sweepJobDisk:
+		return data.Scope.Validate() == nil && validIdentifier(data.OperationID) && validDigest(data.Digest) && (data.Phase == "records" || data.Phase == "proposals" || data.Phase == "origin" || data.Phase == "done") && len(data.After) <= 4096 && (data.Origin == "" || validIdentifier(data.Origin)) && (data.PurgeOperation == "" || validIdentifier(data.PurgeOperation))
+	case *activePurgeDisk:
+		return data.Scope.Validate() == nil && validIdentifier(data.OperationID)
+	case *purgeJobDisk:
+		return validPurgeJob(data)
+	case *purgeItemDisk:
+		return data.Scope.Validate() == nil && validIdentifier(data.OperationID) && validIdentifier(data.ID) && data.Revision <= MaxVersion && ((data.Kind == "record" && data.Revision > 0) || (data.Kind == "proposal" && data.Revision == 0))
+	case *purgeEvidenceDisk:
+		return data.Scope.Validate() == nil && validIdentifier(data.OperationID) && validRef(data.Ref) && validDigest(data.Root)
+	case *membershipDisk:
+		return data.Scope.Validate() == nil && validRef(data.Ref) && validIdentifier(data.MatchID) && (data.Relation == "source" || data.Relation == "lineage") && membershipproof.Shape(data.Proof)
 	default:
 		return false
 	}
+}
+
+func validPurgePhase(phase string) bool {
+	switch phase {
+	case "seed", "expand", "records", "proposals", "origins", "ack", "done", "emit":
+		return true
+	}
+	return false
+}
+
+func validPurgeJob(job *purgeJobDisk) bool {
+	if job.Scope.Validate() != nil || !validIdentifier(job.OperationID) || !validPurgePhase(job.Phase) || job.Queued > uint64(MaxVersion) || job.Next == 0 || job.Clean == 0 || job.Next > job.Queued+1 || job.Clean > job.Queued+1 {
+		return false
+	}
+	if job.Part != "history" && job.Part != "members" && job.Part != "finish" {
+		return false
+	}
+	if job.Phase == "ack" {
+		if job.Resume == "done" && job.Next != job.Queued+1 {
+			return false
+		}
+		if job.Resume == "emit" && job.Next > job.Queued {
+			return false
+		}
+		if job.Resume != "emit" && job.Resume != "done" {
+			return false
+		}
+	} else if job.Resume != "" {
+		return false
+	}
+	if (job.Phase == "proposals" || job.Phase == "origins") && (job.Clean != job.Queued+1 || job.Next != job.Queued+1) {
+		return false
+	}
+	if (job.Phase == "emit" || job.Phase == "ack" || job.Phase == "done") && job.Clean != job.Queued+1 {
+		return false
+	}
+	if job.Origin != "" && (job.Phase != "origins" || !validIdentifier(job.Origin)) {
+		return false
+	}
+	return len(job.After) <= 4096
 }

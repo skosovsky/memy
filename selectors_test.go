@@ -30,7 +30,7 @@ func forgetSelectorCase(t *testing.T, kind memy.SelectorKind) {
 	foreign := seedForeignRecord(t, f)
 	selector := forgetSelector(f.scope, kind, originalSource)
 	// Act.
-	receipt, forgetErr := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", memy.ForgetRequest{
+	receipt, forgetErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", memy.ForgetRequest{
 		OperationID: "forget", Selector: selector, Reason: "host-authorized deletion", PolicyVersion: "deletion/v1",
 		Expected: []memy.RevisionRef{{RecordID: "first", Revision: 1}},
 	})

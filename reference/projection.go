@@ -98,7 +98,7 @@ func (s *ProjectionSink) Purge(ctx context.Context, batch memy.PurgeBatch) (memy
 			delete(s.artifacts, handle)
 		}
 	}
-	return memy.PurgeAck{Sink: s.name, OperationID: batch.OperationID, Epoch: batch.Epoch}, nil
+	return memy.PurgeAck{Sink: s.name, OperationID: batch.OperationID, Epoch: batch.Epoch, Chunk: batch.Chunk}, nil
 }
 
 // ProjectorFunc binds an explicit version to a typed offline projection script.

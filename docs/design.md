@@ -12,7 +12,7 @@ query Q, projection output O and authenticated authority A. A payload never
 assigns identity, scope, policy or permissions. No universal message/agent type
 and no mandatory map[string]any representation is introduced.
 
-The root package imports only the standard library. `store/memory` and
+The root package and its private helpers have only standard-library dependencies. `store/memory` and
 `store/sqlite` implement the same transactional port. `reference` provides
 deterministic offline authority, source, clock, index, projection sink and
 scripted provider adapters. `conformance` supplies reusable suites for Store and every implemented port.
@@ -51,9 +51,9 @@ capability boundary, not implicit full-field permission.
 
 ## Transactional store
 
-Store is a low-level trusted port: View(ctx, scope, callback) and
-Update(ctx, scope, callback). Each callback gets a transaction-local Bucket
-of versioned binary values. Get/Put/Delete/List use detached copies. Store
+Store is a low-level trusted port: consistent View, scoped atomic Update and
+explicit exclusion through FencedView(ctx, scope, callback). Each callback gets a transaction-local Bucket
+of versioned binary values. Get/Put/Delete/Scan use detached copies. Store
 callbacks are synchronous and may not call the same store recursively.
 An update commits the entire callback or rolls it back, including errors,
 panics and canceled context detected before commit. No background goroutines
@@ -63,17 +63,18 @@ does so before touching a bucket. Direct store access is privileged host access.
 Put/Delete require an expected per-key version; absent is version zero. Failed
 CAS is ErrConflict. Delete leaves a version tombstone so deleting/recreating
 a key cannot cause ABA. Versions are monotonically increasing and overflow
-is rejected. List excludes deleted values and returns sorted keys by prefix.
+is rejected. Scan excludes deleted values and returns bounded ordered prefix pages.
 Values cannot be nil or empty; arbitrary nonempty bytes are supported.
 
 In-memory is a process-local reference with serialized transactions and
-context-aware lock acquisition. SQLite uses real BEGIN IMMEDIATE transactions,
+context-aware lock acquisition. SQLite uses BEGIN IMMEDIATE for mutations and WAL read transactions for reads,
 WAL, synchronous FULL, busy timeout, foreign key checks and schema version
 verification. It serializes writers across independently opened connections.
 Driver busy waits are limited to 25 ms; the adapter retries busy/locked BEGIN
 with context checks and a maximum five-second contention window. It never
 turns a deadline into a successful transaction or an empty result. Database/sql
-serializes this handle's connection use and passes cancellation into the driver.
+serializes the writer handle and permits bounded pooled WAL reads, passing
+cancellation into the driver.
 The transaction stores scoped keys, their versions and values together.
 Receipts and lifecycle state are updated in the same transaction as records.
 Rollback after fault injection must survive reopen. Post-commit fault means
@@ -297,8 +298,8 @@ interval ordering, scope binding, lineage, policy and state transitions.
 The executable schema checks use a pinned test-only validator; core runtime
 continues to use the standard library only.
 
-Storage schema v2 has an explicit metadata version. Unsupported newer versions
-fail on open. Future migrations are explicit and transactional; never reinterpret
+Storage schema v3 has an explicit metadata version. Unsupported versions
+fail on open. Host-owned reviewed imports are explicit; never reinterpret
 unknown valid-time as always or updated-at as valid-from. Payload/reference
 codec migration is consumer-controlled, with recorded source mapping and host
 acceptance. Import uses the ordinary host-approved proposal/commit path. No
@@ -419,7 +420,7 @@ not promise cryptographic integrity against arbitrary privileged store rewrites.
 WithDerivedWrite rechecks every exact lineage dependency deadline after final
 host reauthorization and immediately before invoking the synchronous managed
 write callback. If input or transitive evidence expires during that host I/O,
-the callback is not invoked and ErrStaleInput is returned. Canonical View still
+the callback is not invoked and ErrStaleInput is returned. Explicit FencedView
 excludes concurrent revocation during a started callback. Time passing or an
 external effect after callback entry is not rolled back by a timeout; callbacks
 remain responsible for context and their declared external-effect boundaries.
@@ -450,8 +451,8 @@ decision as data. Basis is content-bearing and is purged with historical payload
 tombstones have a null decision and no authority policy content. The permanent
 operation ledger continues to store content-free receipts, never CommitRequest.
 
-Persisted envelopes and database metadata use schema version 2. Only v2 is read;
-v1 databases and envelopes are explicitly rejected, never silently reset or
+Identity/decision behavior was introduced with schema 2; the current persisted
+contract uses schema 3. Earlier databases and envelopes are explicitly rejected, never silently reset or
 migrated. A consumer can provision a fresh database and import reviewed facts
 through normal host-controlled lifecycle, maintaining its current revocations.
 
@@ -460,3 +461,255 @@ with format assertions enabled: valid UTF-8, 1–1024 bytes, no NUL and not all
 Unicode whitespace. JSON Schema maxLength alone counts codepoints, not bytes.
 Consumers validating these schemas must implement this documented format; an
 unconfigured validator checking shape alone is not identity conformance.
+
+## Iteration 02 — storage and delivery contract
+
+This section specifies the target contract for iteration 02. Its implementation
+and independent acceptance are tracked separately in task02 reports; task01
+acceptance does not certify these requirements.
+
+### Transaction and exclusion boundaries
+
+Store.View provides one consistent, read-only transaction. It does not promise
+exclusion of revocation during arbitrary external callbacks. Store.Update is a
+scoped atomic mutation with conditional per-key versions, persistent deletion
+versions, rollback on callback error/panic/cancellation before commit, and an
+explicit unknown-outcome error when durability cannot be disproved.
+
+Store.FencedView is the explicit synchronous managed-write/delivery exclusion
+boundary. Updates in its exact scope wait until its callback exits; independent
+scopes do not wait for that callback. FencedView is a declared capability checked
+before any managed external effect. SQLite must enforce exclusion across
+independently opened handles and processes, not only inside one Engine. Short
+SQLite write transactions may serialize across scopes because SQLite has one
+physical writer. A remote callback must not retain that database writer lock.
+Nested updates are forbidden inside a fenced callback. Callback context and
+latency obligations belong to the trusted host; arbitrary Go callbacks are not
+forcefully interrupted or detached in a background goroutine.
+
+Ranker, Projector and merge callbacks receive detached, initially authorized
+records outside the database transaction. Before final return, canonical exact
+revisions, authority, source identity, current retention, lineage and deadlines
+are checked again under a delivery fence. Revocation that committed before that
+final boundary prevents newly delivered forbidden payload. Data already handed
+to a trusted callback cannot be recalled: callbacks are host data recipients and
+must follow the host's deletion policy. Managed external writes hold the explicit
+scope fence through callback completion; a subsequent Forget purges their
+artifacts. Failure or timeout can leave an external effect and is never an
+exactly-once promise.
+
+### Bounded traversal
+
+Bucket.List is replaced by ordered prefix pages. A request supplies a positive
+entry limit, positive returned-byte budget and an optional opaque cursor. A page
+returns detached live entries in ascending bytewise key order, a continuation
+cursor when more entries remain, and explicit completion. Tombstones do not
+consume unbounded hidden scan work. A value exceeding the requested byte budget
+returns ErrBudget rather than an empty page that claims progress. Cancellation
+invalidates the current attempt without certifying completion.
+
+Cursors bind the store instance/database identity, exact scope, exact prefix,
+last emitted key and scoped mutation generation. A changed generation, reopened
+in-memory store, replaced database, mismatched scope/prefix or invalid cursor is
+explicitly rejected; stale traversal never silently skips new/removed keys.
+Within one consistent transaction all pages use the same generation. A cursor
+retains no live transaction and no callback-owned bucket. Writes after a page
+invalidate its continuation; hosts restart or resume a durable lifecycle job,
+not a silently inconsistent listing. Bucket lifetime, read-only enforcement,
+CAS overflow and detached byte ownership remain executable store guarantees.
+
+Addressed Get reads only the requested key and required canonical dependencies.
+Consolidate loads only its exact input revisions and their required evidence;
+unrelated source failure cannot veto independent inputs. Memory uses per-scope
+state and addressed overlays; SQLite uses indexed addressed SQL operations.
+Neither adapter materializes/copies the entire scope for an addressed read.
+
+### Revocation and host-driven continuation
+
+Source membership and reverse lineage include historical revisions and are
+updated atomically with canonical state. They are traversal indexes, not
+independent knowledge; canonical envelopes remain authoritative. Dependency
+selection visits each reachable vertex/edge once instead of repeatedly scanning
+history to convergence. Scoped graph cycles, overlapping ancestry and retries
+must terminate without creating extra canonical revisions.
+
+Mass Forget installs a durable fence before bounded content cleanup. Pending
+jobs remain unreadable/unwritable through the fence after reopen. The same
+operation identity resumes cleanup and exact sink acknowledgement; complete is
+reported only after every required canonical page and managed sink acknowledgement.
+An interrupted job cannot publish a partially revoked scope as complete. Stale
+jobs, source evidence and cursors cannot bypass the installed fence.
+
+Snapshot and Sweep expose bounded host-driven continuation, without an implicit
+scheduler. Full enumeration necessarily visits the selected scope. Sweep checks
+current retention policy for visited content even when a stored deadline is
+later: a deadline index alone cannot prove eligibility. Authority/policy changes
+and changed snapshots yield explicit retry/failure rather than false completion.
+
+The old Store API is replaced directly. Persisted structural changes require a
+new schema version and explicit incompatible-database rejection; no compatibility
+aliases, automatic imports or parallel old/new paths are retained.
+
+The iteration 02 persisted format is schema 3. Database metadata stores a
+random cursor authentication secret and per-scope mutation generations. Only
+schema 3 is supported after this iteration; earlier envelopes/databases fail
+with ErrSchema. Cursor authentication prevents hosts from accidentally forging
+progress or transferring cursors between databases. Prefix/key comparisons use
+exact bytes; cursor encoding preserves key bytes without JSON normalization.
+Scan limits are 1–1024 entries and a positive byte budget covering key and value
+bytes. A mutation within a transaction invalidates a previously issued cursor
+as well. Failed/rolled-back mutations never change the committed generation.
+
+The optional SQLite adapter supports fenced local databases on Darwin, Linux,
+FreeBSD, OpenBSD, NetBSD and DragonFly. Other platforms reject Open with
+ErrUnsupported before database effects; core and memory remain portable. Its
+scoped shared/exclusive advisory file locks are kernel-owned open-file locks,
+not expiring leases: a slow callback cannot outlive a lease and bypass revoke.
+Process exit releases the lock. Independently opened handles use the resolved
+database path. Hard-linked aliases, network filesystems and privileged removal
+or replacement of live fence files are outside the local-adapter contract.
+The `.memy-fences` directory must remain beside an active database; fence files
+are not deleted during use, because unlinking a locked inode defeats exclusion.
+Cleanup is host-owned after all database handles/processes are closed.
+
+Cursor authentication additionally binds the resolved physical database identity
+(path/device/inode). A copied or replaced database cannot accept cursors from the
+original, even if its persisted secret/generation were copied with the file.
+Reopening the same unmodified database preserves continuation. Import/restore
+revocation responsibilities remain host-owned and are not solved by cursor MACs.
+
+Ordinary SQLite View uses a consistent WAL read transaction and may overlap
+mutations. FencedView holds exact-scope read exclusion; Update holds exact-scope
+exclusive exclusion. Engine canonical delivery uses FencedView. Memory may
+serialize these callbacks within a scope, but never across independent scopes.
+Ranker/Projector receive detached permitted input after the preparation fence
+has been released. A revoke may finish during their callback; final canonical
+revalidation then rejects the result instead of returning its output. A callback
+may already have consumed the earlier permitted input, which is a host boundary.
+
+Historical membership indexes use schema-3 `membership` envelopes containing
+only Scope, exact RevisionRef, relation kind (`source`/`lineage`) and MatchID.
+Canonical Commit writes both relation and record lookup keys in the same atomic
+transaction as the revision. Reconciliation state changes preserve historical
+edges. Revocation removes relation entries through the record lookup, alongside
+canonical content cleanup. Selection revalidates every traversed membership
+against the referenced canonical revision and exact key/scope before following
+it; an index hit cannot authorize payload or independently define knowledge.
+
+Engine.Snapshot returns one SnapshotPage, using SnapshotOptions with Read,
+Cursor, Limit and MaxBytes. A page bounds scanned canonical envelopes, not just
+eligible returned records: an empty eligible page may still have continuation.
+The cursor binds the read options and authenticated actor/policy version through
+an authenticated Scan plan tag. Changing read semantics or policy during a walk
+is rejected rather than presented as one complete snapshot. Host code explicitly
+continues pages; no unbounded Snapshot wrapper remains in the root API.
+
+### Durable bounded Forget
+
+ForgetRequest requires Limit (1–1024 work entries/callbacks) and positive
+MaxBytes for each scanned storage page. Transport budgets are excluded from the
+semantic request digest, so a host may increase them while resuming the same
+operation identity. Each call performs bounded work and reports current progress;
+the host repeats the exact semantic request until complete or a sink requires
+retry. No implicit scheduler or unbounded compatibility wrapper remains.
+
+The first short transaction checks expected revisions, advances the scope epoch,
+installs the selector ledger and an active-purge scope fence, and stores a
+content-free durable job/receipt. It performs no history enumeration. While the
+job is active, Engine canonical reads and mutations fail closed for that scope;
+other scopes remain usable. Only the same operation identity may advance it.
+The temporary scope-wide fence also protects dependencies not discovered yet.
+
+Durable phases enumerate seed membership, expand indexed dependencies, clean
+record history/indexes, discover affected proposal origins, and clean proposal
+history. Each cursor is a stored exact key under the installed durable fence.
+Scan.After is an explicit new suffix-range request, distinct from snapshot
+continuation: it never validates an old snapshot cursor. Snapshot uses only
+authenticated cursors; jobs use fresh bounded suffix scans of frozen canonical
+state. Job progress and canonical deletion commit atomically. Interrupted work
+continues after reopen without inventing another canonical revision.
+
+PurgeBatch contains one bounded records chunk and a monotonic Chunk identifier.
+Sink acknowledgement binds sink, operation, epoch and chunk. Late acknowledgements
+cannot accept a different chunk. CanonicalComplete is true only after every
+canonical cleanup phase; PurgeComplete additionally requires all registered sink
+acknowledgements. Earlier chunk completion does not certify whole-operation
+completion. Receipts never accumulate an unbounded list of all removed record
+IDs; hosts may collect observed chunks themselves. Failed external callbacks may
+have effects and remain idempotent per exact chunk, without exactly-once claims.
+
+A purge continuation validates the active scope pointer against its exact
+operation before advancing or accepting a completed chunk. Invalid job counters,
+phase/resume combinations and foreign proposal history fail with ErrSchema;
+the containing transaction rolls back. All canonical cleanup finishes before
+managed sink chunks are emitted. The active fence remains until the last chunk
+has every required acknowledgement.
+
+### Durable bounded Sweep
+
+Sweep is a host-driven maintenance pass with `SweepRequest{OperationID, Limit,
+MaxBytes}`. Limit is 1–1024 work entries or sink calls per invocation; MaxBytes
+bounds each storage page. Each result contains only the current bounded receipts,
+this call's proposal count, work counters and Complete. Hosts repeat the same
+operation identity. Results never accumulate all receipts inside the library.
+Actor, purpose, scope and operation identity bind the durable pass; transport
+budgets may change on resume. Each call requires current ActionForget permission
+and fresh reauthorization under that call's authority policy. A host authority
+policy rollout does not change the durable request identity or trap its fence.
+A completed pass remains complete on replay; a
+new pass requires a new operation identity.
+
+The first transaction installs a content-free active-sweep pointer and durable
+job, and advances the scope epoch. Canonical Engine reads/mutations fail closed
+in that scope until the pass completes. Independent scopes remain usable. The
+explicit maintenance fence freezes the canonical key set so exact durable suffix
+positions cannot silently omit writes behind the cursor. It also prevents
+proposal resurrection during multi-call history deletion. Store access remains
+privileged. An interrupted pass requires host continuation after reopen; there
+is no background scheduler and no timeout that silently removes its fence.
+
+Work progresses through record revisions, proposal revisions and selected
+proposal history. Each record revision evaluates both stored expiry and current
+host retention policy; no stored-deadline index replaces that evaluation. An
+expired record starts the existing bounded Forget protocol with exact head
+revision and a deterministic operation identity derived from the pass and target.
+Sweep pauses its record cursor until that purge, including every required managed
+sink acknowledgement, finishes. An already active purge is continued before
+canonical enumeration. Purge advancement uses the raw maintenance transaction
+path; public Forget cannot bypass an active sweep. Purge receipts continue to
+identify their own epoch and chunk. Proposal cleanup validates exact origin,
+scope and revision binding before deletion and advances atomically with job state.
+
+The pass scans frozen canonical entries; host policy may change during a pass and
+is checked at the time each entry is visited. Complete certifies completion of
+that pass and its deletions, not a claim that no deadline can expire or policy can
+shorten after an earlier entry was visited. Hosts schedule another pass for such
+changes. Policy failures return an error without advancing the current page.
+Durable progress and canonical deletion commit together; external sink effects
+remain retryable and idempotent rather than exactly once.
+
+### Bounded validation of historical membership
+
+A membership edge carries an inclusion proof over the exact revision's unique
+source/lineage relations, in canonical array order (sources first). Leaf identity
+binds scope, child revision, relation and match ID. Hashes separate leaves,
+branches and the counted root. Proof positions/counts and a maximum depth of 64
+are validated. Duplicate relations collapse deterministically at construction.
+
+A purge first reads/validates the exact immutable canonical revision and computes
+its counted membership root. It persists a content-free purge-evidence document
+bound to scope, operation and exact RevisionRef in the same active-fenced job.
+Subsequent batches validate edge proofs against that durable root. No host-global
+cache survives outside the deletion fence, and an index never authenticates its
+own arbitrary relation. Each canonical revision body is decoded at most once for
+membership validation over the whole interrupted/reopened purge. Each edge has
+fixed bounded proof validation work (at most 64 branch hashes), so batching does
+not multiply full child-lineage parsing by parent degree.
+
+Transaction-local host ports (Authority.Check, Sources.Validate, Retention.Evaluate,
+Clock and codecs) must be bounded local operations and obey context cancellation
+where their interface supplies a context. The host prepares network-backed policy
+and source state before entering the engine. These callbacks may execute inside
+Store.Update or FencedView; they must not perform remote I/O or recursively enter
+the same store. Ranker, Projector and consolidation merge callbacks execute outside
+store transactions and are followed by fresh canonical validation.

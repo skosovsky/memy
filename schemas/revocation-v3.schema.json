@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/skosovsky/memy/schemas/revocation-v3.schema.json",
+  "title": "memy revocation data v2",
+  "$ref": "document-v3.schema.json#/$defs/revocation"
+}

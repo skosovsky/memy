@@ -47,40 +47,60 @@ type Consolidator[P, R any] interface {
 	Merge(context.Context, []Record[P, R], Budget) (MergeResult[P, R], error)
 }
 
-// Snapshot returns typed eligible canonical state under the host read profile.
-// It never includes revoked payload, and unsupported field masks fail closed.
-func (e *Engine[P, R, A]) Snapshot(
-	ctx context.Context,
-	authority A,
-	scope Scope,
-	options ReadOptions,
-) ([]Record[P, R], error) {
-	decision, operationErr := e.authorize(ctx, authority, scope, ActionRead, options.Purpose)
-	if operationErr != nil {
-		return nil, operationErr
+// SnapshotOptions bounds canonical work separately from read eligibility.
+type SnapshotOptions struct {
+	Read     ReadOptions
+	Cursor   string
+	Limit    int
+	MaxBytes int
+}
+
+// SnapshotPage reports progress even when all scanned revisions are ineligible.
+type SnapshotPage[P, R any] struct {
+	Records      []Record[P, R]
+	Cursor       string
+	Complete     bool
+	Scanned      int
+	ScannedBytes int
+}
+
+// Snapshot returns one bounded page of eligible canonical revisions. Hosts
+// explicitly continue cursors; changed state or read policy invalidates the walk.
+func (e *Engine[P, R, A]) Snapshot(ctx context.Context, authority A, scope Scope, options SnapshotOptions) (SnapshotPage[P, R], error) {
+	decision, err := e.authorize(ctx, authority, scope, ActionRead, options.Read.Purpose)
+	if err != nil {
+		return SnapshotPage[P, R]{}, err
 	}
-	result := make([]Record[P, R], 0)
-	operationErr = e.config.Store.View(ctx, scope, func(b Bucket) error {
-		entries, transactionErr := b.List("record/")
-		if transactionErr != nil {
-			return transactionErr
-		}
-		for _, entry := range entries {
-			record, eligible, candidateErr := e.snapshotCandidate(ctx, b, scope, entry, options)
-			if candidateErr != nil {
-				return candidateErr
-			}
-			if eligible {
-				result = append(result, record)
-			}
-		}
-		if err := e.reauthorize(ctx, authority, scope, ActionRead, options.Purpose, decision); err != nil {
+	plan, err := digest(struct {
+		Actor, Policy string
+		Read          ReadOptions
+	}{decision.Actor, decision.PolicyVersion, options.Read})
+	if err != nil {
+		return SnapshotPage[P, R]{}, err
+	}
+	result := SnapshotPage[P, R]{Records: make([]Record[P, R], 0)}
+	err = e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
+		page, err := b.Scan(ScanOptions{Prefix: "record/", Plan: plan, Cursor: options.Cursor, Limit: options.Limit, MaxBytes: options.MaxBytes})
+		if err != nil {
 			return err
 		}
-		return e.deliveryDeadlineGate(b, scope, result)
+		for _, entry := range page.Entries {
+			record, eligible, err := e.snapshotCandidate(ctx, b, scope, entry, options.Read)
+			if err != nil {
+				return err
+			}
+			if eligible {
+				result.Records = append(result.Records, record)
+			}
+		}
+		result.Cursor, result.Complete, result.Scanned, result.ScannedBytes = page.Cursor, page.Complete, len(page.Entries), page.Bytes
+		if err := e.reauthorize(ctx, authority, scope, ActionRead, options.Read.Purpose, decision); err != nil {
+			return err
+		}
+		return e.deliveryDeadlineGate(b, scope, result.Records)
 	})
-	if operationErr != nil {
-		return nil, operationErr
+	if err != nil {
+		return SnapshotPage[P, R]{}, err
 	}
 	return result, nil
 }
@@ -156,7 +176,7 @@ func Consolidate[P, R, A any](
 	}
 	var replay []Proposal[P, R]
 	var completed bool
-	operationErr = e.config.Store.View(ctx, scope, func(b Bucket) error {
+	operationErr = e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
 		op, _, exists, transactionErr := operation(b, request.OperationID, "extract", requestDigest)
 		if transactionErr != nil {
 			return transactionErr
@@ -183,24 +203,42 @@ func Consolidate[P, R, A any](
 	if completed {
 		return replay, nil
 	}
-	state, operationErr := e.Snapshot(
-		ctx,
-		authority,
-		scope,
-		ReadOptions{
-			Purpose:          request.Purpose,
-			ValidAsOf:        time.Time{},
-			RecordedAsOf:     time.Time{},
-			IncludeUnknown:   false,
-			IncludeConflicts: false,
-		},
-	)
+	readDecision, operationErr := e.authorize(ctx, authority, scope, ActionRead, request.Purpose)
 	if operationErr != nil {
 		return nil, operationErr
 	}
-	inputs, inputErr := e.consolidationInputs(state, request)
-	if inputErr != nil {
-		return nil, inputErr
+	var inputs []Record[P, R]
+	operationErr = e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
+		state := make([]Record[P, R], 0, len(request.Inputs))
+		seen := make(map[RevisionRef]bool, len(request.Inputs))
+		for _, ref := range request.Inputs {
+			if !validRef(ref) || seen[ref] {
+				return ErrInvalid
+			}
+			seen[ref] = true
+			record, eligible, err := e.recallCandidate(ctx, b, scope,
+				Candidate{RecordID: ref.RecordID, Revision: ref.Revision},
+				ReadOptions{Purpose: request.Purpose})
+			if err != nil {
+				return err
+			}
+			if !eligible || record.State != Active {
+				return ErrStaleInput
+			}
+			state = append(state, record)
+		}
+		var err error
+		inputs, err = e.consolidationInputs(state, request)
+		if err != nil {
+			return err
+		}
+		if err := e.reauthorize(ctx, authority, scope, ActionRead, request.Purpose, readDecision); err != nil {
+			return err
+		}
+		return e.deliveryDeadlineGate(b, scope, inputs)
+	})
+	if operationErr != nil {
+		return nil, operationErr
 	}
 	script := extractionMerge[P, R, A]{
 		engine:    e,

@@ -27,7 +27,10 @@ type Config[P, R, A any] struct {
 
 // Engine coordinates typed knowledge lifecycle over a transactional store.
 // It creates no workers; callers own scheduling and may call it concurrently.
-type Engine[P, R, A any] struct{ config Config[P, R, A] }
+type Engine[P, R, A any] struct {
+	config Config[P, R, A]
+	raw    Store
+}
 
 // New verifies the configured capabilities before exposing a lifecycle engine.
 func New[P, R, A any](config Config[P, R, A]) (*Engine[P, R, A], error) {
@@ -46,7 +49,7 @@ func New[P, R, A any](config Config[P, R, A]) (*Engine[P, R, A], error) {
 		return nil, ErrInvalid
 	}
 	caps := config.Store.Capabilities()
-	if !caps.Atomic || !caps.ConditionalWrite {
+	if !caps.Atomic || !caps.ConditionalWrite || !caps.FencedView {
 		return nil, ErrUnsupported
 	}
 	if caps.SchemaVersion != SchemaVersion || !validIdentifier(config.PayloadCodec.Version()) || !validIdentifier(config.ReferenceCodec.Version()) {
@@ -60,7 +63,9 @@ func New[P, R, A any](config Config[P, R, A]) (*Engine[P, R, A], error) {
 		names[sink.Name()] = true
 	}
 	config.Sinks = slices.Clone(config.Sinks)
-	return &Engine[P, R, A]{config: config}, nil
+	raw := config.Store
+	config.Store = lifecycleStore{Store: raw}
+	return &Engine[P, R, A]{config: config, raw: raw}, nil
 }
 
 func nilPort(port any) bool {
@@ -392,7 +397,7 @@ func (e *Engine[P, R, A]) Proposal(
 		return Proposal[P, R]{}, ErrInvalid
 	}
 	var result Proposal[P, R]
-	operationErr = e.config.Store.View(ctx, scope, func(b Bucket) error {
+	operationErr = e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
 		var stored proposalDisk
 		if _, err := readDocument(b, objectKey("proposal", id), "proposal", &stored); err != nil {
 			return err
@@ -590,7 +595,7 @@ func (e *Engine[P, R, A]) Get(
 		return Record[P, R]{}, ErrInvalid
 	}
 	var result Record[P, R]
-	operationErr = e.config.Store.View(ctx, scope, func(b Bucket) error {
+	operationErr = e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
 		selected, readErr := e.selectCanonical(ctx, b, scope, id, options)
 		if readErr != nil {
 			return readErr
@@ -602,6 +607,9 @@ func (e *Engine[P, R, A]) Get(
 		return e.deliveryDeadlineGate(b, scope, []Record[P, R]{selected})
 	})
 	if operationErr != nil {
+		if errors.Is(operationErr, ErrRevoked) {
+			return Record[P, R]{}, errors.Join(ErrNotFound, operationErr)
+		}
 		return Record[P, R]{}, operationErr
 	}
 	return result, nil
@@ -624,7 +632,7 @@ func (e *Engine[P, R, A]) selectCanonical(
 	if head.State == Revoked {
 		return Record[P, R]{}, ErrNotFound
 	}
-	entries, operationErr := b.List(objectKey("record", id) + "/")
+	entries, operationErr := scanAll(b, objectKey("record", id)+"/")
 	if operationErr != nil {
 		return Record[P, R]{}, operationErr
 	}

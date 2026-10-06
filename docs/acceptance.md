@@ -205,3 +205,18 @@ historical evidence rather than claims about unchanged current hashes.
 | ID-05 | Authorized historical reads expose only initial decision and state known as-of |
 | ID-06 | Forget removes sensitive basis from history and managed projections; receipts remain content-free |
 | ID-07 | v2 schema/runtime agree and old database/envelopes fail closed |
+
+## Iteration 02 — storage and concurrency (requirements, not acceptance)
+
+| Requirement | Required evidence |
+| --- | --- |
+| ST-01 | Both adapters pass shared conformance for transaction lifetime, rollback, panic/cancel, CAS/ABA, close and unknown outcome |
+| ST-02 | Ordered bounded scans enforce entry/byte limits, scope/database/prefix binding, cancellation and explicit stale-cursor failure |
+| ST-03 | Addressed Get and fixed-input Consolidate do not enumerate/decode unrelated history; instrumented work counters prove the cost boundary |
+| ST-04 | Slow rank/project/managed callbacks in scope A permit independent scope B operations; no remote callback holds SQLite's global writer lock |
+| ST-05 | Final delivery/managed-write fences preserve authority/source/retention/deadline and revoke behavior, including independent SQLite handles/processes |
+| ST-06 | Durable interrupted mass purge resumes after reopen with identical operation identity and no premature completion or resurrection |
+| ST-07 | Historical sources and chain/branch lineage purge completely in linear graph traversal without extra revisions on replay |
+| ST-08 | Snapshot/Sweep expose bounded continuation and still enforce shortened current retention policies |
+| ST-09 | Before/after memory/SQLite cost corpus covers 1k/10k/100k revisions, fixed payload and growing lineage; counters, allocations, latency and contention are recorded |
+| ST-10 | Race/vet/format/examples pass; two independent reports certify all task02 requirements on the final source snapshot |

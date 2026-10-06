@@ -52,7 +52,7 @@ func TestRetentionChangeInvalidatesAcceptedCommit(t *testing.T) {
 	policy.change(memy.Retention{PolicyVersion: "retention/v2"}, nil)
 	// Act.
 	_, commitErr := f.engine.Commit(context.Background(), f.actor, f.scope, "assist", request)
-	records, readErr := f.engine.Snapshot(context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	records, readErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
 	// Assert: a new host policy requires new review, not an implicit upgrade.
 	if !errors.Is(commitErr, memy.ErrStaleInput) || readErr != nil || len(records) != 0 {
 		t.Fatalf("commit=%v state=%v read=%v", commitErr, records, readErr)
@@ -81,7 +81,7 @@ func TestRetentionReadChangesAndOutageFailClosed(t *testing.T) {
 			}
 			// Act.
 			record, readErr := f.engine.Get(context.Background(), f.actor, f.scope, "timezone", memy.ReadOptions{})
-			records, snapshotErr := f.engine.Snapshot(context.Background(), f.actor, f.scope, memy.ReadOptions{})
+			records, snapshotErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
 			// Assert: no partial payload escapes with stale/unknown policy.
 			if !errors.Is(readErr, expected) || !errors.Is(snapshotErr, expected) || record.Payload.Value != "" ||
 				len(records) != 0 {
@@ -98,7 +98,7 @@ func TestSweepAppliesShorterCurrentRetentionDeadline(t *testing.T) {
 	f.commit(t, f.acceptedRequest(t, "commit", "timezone", 0, p, memy.Append))
 	policy.change(memy.Retention{PolicyVersion: "retention/v2", ExpiresAt: f.clock.Now().Add(-time.Second)}, nil)
 	// Act.
-	swept, sweepErr := f.engine.Sweep(context.Background(), f.actor, f.scope, "assist", "current-policy")
+	swept, sweepErr := fullSweep(f.engine, context.Background(), f.actor, f.scope, "assist", "current-policy")
 	_, readErr := f.engine.Get(context.Background(), f.actor, f.scope, "timezone", memy.ReadOptions{})
 	// Assert: current policy triggers real revocation, rather than only denying reads.
 	if sweepErr != nil || len(swept.Records) != 1 || swept.Records[0].State != memy.PurgeComplete ||
@@ -172,7 +172,7 @@ func TestSweepPurgesDraftsUnderCurrentRetention(t *testing.T) {
 	p := f.propose(t, "draft", "private draft", memy.Interval{})
 	policy.change(memy.Retention{PolicyVersion: "retention/v2", ExpiresAt: f.clock.Now().Add(-time.Second)}, nil)
 	// Act.
-	swept, operationErr := f.engine.Sweep(context.Background(), f.actor, f.scope, "assist", "purge-draft")
+	swept, operationErr := fullSweep(f.engine, context.Background(), f.actor, f.scope, "assist", "purge-draft")
 	proposal, readErr := f.engine.Proposal(context.Background(), f.actor, f.scope, p.ID, "assist")
 	// Assert: draft and immutable revisions follow current retention too.
 	if operationErr != nil || swept.ExpiredProposals != 1 || !errors.Is(readErr, memy.ErrNotFound) ||

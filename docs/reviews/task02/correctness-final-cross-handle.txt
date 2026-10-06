@@ -1,0 +1,4 @@
+=== RUN   TestIndependentSQLiteEnginesShareLifecycleIdempotency
+--- PASS: TestIndependentSQLiteEnginesShareLifecycleIdempotency (0.08s)
+PASS
+ok  	github.com/skosovsky/memy	1.393s

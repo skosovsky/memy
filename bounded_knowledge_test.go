@@ -50,7 +50,7 @@ func TestEpisodeAndProceduralProposalRemainDataAfterReopen(t *testing.T) {
 	}
 	projected, projectionErr := memy.Project(context.Background(), f.engine, f.actor, f.scope,
 		"episode/session-42", memy.ReadOptions{ValidAsOf: interval.From}, projector)
-	state, stateErr := f.engine.Snapshot(context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	state, stateErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
 	// Assert: one outcome is not a timeless rule; executable host policy is separate.
 	if withinErr != nil || within.Payload.Key != "episode/session-42" || within.Valid != interval ||
 		!errors.Is(outsideErr, memy.ErrNotFound) || pendingErr != nil || pending.State != memy.Proposed {

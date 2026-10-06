@@ -4,6 +4,7 @@ package conformance
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"sync"
 	"testing"
@@ -38,6 +39,8 @@ func StoreSuite(t *testing.T, factory Factory) {
 		{"context_aware_wait", contextWait},
 		{"malformed_input", malformedInput},
 		{"closed", closed},
+		{"bounded_scan", boundedScan},
+		{"scan_cursor_binding", scanCursorBinding},
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
@@ -49,6 +52,144 @@ func StoreSuite(t *testing.T, factory Factory) {
 			})
 			test.check(t, store)
 		})
+	}
+}
+
+func boundedScan(t *testing.T, store memy.Store) {
+	// Arrange: ordered live keys, a different prefix, and many retained tombstones.
+	must(t, store.Update(context.Background(), scope(), func(b memy.Bucket) error {
+		for i := 0; i < 700; i++ {
+			key := "prefix/" + fmt.Sprintf("%04d", i)
+			if _, err := b.Put(key, 0, []byte("payload")); err != nil {
+				return err
+			}
+		}
+		for i := 0; i < 1000; i++ {
+			if _, err := b.Delete("deleted/"+strconv.Itoa(i), 0); err != nil {
+				return err
+			}
+		}
+		_, err := b.Put("other/key", 0, []byte("excluded"))
+		return err
+	}))
+	options := memy.ScanOptions{Prefix: "prefix/", Limit: 37, MaxBytes: 200}
+	var keys []string
+	// Act: continue across independent consistent transactions without mutation.
+	for {
+		var page memy.ScanPage
+		must(t, store.View(context.Background(), scope(), func(b memy.Bucket) error {
+			var err error
+			page, err = b.Scan(options)
+			return err
+		}))
+		// Assert: work/output limits, exact order, and detached value ownership.
+		if len(page.Entries) > options.Limit || page.Bytes > options.MaxBytes {
+			t.Fatalf("unbounded page: %+v", page)
+		}
+		for _, entry := range page.Entries {
+			keys = append(keys, entry.Key)
+			entry.Value.Data[0] = 'X'
+		}
+		if page.Complete {
+			if page.Cursor != "" {
+				t.Fatal("complete cursor")
+			}
+			break
+		}
+		if page.Cursor == "" || len(page.Entries) == 0 {
+			t.Fatal("false progress")
+		}
+		options.Cursor = page.Cursor
+	}
+	if len(keys) != 700 {
+		t.Fatalf("keys=%d", len(keys))
+	}
+	for i, key := range keys {
+		if key != "prefix/"+fmt.Sprintf("%04d", i) {
+			t.Fatalf("unordered key %d: %s", i, key)
+		}
+	}
+	must(t, store.View(context.Background(), scope(), func(b memy.Bucket) error {
+		v, err := b.Get(keys[0])
+		if err != nil {
+			return err
+		}
+		if string(v.Data) != "payload" {
+			t.Fatal("scan aliases stored bytes")
+		}
+		for _, options := range []memy.ScanOptions{{Limit: 0, MaxBytes: 1}, {Limit: 1025, MaxBytes: 1}, {Limit: 1, MaxBytes: 0}} {
+			if _, err := b.Scan(options); !errors.Is(err, memy.ErrInvalid) {
+				t.Fatalf("invalid scan: %v", err)
+			}
+		}
+		if _, err := b.Scan(memy.ScanOptions{Prefix: "prefix/", Limit: 1, MaxBytes: 1}); !errors.Is(err, memy.ErrBudget) {
+			t.Fatalf("oversized entry: %v", err)
+		}
+		return nil
+	}))
+}
+
+func scanCursorBinding(t *testing.T, store memy.Store) {
+	// Arrange: a continuation cursor bound to the exact current scope generation.
+	must(t, store.Update(context.Background(), scope(), func(b memy.Bucket) error {
+		for _, key := range []string{"a/1", "a/2", "a/3"} {
+			if _, err := b.Put(key, 0, []byte("v")); err != nil {
+				return err
+			}
+		}
+		return nil
+	}))
+	options := memy.ScanOptions{Prefix: "a/", Limit: 1, MaxBytes: 100}
+	must(t, store.View(context.Background(), scope(), func(b memy.Bucket) error { page, err := b.Scan(options); options.Cursor = page.Cursor; return err }))
+	if options.Cursor == "" {
+		t.Fatal("missing continuation")
+	}
+	// Act/Assert: prefix/scope mismatch, tampering, rollback and mutation boundaries.
+	changed := options
+	changed.Prefix = "b/"
+	must(t, store.View(context.Background(), scope(), func(b memy.Bucket) error {
+		if _, err := b.Scan(changed); !errors.Is(err, memy.ErrInvalid) {
+			t.Fatalf("prefix: %v", err)
+		}
+		return nil
+	}))
+	other := scope()
+	other.Subject = "other"
+	must(t, store.View(context.Background(), other, func(b memy.Bucket) error {
+		if _, err := b.Scan(options); !errors.Is(err, memy.ErrInvalid) {
+			t.Fatalf("scope: %v", err)
+		}
+		return nil
+	}))
+	rollbackErr := errors.New("rollback")
+	if err := store.Update(context.Background(), scope(), func(b memy.Bucket) error {
+		if _, err := b.Put("a/4", 0, []byte("v")); err != nil {
+			return err
+		}
+		return rollbackErr
+	}); !errors.Is(err, rollbackErr) {
+		t.Fatal(err)
+	}
+	must(t, store.View(context.Background(), scope(), func(b memy.Bucket) error { _, err := b.Scan(options); return err }))
+	must(t, store.Update(context.Background(), scope(), func(b memy.Bucket) error {
+		if _, err := b.Put("unrelated", 0, []byte("v")); err != nil {
+			return err
+		}
+		if _, err := b.Scan(options); !errors.Is(err, memy.ErrStaleCursor) {
+			t.Fatalf("transaction cursor: %v", err)
+		}
+		return nil
+	}))
+	var escaped memy.Bucket
+	must(t, store.View(context.Background(), scope(), func(b memy.Bucket) error {
+		escaped = b
+		if _, err := b.Scan(options); !errors.Is(err, memy.ErrStaleCursor) {
+			t.Fatalf("stale cursor: %v", err)
+		}
+		return nil
+	}))
+	if _, err := escaped.Scan(options); !errors.Is(err, memy.ErrClosed) {
+		t.Fatalf("escaped scan: %v", err)
 	}
 }
 
@@ -84,7 +225,7 @@ func capabilities(t *testing.T, store memy.Store) {
 	// Arrange / Act.
 	caps := store.Capabilities()
 	// Assert.
-	if !caps.Atomic || !caps.ConditionalWrite || caps.SchemaVersion != memy.SchemaVersion {
+	if !caps.Atomic || !caps.ConditionalWrite || !caps.FencedView || caps.SchemaVersion != memy.SchemaVersion {
 		t.Fatalf("capabilities: %+v", caps)
 	}
 }
@@ -186,7 +327,7 @@ func detachedBytes(t *testing.T, store memy.Store) {
 	value := get(t, store, scope(), "record")
 	value.Data[0] = 'Y'
 	must(t, store.View(context.Background(), scope(), func(b memy.Bucket) error {
-		entries, transactionErr := b.List("")
+		entries, transactionErr := entries(b, "")
 		if transactionErr != nil {
 			return transactionErr
 		}
@@ -276,7 +417,7 @@ func concurrentCAS(t *testing.T, store memy.Store) {
 }
 
 func contextWait(t *testing.T, store memy.Store) {
-	// Arrange: hold the store's transaction lock.
+	// Arrange: hold exact-scope mutation exclusion.
 	entered, release, done := make(chan struct{}), make(chan struct{}), make(chan error, 1)
 	go func() {
 		done <- store.Update(context.Background(), scope(), func(memy.Bucket) error { close(entered); <-release; return nil })
@@ -285,7 +426,7 @@ func contextWait(t *testing.T, store memy.Store) {
 	ctx, cancel := context.WithTimeout(context.Background(), lockWaitDeadline)
 	defer cancel()
 	// Act.
-	operationErr := store.View(ctx, scope(), func(memy.Bucket) error { return errors.New("must not enter") })
+	operationErr := store.FencedView(ctx, scope(), func(memy.Bucket) error { return errors.New("must not enter") })
 	close(release)
 	otherErr := <-done
 	// Assert.
@@ -361,5 +502,24 @@ func malformedScopeIdentity(t *testing.T, store memy.Store) {
 	}
 	if value := get(t, store, good, "record"); string(value.Data) != "original" || value.Version != 1 {
 		t.Fatal("invalid scope mutated valid state")
+	}
+}
+
+func entries(b memy.Bucket, prefix string) ([]memy.Entry, error) {
+	var result []memy.Entry
+	options := memy.ScanOptions{Prefix: prefix, Limit: 256, MaxBytes: int(^uint(0) >> 1)}
+	for {
+		page, err := b.Scan(options)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, page.Entries...)
+		if page.Complete {
+			return result, nil
+		}
+		if page.Cursor == "" || len(page.Entries) == 0 {
+			return nil, memy.ErrSchema
+		}
+		options.Cursor = page.Cursor
 	}
 }

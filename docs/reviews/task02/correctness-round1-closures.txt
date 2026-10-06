@@ -1,0 +1,9 @@
+=== RUN   TestReviewClosurePolicyAndReplay
+    review_closure_test.go:14: denied continuation rejected; currently authorized continuation completes; old completed replay does not disturb newer fence
+--- PASS: TestReviewClosurePolicyAndReplay (0.00s)
+=== RUN   TestSweepCanResumeUnderCurrentAuthorityPolicy
+--- PASS: TestSweepCanResumeUnderCurrentAuthorityPolicy (0.00s)
+=== RUN   TestSweepRejectsFalseCompletedJobWithLiveFence
+--- PASS: TestSweepRejectsFalseCompletedJobWithLiveFence (0.00s)
+PASS
+ok  	github.com/skosovsky/memy	1.833s

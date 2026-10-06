@@ -1,0 +1,8 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/skosovsky/memy
+cpu: Apple M1 Max
+BenchmarkLifecycleCost/memory/1000/SourceForget-10         	       1	 559472458 ns/op	         0 censored/op	      3007 get-requests/op	      4002 listed-entries/op	   6339211 returned-bytes/op	583800792 B/op	 6455658 allocs/op
+BenchmarkLifecycleCost/sqlite/1000/SourceForget-10         	       1	1019672500 ns/op	         0 censored/op	      3007 get-requests/op	      4002 listed-entries/op	   6339211 returned-bytes/op	606657248 B/op	 6811243 allocs/op
+PASS
+ok  	github.com/skosovsky/memy	2.186s

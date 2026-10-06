@@ -1,0 +1,16 @@
+--- FAIL: TestNativePurgeTraversesLongHistoricalGraph (357.63s)
+    --- FAIL: TestNativePurgeTraversesLongHistoricalGraph/sqlite (205.04s)
+        purge_graph_test.go:95: context deadline exceeded
+FAIL
+FAIL	github.com/skosovsky/memy	491.555s
+?   	github.com/skosovsky/memy/conformance	[no test files]
+ok  	github.com/skosovsky/memy/examples/lifecycle	1.560s
+?   	github.com/skosovsky/memy/examples/quality	[no test files]
+ok  	github.com/skosovsky/memy/internal/kv	2.269s
+ok  	github.com/skosovsky/memy/internal/membershipproof	1.394s
+ok  	github.com/skosovsky/memy/internal/quality	2.780s
+?   	github.com/skosovsky/memy/internal/workcost	[no test files]
+ok  	github.com/skosovsky/memy/reference	1.445s
+ok  	github.com/skosovsky/memy/store/memory	1.911s
+ok  	github.com/skosovsky/memy/store/sqlite	3.226s
+FAIL

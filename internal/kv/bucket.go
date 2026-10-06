@@ -4,7 +4,7 @@ package kv
 import (
 	"bytes"
 	"context"
-	"slices"
+	"github.com/skosovsky/memy/internal/workcost"
 	"strings"
 
 	"github.com/skosovsky/memy"
@@ -12,15 +12,37 @@ import (
 
 // Bucket owns a detached snapshot for one transaction.
 type Bucket struct {
-	Values   map[string]memy.Value
-	ctx      context.Context
-	writable bool
-	closed   bool
+	Values      map[string]memy.Value
+	index       *Index
+	destination *Index
+	Binding     Binding
+	pending     map[string]memy.Value
+	ctx         context.Context
+	writable    bool
+	closed      bool
 }
 
-// New creates a transaction snapshot. Values must be privately owned.
-func New(ctx context.Context, values map[string]memy.Value, writable bool) *Bucket {
-	return &Bucket{Values: values, ctx: ctx, writable: writable, closed: false}
+// New creates an addressed transaction overlay. The owner must exclude writes
+// to values through the callback; no complete snapshot or payload copy is made.
+func New(ctx context.Context, values map[string]memy.Value, index *Index, binding Binding, writable bool) *Bucket {
+	owned := *index
+	return &Bucket{Values: values, index: &owned, destination: index, Binding: binding, pending: make(map[string]memy.Value), ctx: ctx, writable: writable, closed: false}
+}
+
+// Commit applies only touched keys after the owner's successful transaction.
+// The caller must hold the same exclusion boundary used for the callback.
+func (b *Bucket) Commit() {
+	for key, value := range b.pending {
+		b.Values[key] = value
+	}
+	*b.destination = *b.index
+}
+
+func (b *Bucket) value(key string) memy.Value {
+	if value, exists := b.pending[key]; exists {
+		return value
+	}
+	return b.Values[key]
 }
 
 // Seal invalidates all operations on an escaped transaction.
@@ -44,30 +66,42 @@ func (b *Bucket) Get(key string) (memy.Value, error) {
 	if err := b.check(key); err != nil {
 		return memy.Value{}, err
 	}
-	value := b.Values[key]
+	value := b.value(key)
+	workcost.Copy(len(value.Data))
 	value.Data = bytes.Clone(value.Data)
 	return value, nil
 }
 
-// List returns live entries in deterministic key order.
-func (b *Bucket) List(prefix string) ([]memy.Entry, error) {
-	if err := b.check("list"); err != nil {
-		return nil, err
+// Scan visits only the live ordered prefix range, including transaction writes.
+func (b *Bucket) Scan(options memy.ScanOptions) (memy.ScanPage, error) {
+	if err := b.check("scan"); err != nil {
+		return memy.ScanPage{}, err
 	}
-	keys := make([]string, 0, len(b.Values))
-	for key, value := range b.Values {
-		if value.Data != nil && strings.HasPrefix(key, prefix) {
-			keys = append(keys, key)
-		}
+	after, err := b.Binding.Resume(options)
+	if err != nil {
+		return memy.ScanPage{}, err
 	}
-	slices.Sort(keys)
-	entries := make([]memy.Entry, 0, len(keys))
+	keys := b.index.Keys(options.Prefix, after, options.Limit+1)
+	page := memy.ScanPage{Entries: make([]memy.Entry, 0, min(len(keys), options.Limit)), Complete: true}
 	for _, key := range keys {
-		value := b.Values[key]
+		if err := b.ctx.Err(); err != nil {
+			return memy.ScanPage{}, err
+		}
+		value := b.value(key)
+		if len(page.Entries) == options.Limit || len(key) > options.MaxBytes-page.Bytes || len(value.Data) > options.MaxBytes-page.Bytes-len(key) {
+			if len(page.Entries) == 0 {
+				return memy.ScanPage{}, memy.ErrBudget
+			}
+			page.Complete = false
+			page.Cursor = b.Binding.Next(options, page.Entries[len(page.Entries)-1].Key)
+			break
+		}
+		workcost.Copy(len(value.Data))
 		value.Data = bytes.Clone(value.Data)
-		entries = append(entries, memy.Entry{Key: key, Value: value})
+		page.Entries = append(page.Entries, memy.Entry{Key: key, Value: value})
+		page.Bytes += len(key) + len(value.Data)
 	}
-	return entries, nil
+	return page, nil
 }
 
 // Put conditionally writes a live value, incrementing its version.
@@ -90,24 +124,20 @@ func (b *Bucket) write(key string, expected memy.Version, data []byte) (memy.Ver
 	if !b.writable {
 		return 0, memy.ErrUnsupported
 	}
-	old := b.Values[key]
+	old := b.value(key)
 	if old.Version != expected {
 		return 0, memy.ErrConflict
 	}
-	if expected >= memy.MaxVersion {
+	if expected >= memy.MaxVersion || b.Binding.Generation >= memy.MaxVersion {
 		return 0, memy.ErrConflict
 	}
 	next := expected + 1
-	b.Values[key] = memy.Value{Version: next, Data: data}
-	return next, nil
-}
-
-// Clone detaches all bytes from a snapshot.
-func Clone(values map[string]memy.Value) map[string]memy.Value {
-	result := make(map[string]memy.Value, len(values))
-	for key, value := range values {
-		value.Data = bytes.Clone(value.Data)
-		result[key] = value
+	b.pending[key] = memy.Value{Version: next, Data: data}
+	if data == nil {
+		b.index.Remove(key)
+	} else {
+		b.index.Add(key)
 	}
-	return result
+	b.Binding.Generation++
+	return next, nil
 }

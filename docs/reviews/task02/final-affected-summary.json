@@ -1,0 +1,1439 @@
+{
+  "BenchmarkLifecycleCost/memory/1000/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      797253917.0,
+      810541167.0,
+      805457916.0
+    ],
+    "complete_median": {
+      "B/op": 826838344.0,
+      "allocs/op": 9498333.0,
+      "censored/op": 0.0,
+      "decoded-bytes/op": 7181383.0,
+      "decoded-docs/op": 11139.0,
+      "get-requests/op": 12168.0,
+      "index-nodes/op": 44422.0,
+      "listed-entries/op": 3003.0,
+      "memory-copy-bytes/op": 7660935.0,
+      "ns/op": 805457916.0,
+      "p50-ns": 805498250.0,
+      "p95-ns": 805498250.0,
+      "returned-bytes/op": 7660935.0,
+      "sql-metadata-rows/op": 0.0,
+      "sql-value-bytes/op": 0.0,
+      "sql-value-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 797253917.0,
+        "censored/op": 0.0,
+        "decoded-bytes/op": 7181383.0,
+        "decoded-docs/op": 11139.0,
+        "get-requests/op": 12168.0,
+        "index-nodes/op": 44422.0,
+        "listed-entries/op": 3003.0,
+        "memory-copy-bytes/op": 7660935.0,
+        "p50-ns": 797245792.0,
+        "p95-ns": 797245792.0,
+        "returned-bytes/op": 7660935.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 826531968.0,
+        "allocs/op": 9497691.0
+      },
+      {
+        "ns/op": 810541167.0,
+        "censored/op": 0.0,
+        "decoded-bytes/op": 7181383.0,
+        "decoded-docs/op": 11139.0,
+        "get-requests/op": 12168.0,
+        "index-nodes/op": 44422.0,
+        "listed-entries/op": 3003.0,
+        "memory-copy-bytes/op": 7660935.0,
+        "p50-ns": 810635584.0,
+        "p95-ns": 810635584.0,
+        "returned-bytes/op": 7660935.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 826902016.0,
+        "allocs/op": 9499152.0
+      },
+      {
+        "ns/op": 805457916.0,
+        "censored/op": 0.0,
+        "decoded-bytes/op": 7181383.0,
+        "decoded-docs/op": 11139.0,
+        "get-requests/op": 12168.0,
+        "index-nodes/op": 44422.0,
+        "listed-entries/op": 3003.0,
+        "memory-copy-bytes/op": 7660935.0,
+        "p50-ns": 805498250.0,
+        "p95-ns": 805498250.0,
+        "returned-bytes/op": 7660935.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 826838344.0,
+        "allocs/op": 9498333.0
+      }
+    ]
+  },
+  "BenchmarkLifecycleCost/memory/1000/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      199621208.0,
+      202877250.0,
+      195782834.0
+    ],
+    "complete_median": {
+      "B/op": 208706560.0,
+      "allocs/op": 2337209.0,
+      "censored/op": 0.0,
+      "decoded-bytes/op": 1956127.0,
+      "decoded-docs/op": 3007.0,
+      "get-requests/op": 3012.0,
+      "index-nodes/op": 12904.0,
+      "listed-entries/op": 1001.0,
+      "memory-copy-bytes/op": 1956127.0,
+      "ns/op": 199621208.0,
+      "p50-ns": 199701458.0,
+      "p95-ns": 199701458.0,
+      "returned-bytes/op": 1956127.0,
+      "sql-metadata-rows/op": 0.0,
+      "sql-value-bytes/op": 0.0,
+      "sql-value-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 199621208.0,
+        "censored/op": 0.0,
+        "decoded-bytes/op": 1956127.0,
+        "decoded-docs/op": 3007.0,
+        "get-requests/op": 3012.0,
+        "index-nodes/op": 12904.0,
+        "listed-entries/op": 1001.0,
+        "memory-copy-bytes/op": 1956127.0,
+        "p50-ns": 199701458.0,
+        "p95-ns": 199701458.0,
+        "returned-bytes/op": 1956127.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 208706560.0,
+        "allocs/op": 2337209.0
+      },
+      {
+        "ns/op": 202877250.0,
+        "censored/op": 0.0,
+        "decoded-bytes/op": 1956127.0,
+        "decoded-docs/op": 3007.0,
+        "get-requests/op": 3012.0,
+        "index-nodes/op": 12904.0,
+        "listed-entries/op": 1001.0,
+        "memory-copy-bytes/op": 1956127.0,
+        "p50-ns": 202915083.0,
+        "p95-ns": 202915083.0,
+        "returned-bytes/op": 1956127.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 208777192.0,
+        "allocs/op": 2337640.0
+      },
+      {
+        "ns/op": 195782834.0,
+        "censored/op": 0.0,
+        "decoded-bytes/op": 1956127.0,
+        "decoded-docs/op": 3007.0,
+        "get-requests/op": 3012.0,
+        "index-nodes/op": 12904.0,
+        "listed-entries/op": 1001.0,
+        "memory-copy-bytes/op": 1956127.0,
+        "p50-ns": 195828959.0,
+        "p95-ns": 195828959.0,
+        "returned-bytes/op": 1956127.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 208682664.0,
+        "allocs/op": 2337069.0
+      }
+    ]
+  },
+  "BenchmarkLifecycleCost/memory/10000/SourceForget": {
+    "samples": 3,
+    "completed_samples": 0,
+    "censored_samples": 3,
+    "completed_latency_ns": [],
+    "complete_median": {},
+    "all_samples": [
+      {
+        "ns/op": 5001101626.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 46504346.0,
+        "decoded-docs/op": 62636.0,
+        "get-requests/op": 72762.0,
+        "index-nodes/op": 313837.0,
+        "listed-entries/op": 17383.0,
+        "memory-copy-bytes/op": 48271682.0,
+        "p50-ns": 5001170584.0,
+        "p95-ns": 5001170584.0,
+        "returned-bytes/op": 48271682.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 5514859168.0,
+        "allocs/op": 62863959.0
+      },
+      {
+        "ns/op": 5000998125.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 46160265.0,
+        "decoded-docs/op": 62070.0,
+        "get-requests/op": 72195.0,
+        "index-nodes/op": 310255.0,
+        "listed-entries/op": 17196.0,
+        "memory-copy-bytes/op": 47882825.0,
+        "p50-ns": 5001102042.0,
+        "p95-ns": 5001102042.0,
+        "returned-bytes/op": 47882825.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 5475753536.0,
+        "allocs/op": 62412417.0
+      },
+      {
+        "ns/op": 5001174333.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 48084311.0,
+        "decoded-docs/op": 65242.0,
+        "get-requests/op": 75373.0,
+        "index-nodes/op": 330510.0,
+        "listed-entries/op": 18245.0,
+        "memory-copy-bytes/op": 50058051.0,
+        "p50-ns": 5001273083.0,
+        "p95-ns": 5001273083.0,
+        "returned-bytes/op": 50058051.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 5694160056.0,
+        "allocs/op": 64938681.0
+      }
+    ]
+  },
+  "BenchmarkLifecycleCost/memory/10000/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      2008883583.0,
+      1835377750.0,
+      1823349541.0
+    ],
+    "complete_median": {
+      "B/op": 2076222088.0,
+      "allocs/op": 23324818.0,
+      "censored/op": 0.0,
+      "decoded-bytes/op": 19551127.0,
+      "decoded-docs/op": 30007.0,
+      "get-requests/op": 30012.0,
+      "index-nodes/op": 162376.0,
+      "listed-entries/op": 10001.0,
+      "memory-copy-bytes/op": 19551127.0,
+      "ns/op": 1835377750.0,
+      "p50-ns": 1835584083.0,
+      "p95-ns": 1835584083.0,
+      "returned-bytes/op": 19551127.0,
+      "sql-metadata-rows/op": 0.0,
+      "sql-value-bytes/op": 0.0,
+      "sql-value-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 2008883583.0,
+        "censored/op": 0.0,
+        "decoded-bytes/op": 19551127.0,
+        "decoded-docs/op": 30007.0,
+        "get-requests/op": 30012.0,
+        "index-nodes/op": 162376.0,
+        "listed-entries/op": 10001.0,
+        "memory-copy-bytes/op": 19551127.0,
+        "p50-ns": 2008953417.0,
+        "p95-ns": 2008953417.0,
+        "returned-bytes/op": 19551127.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 2076222088.0,
+        "allocs/op": 23324799.0
+      },
+      {
+        "ns/op": 1835377750.0,
+        "censored/op": 0.0,
+        "decoded-bytes/op": 19551127.0,
+        "decoded-docs/op": 30007.0,
+        "get-requests/op": 30012.0,
+        "index-nodes/op": 162376.0,
+        "listed-entries/op": 10001.0,
+        "memory-copy-bytes/op": 19551127.0,
+        "p50-ns": 1835584083.0,
+        "p95-ns": 1835584083.0,
+        "returned-bytes/op": 19551127.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 2076239712.0,
+        "allocs/op": 23325628.0
+      },
+      {
+        "ns/op": 1823349541.0,
+        "censored/op": 0.0,
+        "decoded-bytes/op": 19551127.0,
+        "decoded-docs/op": 30007.0,
+        "get-requests/op": 30012.0,
+        "index-nodes/op": 162376.0,
+        "listed-entries/op": 10001.0,
+        "memory-copy-bytes/op": 19551127.0,
+        "p50-ns": 1823449917.0,
+        "p95-ns": 1823449917.0,
+        "returned-bytes/op": 19551127.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 2076142424.0,
+        "allocs/op": 23324818.0
+      }
+    ]
+  },
+  "BenchmarkLifecycleCost/memory/100000/SourceForget": {
+    "samples": 3,
+    "completed_samples": 0,
+    "censored_samples": 3,
+    "completed_latency_ns": [],
+    "complete_median": {},
+    "all_samples": [
+      {
+        "ns/op": 5000259958.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 46779840.0,
+        "decoded-docs/op": 45307.0,
+        "get-requests/op": 60393.0,
+        "index-nodes/op": 16242.0,
+        "listed-entries/op": 15104.0,
+        "memory-copy-bytes/op": 46799030.0,
+        "p50-ns": 5000396416.0,
+        "p95-ns": 5000396416.0,
+        "returned-bytes/op": 46799030.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 5836968912.0,
+        "allocs/op": 65317360.0
+      },
+      {
+        "ns/op": 5001080084.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 46128890.0,
+        "decoded-docs/op": 44676.0,
+        "get-requests/op": 59552.0,
+        "index-nodes/op": 15966.0,
+        "listed-entries/op": 14848.0,
+        "memory-copy-bytes/op": 46136803.0,
+        "p50-ns": 5001188584.0,
+        "p95-ns": 5001188584.0,
+        "returned-bytes/op": 46136803.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 5756098688.0,
+        "allocs/op": 64407858.0
+      },
+      {
+        "ns/op": 5001098750.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 45810031.0,
+        "decoded-docs/op": 44368.0,
+        "get-requests/op": 59142.0,
+        "index-nodes/op": 15966.0,
+        "listed-entries/op": 14848.0,
+        "memory-copy-bytes/op": 45842652.0,
+        "p50-ns": 5001180125.0,
+        "p95-ns": 5001180125.0,
+        "returned-bytes/op": 45842652.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 5714267472.0,
+        "allocs/op": 63962858.0
+      }
+    ]
+  },
+  "BenchmarkLifecycleCost/memory/100000/Sweep": {
+    "samples": 3,
+    "completed_samples": 0,
+    "censored_samples": 3,
+    "completed_latency_ns": [],
+    "complete_median": {},
+    "all_samples": [
+      {
+        "ns/op": 5001012416.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 52169086.0,
+        "decoded-docs/op": 80019.0,
+        "get-requests/op": 80022.0,
+        "index-nodes/op": 517482.0,
+        "listed-entries/op": 26673.0,
+        "memory-copy-bytes/op": 52169086.0,
+        "p50-ns": 5001140416.0,
+        "p95-ns": 5001140416.0,
+        "returned-bytes/op": 52169086.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 5540176704.0,
+        "allocs/op": 62323180.0
+      },
+      {
+        "ns/op": 5000999834.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 53604717.0,
+        "decoded-docs/op": 82221.0,
+        "get-requests/op": 82224.0,
+        "index-nodes/op": 531248.0,
+        "listed-entries/op": 27407.0,
+        "memory-copy-bytes/op": 53604717.0,
+        "p50-ns": 5001098208.0,
+        "p95-ns": 5001098208.0,
+        "returned-bytes/op": 53604717.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 5692629544.0,
+        "allocs/op": 64038212.0
+      },
+      {
+        "ns/op": 5000977250.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 53999819.0,
+        "decoded-docs/op": 82827.0,
+        "get-requests/op": 82830.0,
+        "index-nodes/op": 534957.0,
+        "listed-entries/op": 27609.0,
+        "memory-copy-bytes/op": 53999819.0,
+        "p50-ns": 5001507125.0,
+        "p95-ns": 5001507125.0,
+        "returned-bytes/op": 53999819.0,
+        "sql-metadata-rows/op": 0.0,
+        "sql-value-bytes/op": 0.0,
+        "sql-value-rows/op": 0.0,
+        "B/op": 5734553128.0,
+        "allocs/op": 64509966.0
+      }
+    ]
+  },
+  "BenchmarkLifecycleCost/sqlite/1000/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      1355505209.0,
+      1404597209.0,
+      1472046624.0
+    ],
+    "complete_median": {
+      "B/op": 860714360.0,
+      "allocs/op": 10078319.0,
+      "censored/op": 0.0,
+      "decoded-bytes/op": 7181383.0,
+      "decoded-docs/op": 11139.0,
+      "get-requests/op": 12168.0,
+      "index-nodes/op": 0.0,
+      "listed-entries/op": 3003.0,
+      "memory-copy-bytes/op": 0.0,
+      "ns/op": 1404597209.0,
+      "p50-ns": 1404673958.0,
+      "p95-ns": 1404673958.0,
+      "returned-bytes/op": 7660935.0,
+      "sql-metadata-rows/op": 3006.0,
+      "sql-value-bytes/op": 7660935.0,
+      "sql-value-rows/op": 13142.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 1355505209.0,
+        "censored/op": 0.0,
+        "decoded-bytes/op": 7181383.0,
+        "decoded-docs/op": 11139.0,
+        "get-requests/op": 12168.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 3003.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 1355575833.0,
+        "p95-ns": 1355575833.0,
+        "returned-bytes/op": 7660935.0,
+        "sql-metadata-rows/op": 3006.0,
+        "sql-value-bytes/op": 7660935.0,
+        "sql-value-rows/op": 13142.0,
+        "B/op": 860990000.0,
+        "allocs/op": 10079832.0
+      },
+      {
+        "ns/op": 1404597209.0,
+        "censored/op": 0.0,
+        "decoded-bytes/op": 7181383.0,
+        "decoded-docs/op": 11139.0,
+        "get-requests/op": 12168.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 3003.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 1404673958.0,
+        "p95-ns": 1404673958.0,
+        "returned-bytes/op": 7660935.0,
+        "sql-metadata-rows/op": 3006.0,
+        "sql-value-bytes/op": 7660935.0,
+        "sql-value-rows/op": 13142.0,
+        "B/op": 860714360.0,
+        "allocs/op": 10078319.0
+      },
+      {
+        "ns/op": 1472046624.0,
+        "censored/op": 0.0,
+        "decoded-bytes/op": 7181383.0,
+        "decoded-docs/op": 11139.0,
+        "get-requests/op": 12168.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 3003.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 1472102875.0,
+        "p95-ns": 1472102875.0,
+        "returned-bytes/op": 7660935.0,
+        "sql-metadata-rows/op": 3006.0,
+        "sql-value-bytes/op": 7660935.0,
+        "sql-value-rows/op": 13142.0,
+        "B/op": 860419000.0,
+        "allocs/op": 10077331.0
+      }
+    ]
+  },
+  "BenchmarkLifecycleCost/sqlite/1000/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      962004458.0,
+      958248792.0,
+      929478375.0
+    ],
+    "complete_median": {
+      "B/op": 222050560.0,
+      "allocs/op": 2586332.0,
+      "censored/op": 0.0,
+      "decoded-bytes/op": 1956127.0,
+      "decoded-docs/op": 3007.0,
+      "get-requests/op": 3012.0,
+      "index-nodes/op": 0.0,
+      "listed-entries/op": 1001.0,
+      "memory-copy-bytes/op": 0.0,
+      "ns/op": 958248792.0,
+      "p50-ns": 958306959.0,
+      "p95-ns": 958306959.0,
+      "returned-bytes/op": 1956127.0,
+      "sql-metadata-rows/op": 2000.0,
+      "sql-value-bytes/op": 1956127.0,
+      "sql-value-rows/op": 3007.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 962004458.0,
+        "censored/op": 0.0,
+        "decoded-bytes/op": 1956127.0,
+        "decoded-docs/op": 3007.0,
+        "get-requests/op": 3012.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 1001.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 962064583.0,
+        "p95-ns": 962064583.0,
+        "returned-bytes/op": 1956127.0,
+        "sql-metadata-rows/op": 2000.0,
+        "sql-value-bytes/op": 1956127.0,
+        "sql-value-rows/op": 3007.0,
+        "B/op": 222125160.0,
+        "allocs/op": 2586865.0
+      },
+      {
+        "ns/op": 958248792.0,
+        "censored/op": 0.0,
+        "decoded-bytes/op": 1956127.0,
+        "decoded-docs/op": 3007.0,
+        "get-requests/op": 3012.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 1001.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 958306959.0,
+        "p95-ns": 958306959.0,
+        "returned-bytes/op": 1956127.0,
+        "sql-metadata-rows/op": 2000.0,
+        "sql-value-bytes/op": 1956127.0,
+        "sql-value-rows/op": 3007.0,
+        "B/op": 222050560.0,
+        "allocs/op": 2586332.0
+      },
+      {
+        "ns/op": 929478375.0,
+        "censored/op": 0.0,
+        "decoded-bytes/op": 1956127.0,
+        "decoded-docs/op": 3007.0,
+        "get-requests/op": 3012.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 1001.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 929533458.0,
+        "p95-ns": 929533458.0,
+        "returned-bytes/op": 1956127.0,
+        "sql-metadata-rows/op": 2000.0,
+        "sql-value-bytes/op": 1956127.0,
+        "sql-value-rows/op": 3007.0,
+        "B/op": 222025848.0,
+        "allocs/op": 2585995.0
+      }
+    ]
+  },
+  "BenchmarkLifecycleCost/sqlite/10000/SourceForget": {
+    "samples": 3,
+    "completed_samples": 0,
+    "censored_samples": 3,
+    "completed_latency_ns": [],
+    "complete_median": {},
+    "all_samples": [
+      {
+        "ns/op": 5000038625.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 25833827.0,
+        "decoded-docs/op": 25046.0,
+        "get-requests/op": 33388.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 8448.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 5000135625.0,
+        "p95-ns": 5000135625.0,
+        "returned-bytes/op": 25867991.0,
+        "sql-metadata-rows/op": 8481.0,
+        "sql-value-bytes/op": 25867991.0,
+        "sql-value-rows/op": 25189.0,
+        "B/op": 3320376968.0,
+        "allocs/op": 37250189.0
+      },
+      {
+        "ns/op": 5000040750.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 25793436.0,
+        "decoded-docs/op": 25007.0,
+        "get-requests/op": 33337.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 8448.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 5000102583.0,
+        "p95-ns": 5000102583.0,
+        "returned-bytes/op": 25830707.0,
+        "sql-metadata-rows/op": 8481.0,
+        "sql-value-bytes/op": 25830707.0,
+        "sql-value-rows/op": 25163.0,
+        "B/op": 3314700384.0,
+        "allocs/op": 37187889.0
+      },
+      {
+        "ns/op": 5000071291.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 25004743.0,
+        "decoded-docs/op": 24242.0,
+        "get-requests/op": 32316.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 8192.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 5000121750.0,
+        "p95-ns": 5000121750.0,
+        "returned-bytes/op": 25041524.0,
+        "sql-metadata-rows/op": 8224.0,
+        "sql-value-bytes/op": 25041524.0,
+        "sql-value-rows/op": 24396.0,
+        "B/op": 3216187984.0,
+        "allocs/op": 36066313.0
+      }
+    ]
+  },
+  "BenchmarkLifecycleCost/sqlite/10000/Sweep": {
+    "samples": 3,
+    "completed_samples": 0,
+    "censored_samples": 3,
+    "completed_latency_ns": [],
+    "complete_median": {},
+    "all_samples": [
+      {
+        "ns/op": 5000962875.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 5313606.0,
+        "decoded-docs/op": 8156.0,
+        "get-requests/op": 8160.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 2718.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 5001033208.0,
+        "p95-ns": 5001033208.0,
+        "returned-bytes/op": 5313606.0,
+        "sql-metadata-rows/op": 5438.0,
+        "sql-value-bytes/op": 5313606.0,
+        "sql-value-rows/op": 8156.0,
+        "B/op": 604353528.0,
+        "allocs/op": 7033140.0
+      },
+      {
+        "ns/op": 5000986083.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 5360523.0,
+        "decoded-docs/op": 8228.0,
+        "get-requests/op": 8232.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 2742.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 5001065958.0,
+        "p95-ns": 5001065958.0,
+        "returned-bytes/op": 5360523.0,
+        "sql-metadata-rows/op": 5484.0,
+        "sql-value-bytes/op": 5360523.0,
+        "sql-value-rows/op": 8228.0,
+        "B/op": 609331208.0,
+        "allocs/op": 7092739.0
+      },
+      {
+        "ns/op": 5000997583.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 5460226.0,
+        "decoded-docs/op": 8381.0,
+        "get-requests/op": 8385.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 2793.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 5001066750.0,
+        "p95-ns": 5001066750.0,
+        "returned-bytes/op": 5460226.0,
+        "sql-metadata-rows/op": 5586.0,
+        "sql-value-bytes/op": 5460226.0,
+        "sql-value-rows/op": 8381.0,
+        "B/op": 620758344.0,
+        "allocs/op": 7225599.0
+      }
+    ]
+  },
+  "BenchmarkLifecycleCost/sqlite/100000/SourceForget": {
+    "samples": 3,
+    "completed_samples": 0,
+    "censored_samples": 3,
+    "completed_latency_ns": [],
+    "complete_median": {},
+    "all_samples": [
+      {
+        "ns/op": 5000055167.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 23885799.0,
+        "decoded-docs/op": 23134.0,
+        "get-requests/op": 30839.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 7680.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 5000524167.0,
+        "p95-ns": 5000524167.0,
+        "returned-bytes/op": 23887718.0,
+        "sql-metadata-rows/op": 7710.0,
+        "sql-value-bytes/op": 23887718.0,
+        "sql-value-rows/op": 23142.0,
+        "B/op": 3066097632.0,
+        "allocs/op": 34396966.0
+      },
+      {
+        "ns/op": 4999978791.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 23413147.0,
+        "decoded-docs/op": 22678.0,
+        "get-requests/op": 30232.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 7680.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 5000059375.0,
+        "p95-ns": 5000059375.0,
+        "returned-bytes/op": 23451524.0,
+        "sql-metadata-rows/op": 7710.0,
+        "sql-value-bytes/op": 23451524.0,
+        "sql-value-rows/op": 22838.0,
+        "B/op": 3006008800.0,
+        "allocs/op": 33724643.0
+      },
+      {
+        "ns/op": 4999954084.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 22511731.0,
+        "decoded-docs/op": 21805.0,
+        "get-requests/op": 29069.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 7424.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 5000035292.0,
+        "p95-ns": 5000035292.0,
+        "returned-bytes/op": 22558271.0,
+        "sql-metadata-rows/op": 7453.0,
+        "sql-value-bytes/op": 22558271.0,
+        "sql-value-rows/op": 21999.0,
+        "B/op": 2889395520.0,
+        "allocs/op": 32423719.0
+      }
+    ]
+  },
+  "BenchmarkLifecycleCost/sqlite/100000/Sweep": {
+    "samples": 3,
+    "completed_samples": 0,
+    "censored_samples": 3,
+    "completed_latency_ns": [],
+    "complete_median": {},
+    "all_samples": [
+      {
+        "ns/op": 5000490584.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 5251794.0,
+        "decoded-docs/op": 8057.0,
+        "get-requests/op": 8061.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 2685.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 5000576333.0,
+        "p95-ns": 5000576333.0,
+        "returned-bytes/op": 5251794.0,
+        "sql-metadata-rows/op": 5372.0,
+        "sql-value-bytes/op": 5251794.0,
+        "sql-value-rows/op": 8057.0,
+        "B/op": 596638048.0,
+        "allocs/op": 6944908.0
+      },
+      {
+        "ns/op": 5001002250.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 5089456.0,
+        "decoded-docs/op": 7808.0,
+        "get-requests/op": 7812.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 2602.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 5001101958.0,
+        "p95-ns": 5001101958.0,
+        "returned-bytes/op": 5089456.0,
+        "sql-metadata-rows/op": 5204.0,
+        "sql-value-bytes/op": 5089456.0,
+        "sql-value-rows/op": 7808.0,
+        "B/op": 578251336.0,
+        "allocs/op": 6731423.0
+      },
+      {
+        "ns/op": 5000989292.0,
+        "censored/op": 1.0,
+        "decoded-bytes/op": 5314383.0,
+        "decoded-docs/op": 8153.0,
+        "get-requests/op": 8157.0,
+        "index-nodes/op": 0.0,
+        "listed-entries/op": 2717.0,
+        "memory-copy-bytes/op": 0.0,
+        "p50-ns": 5001080875.0,
+        "p95-ns": 5001080875.0,
+        "returned-bytes/op": 5314383.0,
+        "sql-metadata-rows/op": 5434.0,
+        "sql-value-bytes/op": 5314383.0,
+        "sql-value-rows/op": 8153.0,
+        "B/op": 604312024.0,
+        "allocs/op": 7030600.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/10/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      14786751.0,
+      14779042.0,
+      14768708.0
+    ],
+    "complete_median": {
+      "B/op": 11778560.0,
+      "allocs/op": 139308.0,
+      "decoded-bytes/op": 119804.0,
+      "decoded-docs/op": 207.0,
+      "index-nodes/op": 384.0,
+      "ns/op": 14779042.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 14786751.0,
+        "decoded-bytes/op": 119804.0,
+        "decoded-docs/op": 207.0,
+        "index-nodes/op": 384.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 11778560.0,
+        "allocs/op": 139308.0
+      },
+      {
+        "ns/op": 14779042.0,
+        "decoded-bytes/op": 119804.0,
+        "decoded-docs/op": 207.0,
+        "index-nodes/op": 384.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 11792792.0,
+        "allocs/op": 139495.0
+      },
+      {
+        "ns/op": 14768708.0,
+        "decoded-bytes/op": 119804.0,
+        "decoded-docs/op": 207.0,
+        "index-nodes/op": 384.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 11757760.0,
+        "allocs/op": 139215.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/10/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      3451084.0,
+      2911959.0,
+      3097416.0
+    ],
+    "complete_median": {
+      "B/op": 2771568.0,
+      "allocs/op": 31268.0,
+      "decoded-bytes/op": 26468.0,
+      "decoded-docs/op": 43.0,
+      "index-nodes/op": 101.0,
+      "ns/op": 3097416.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 3451084.0,
+        "decoded-bytes/op": 26468.0,
+        "decoded-docs/op": 43.0,
+        "index-nodes/op": 101.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 2784920.0,
+        "allocs/op": 31318.0
+      },
+      {
+        "ns/op": 2911959.0,
+        "decoded-bytes/op": 26468.0,
+        "decoded-docs/op": 43.0,
+        "index-nodes/op": 101.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 2766264.0,
+        "allocs/op": 31264.0
+      },
+      {
+        "ns/op": 3097416.0,
+        "decoded-bytes/op": 26468.0,
+        "decoded-docs/op": 43.0,
+        "index-nodes/op": 101.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 2771568.0,
+        "allocs/op": 31268.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/100/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      125519584.0,
+      126101916.0,
+      123923250.0
+    ],
+    "complete_median": {
+      "B/op": 100908720.0,
+      "allocs/op": 1176836.0,
+      "decoded-bytes/op": 1102901.0,
+      "decoded-docs/op": 1751.0,
+      "index-nodes/op": 4363.0,
+      "ns/op": 125519584.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 125519584.0,
+        "decoded-bytes/op": 1102901.0,
+        "decoded-docs/op": 1751.0,
+        "index-nodes/op": 4363.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 100818440.0,
+        "allocs/op": 1176395.0
+      },
+      {
+        "ns/op": 126101916.0,
+        "decoded-bytes/op": 1102901.0,
+        "decoded-docs/op": 1751.0,
+        "index-nodes/op": 4363.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 100947048.0,
+        "allocs/op": 1176836.0
+      },
+      {
+        "ns/op": 123923250.0,
+        "decoded-bytes/op": 1102901.0,
+        "decoded-docs/op": 1751.0,
+        "index-nodes/op": 4363.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 100908720.0,
+        "allocs/op": 1176841.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/100/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      26009916.0,
+      26437875.0,
+      26159084.0
+    ],
+    "complete_median": {
+      "B/op": 22146896.0,
+      "allocs/op": 246260.0,
+      "decoded-bytes/op": 209444.0,
+      "decoded-docs/op": 313.0,
+      "index-nodes/op": 1138.0,
+      "ns/op": 26159084.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 26009916.0,
+        "decoded-bytes/op": 209444.0,
+        "decoded-docs/op": 313.0,
+        "index-nodes/op": 1138.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 22131240.0,
+        "allocs/op": 246112.0
+      },
+      {
+        "ns/op": 26437875.0,
+        "decoded-bytes/op": 209444.0,
+        "decoded-docs/op": 313.0,
+        "index-nodes/op": 1138.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 22146896.0,
+        "allocs/op": 246260.0
+      },
+      {
+        "ns/op": 26159084.0,
+        "decoded-bytes/op": 209444.0,
+        "decoded-docs/op": 313.0,
+        "index-nodes/op": 1138.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 22162552.0,
+        "allocs/op": 246326.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/1000/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      1005868500.0,
+      1007163458.0,
+      999562791.0
+    ],
+    "complete_median": {
+      "B/op": 992134928.0,
+      "allocs/op": 11637670.0,
+      "decoded-bytes/op": 11696144.0,
+      "decoded-docs/op": 17222.0,
+      "index-nodes/op": 55864.0,
+      "ns/op": 1005868500.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 1005868500.0,
+        "decoded-bytes/op": 11696144.0,
+        "decoded-docs/op": 17222.0,
+        "index-nodes/op": 55864.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 992095920.0,
+        "allocs/op": 11637625.0
+      },
+      {
+        "ns/op": 1007163458.0,
+        "decoded-bytes/op": 11696144.0,
+        "decoded-docs/op": 17222.0,
+        "index-nodes/op": 55864.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 992134928.0,
+        "allocs/op": 11637670.0
+      },
+      {
+        "ns/op": 999562791.0,
+        "decoded-bytes/op": 11696144.0,
+        "decoded-docs/op": 17222.0,
+        "index-nodes/op": 55864.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 992148488.0,
+        "allocs/op": 11637787.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/1000/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      199402042.0,
+      199386667.0,
+      201643667.0
+    ],
+    "complete_median": {
+      "B/op": 212583152.0,
+      "allocs/op": 2384671.0,
+      "decoded-bytes/op": 2041850.0,
+      "decoded-docs/op": 3013.0,
+      "index-nodes/op": 13936.0,
+      "ns/op": 199402042.0,
+      "sql-returned-rows/op": 0.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 199402042.0,
+        "decoded-bytes/op": 2041850.0,
+        "decoded-docs/op": 3013.0,
+        "index-nodes/op": 13936.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 212488168.0,
+        "allocs/op": 2384100.0
+      },
+      {
+        "ns/op": 199386667.0,
+        "decoded-bytes/op": 2041850.0,
+        "decoded-docs/op": 3013.0,
+        "index-nodes/op": 13936.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 212583152.0,
+        "allocs/op": 2384671.0
+      },
+      {
+        "ns/op": 201643667.0,
+        "decoded-bytes/op": 2041850.0,
+        "decoded-docs/op": 3013.0,
+        "index-nodes/op": 13936.0,
+        "sql-returned-rows/op": 0.0,
+        "B/op": 212587112.0,
+        "allocs/op": 2384791.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/10/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      21508376.0,
+      22745376.0,
+      21329500.0
+    ],
+    "complete_median": {
+      "B/op": 12363872.0,
+      "allocs/op": 151211.0,
+      "decoded-bytes/op": 119804.0,
+      "decoded-docs/op": 207.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 21508376.0,
+      "sql-returned-rows/op": 353.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 21508376.0,
+        "decoded-bytes/op": 119804.0,
+        "decoded-docs/op": 207.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 353.0,
+        "B/op": 12370520.0,
+        "allocs/op": 151361.0
+      },
+      {
+        "ns/op": 22745376.0,
+        "decoded-bytes/op": 119804.0,
+        "decoded-docs/op": 207.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 353.0,
+        "B/op": 12335344.0,
+        "allocs/op": 151120.0
+      },
+      {
+        "ns/op": 21329500.0,
+        "decoded-bytes/op": 119804.0,
+        "decoded-docs/op": 207.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 353.0,
+        "B/op": 12363872.0,
+        "allocs/op": 151211.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/10/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      7666791.0,
+      7496000.0,
+      7664959.0
+    ],
+    "complete_median": {
+      "B/op": 2961040.0,
+      "allocs/op": 34932.0,
+      "decoded-bytes/op": 26468.0,
+      "decoded-docs/op": 43.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 7664959.0,
+      "sql-returned-rows/op": 67.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 7666791.0,
+        "decoded-bytes/op": 26468.0,
+        "decoded-docs/op": 43.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 67.0,
+        "B/op": 2969104.0,
+        "allocs/op": 34981.0
+      },
+      {
+        "ns/op": 7496000.0,
+        "decoded-bytes/op": 26468.0,
+        "decoded-docs/op": 43.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 67.0,
+        "B/op": 2959288.0,
+        "allocs/op": 34891.0
+      },
+      {
+        "ns/op": 7664959.0,
+        "decoded-bytes/op": 26468.0,
+        "decoded-docs/op": 43.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 67.0,
+        "B/op": 2961040.0,
+        "allocs/op": 34932.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/100/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      183241458.0,
+      181007541.0,
+      182720208.0
+    ],
+    "complete_median": {
+      "B/op": 105429144.0,
+      "allocs/op": 1269815.0,
+      "decoded-bytes/op": 1102901.0,
+      "decoded-docs/op": 1751.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 182720208.0,
+      "sql-returned-rows/op": 3069.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 183241458.0,
+        "decoded-bytes/op": 1102901.0,
+        "decoded-docs/op": 1751.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 3069.0,
+        "B/op": 105408192.0,
+        "allocs/op": 1269762.0
+      },
+      {
+        "ns/op": 181007541.0,
+        "decoded-bytes/op": 1102901.0,
+        "decoded-docs/op": 1751.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 3069.0,
+        "B/op": 105429144.0,
+        "allocs/op": 1269815.0
+      },
+      {
+        "ns/op": 182720208.0,
+        "decoded-bytes/op": 1102901.0,
+        "decoded-docs/op": 1751.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 3069.0,
+        "B/op": 105537480.0,
+        "allocs/op": 1270373.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/100/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      68453542.0,
+      64466292.0,
+      68237792.0
+    ],
+    "complete_median": {
+      "B/op": 23318144.0,
+      "allocs/op": 271092.0,
+      "decoded-bytes/op": 209444.0,
+      "decoded-docs/op": 313.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 68237792.0,
+      "sql-returned-rows/op": 517.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 68453542.0,
+        "decoded-bytes/op": 209444.0,
+        "decoded-docs/op": 313.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 517.0,
+        "B/op": 23305232.0,
+        "allocs/op": 270845.0
+      },
+      {
+        "ns/op": 64466292.0,
+        "decoded-bytes/op": 209444.0,
+        "decoded-docs/op": 313.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 517.0,
+        "B/op": 23335264.0,
+        "allocs/op": 271174.0
+      },
+      {
+        "ns/op": 68237792.0,
+        "decoded-bytes/op": 209444.0,
+        "decoded-docs/op": 313.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 517.0,
+        "B/op": 23318144.0,
+        "allocs/op": 271092.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/1000/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      1987610124.0,
+      2011936208.0,
+      1986999000.0
+    ],
+    "complete_median": {
+      "B/op": 1049769952.0,
+      "allocs/op": 12570843.0,
+      "decoded-bytes/op": 11696144.0,
+      "decoded-docs/op": 17222.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 1987610124.0,
+      "sql-returned-rows/op": 30254.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 1987610124.0,
+        "decoded-bytes/op": 11696144.0,
+        "decoded-docs/op": 17222.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 30254.0,
+        "B/op": 1049673792.0,
+        "allocs/op": 12570795.0
+      },
+      {
+        "ns/op": 2011936208.0,
+        "decoded-bytes/op": 11696144.0,
+        "decoded-docs/op": 17222.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 30254.0,
+        "B/op": 1050149504.0,
+        "allocs/op": 12572462.0
+      },
+      {
+        "ns/op": 1986999000.0,
+        "decoded-bytes/op": 11696144.0,
+        "decoded-docs/op": 17222.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 30254.0,
+        "B/op": 1049769952.0,
+        "allocs/op": 12570843.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/1000/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      989206333.0,
+      962911791.0,
+      993714666.0
+    ],
+    "complete_median": {
+      "B/op": 226996064.0,
+      "allocs/op": 2638255.0,
+      "decoded-bytes/op": 2041850.0,
+      "decoded-docs/op": 3013.0,
+      "index-nodes/op": 0.0,
+      "ns/op": 989206333.0,
+      "sql-returned-rows/op": 5017.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 989206333.0,
+        "decoded-bytes/op": 2041850.0,
+        "decoded-docs/op": 3013.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 5017.0,
+        "B/op": 226926000.0,
+        "allocs/op": 2638040.0
+      },
+      {
+        "ns/op": 962911791.0,
+        "decoded-bytes/op": 2041850.0,
+        "decoded-docs/op": 3013.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 5017.0,
+        "B/op": 226996064.0,
+        "allocs/op": 2638255.0
+      },
+      {
+        "ns/op": 993714666.0,
+        "decoded-bytes/op": 2041850.0,
+        "decoded-docs/op": 3013.0,
+        "index-nodes/op": 0.0,
+        "sql-returned-rows/op": 5017.0,
+        "B/op": 227027880.0,
+        "allocs/op": 2638488.0
+      }
+    ]
+  }
+}

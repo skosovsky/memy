@@ -1,0 +1,55 @@
+package memy_test
+import("testing";"time";"github.com/skosovsky/memy/reference";"errors";"encoding/json";"github.com/skosovsky/memy";"github.com/skosovsky/memy/internal/workcost")
+func TestReviewSweepPolicyBump(t *testing.T){
+ f:=newFixture(t,nil); q:=memy.SweepRequest{OperationID:"review-pass",Limit:1,MaxBytes:1<<20}
+ a,e:=f.engine.Sweep(t.Context(),f.actor,f.scope,"assist",q);if e!=nil||a.Complete{t.Fatal(a,e)}
+ f.policy.Grant("alice",f.scope,"authority/v2",memy.ActionRead,memy.ActionForget)
+ _,e=f.engine.Sweep(t.Context(),f.actor,f.scope,"assist",q);if !errors.Is(e,memy.ErrConflict){t.Fatal(e)}
+ q.OperationID="replacement";_,e=f.engine.Sweep(t.Context(),f.actor,f.scope,"assist",q);if !errors.Is(e,memy.ErrRevoked){t.Fatal(e)}
+ _,e=f.engine.Fence(t.Context(),f.actor,f.scope,"assist");if !errors.Is(e,memy.ErrRevoked){t.Fatal(e)}
+ t.Log("policy bump: original ErrConflict; replacement ErrRevoked; Fence ErrRevoked")
+}
+func TestReviewSweepDoneCorruption(t *testing.T){
+ f:=newFixture(t,nil); q:=memy.SweepRequest{OperationID:"review-pass",Limit:1,MaxBytes:1<<20}
+ _,e:=f.engine.Sweep(t.Context(),f.actor,f.scope,"assist",q);if e!=nil{t.Fatal(e)}
+ e=f.config.Store.Update(t.Context(),f.scope,func(b memy.Bucket)error{p,e:=b.Scan(memy.ScanOptions{Prefix:"sweep_job/",Limit:1,MaxBytes:1<<20});if e!=nil{return e};v:=p.Entries[0];var x map[string]any;if e=json.Unmarshal(v.Value.Data,&x);e!=nil{return e};x["data"].(map[string]any)["phase"]="done";raw,_:=json.Marshal(x);_,e=b.Put(v.Key,v.Value.Version,raw);return e});if e!=nil{t.Fatal(e)}
+ a,e:=f.engine.Sweep(t.Context(),f.actor,f.scope,"assist",q);if e!=nil||!a.Complete{t.Fatal(a,e)}
+ _,e=f.engine.Fence(t.Context(),f.actor,f.scope,"assist");if !errors.Is(e,memy.ErrRevoked){t.Fatal(e)}
+ t.Log("corrupt phase: Complete=true but scope still fenced")
+}
+
+func TestReviewFanInPurgeCost(t *testing.T){
+ for _, n:=range []int{100,200,400}{
+ f:=newFixture(t,nil);seedCostLineage(t,f,n)
+ c:=&workcost.Counters{};workcost.Start(c)
+ r,e:=fullForget(f.engine,t.Context(),f.actor,f.scope,"assist",memy.ForgetRequest{OperationID:"fan-in",Selector:memy.Selector{Kind:memy.SelectSource,ID:f.source.ID},Reason:"review",PolicyVersion:"v1",Limit:1,MaxBytes:1<<20})
+ workcost.Stop(c);if e!=nil||r.State!=memy.PurgeComplete{t.Fatal(e,r.State)}
+ t.Logf("n=%d edges=%d decoded=%d bytes=%d copied=%d",n,2*n,c.DecodedDocs.Load(),c.DecodedBytes.Load(),c.MemoryCopiedBytes.Load())
+ }
+}
+
+func TestReviewSweepForeignRevisionKey(t *testing.T){
+ f:=newFixture(t,nil); f.config.Retention=reference.Retain[preference]{Version:"retention/v1",ExpiresAt:f.clock.Now().Add(time.Hour)}
+ var e error;f.engine,e=memy.New(f.config);if e!=nil{t.Fatal(e)};seedCostCorpus(t,f,1)
+ e=f.config.Store.Update(t.Context(),f.scope,func(b memy.Bucket)error{p,e:=b.Scan(memy.ScanOptions{Prefix:"record/",Limit:1,MaxBytes:1<<20});if e!=nil{return e};_,e=b.Put("record/000-foreign/00000000000000000001",0,p.Entries[0].Value.Data);return e});if e!=nil{t.Fatal(e)}
+ f.clock.Advance(2*time.Hour)
+ for i:=0;i<100;i++{p,e:=f.engine.Sweep(t.Context(),f.actor,f.scope,"assist",memy.SweepRequest{OperationID:"foreign",Limit:128,MaxBytes:1<<20});if e!=nil{t.Fatalf("error %v",e)};if p.Complete{break};if i==99{t.Fatal("not complete")}}
+ e=f.config.Store.View(t.Context(),f.scope,func(b memy.Bucket)error{v,e:=b.Get("record/000-foreign/00000000000000000001");if e!=nil{return e};if v.Data==nil{t.Fatal("foreign key erased")};t.Logf("Sweep completed without schema error; foreign canonical row retains %d bytes",len(v.Data));return nil});if e!=nil{t.Fatal(e)}
+}
+func TestReviewPurgeDoneCorruption(t *testing.T){
+ f:=newFixture(t,nil);seedCostCorpus(t,f,1)
+ q:=memy.ForgetRequest{OperationID:"review-purge",Selector:memy.Selector{Kind:memy.SelectRecord,ID:"cost-0"},Reason:"review",PolicyVersion:"v1",Limit:1,MaxBytes:1<<20}
+ a,e:=f.engine.Forget(t.Context(),f.actor,f.scope,"assist",q);if e!=nil||a.State!=memy.RevocationCommitted{t.Fatal(a,e)}
+ e=f.config.Store.Update(t.Context(),f.scope,func(b memy.Bucket)error{p,e:=b.Scan(memy.ScanOptions{Prefix:"purge_job/",Limit:1,MaxBytes:1<<20});if e!=nil{return e};v:=p.Entries[0];var x map[string]any;if e=json.Unmarshal(v.Value.Data,&x);e!=nil{return e};x["data"].(map[string]any)["phase"]="done";raw,_:=json.Marshal(x);_,e=b.Put(v.Key,v.Value.Version,raw);return e});if e!=nil{t.Fatal(e)}
+ for i:=0;i<3;i++{a,e=f.engine.Forget(t.Context(),f.actor,f.scope,"assist",q);if e!=nil||a.State!=memy.RevocationCommitted{t.Fatal(a,e)}}
+ _,e=f.engine.Fence(t.Context(),f.actor,f.scope,"assist");if !errors.Is(e,memy.ErrRevoked){t.Fatal(e)}
+ t.Log("purge done corruption: three retries return revocation_committed, no error, no advance; scope remains fenced")
+}
+func TestReviewPurgeEmitCorruption(t *testing.T){
+ f:=newFixture(t,nil);seedCostCorpus(t,f,1)
+ q:=memy.ForgetRequest{OperationID:"review-purge",Selector:memy.Selector{Kind:memy.SelectRecord,ID:"cost-0"},Reason:"review",PolicyVersion:"v1",Limit:1,MaxBytes:1<<20}
+ a,e:=f.engine.Forget(t.Context(),f.actor,f.scope,"assist",q);if e!=nil||a.State!=memy.RevocationCommitted{t.Fatal(a,e)}
+ e=f.config.Store.Update(t.Context(),f.scope,func(b memy.Bucket)error{p,e:=b.Scan(memy.ScanOptions{Prefix:"purge_job/",Limit:1,MaxBytes:1<<20});if e!=nil{return e};v:=p.Entries[0];var x map[string]any;if e=json.Unmarshal(v.Value.Data,&x);e!=nil{return e};x["data"].(map[string]any)["phase"]="emit";raw,_:=json.Marshal(x);_,e=b.Put(v.Key,v.Value.Version,raw);return e});if e!=nil{t.Fatal(e)}
+ a,e=f.engine.Forget(t.Context(),f.actor,f.scope,"assist",q);if e!=nil||a.State!=memy.PurgeComplete{t.Fatal(a,e)}
+ e=f.config.Store.View(t.Context(),f.scope,func(b memy.Bucket)error{p,e:=b.Scan(memy.ScanOptions{Prefix:"record/",Limit:1,MaxBytes:1<<20});if e!=nil{return e};if len(p.Entries)!=1{t.Fatal("canonical row erased")};t.Logf("purge emit corruption: Complete=true while canonical payload remains (%d bytes)",len(p.Entries[0].Value.Data));return nil});if e!=nil{t.Fatal(e)}
+}

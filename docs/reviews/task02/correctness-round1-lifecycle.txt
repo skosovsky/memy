@@ -1,0 +1,1 @@
+ok  	github.com/skosovsky/memy	35.983s

@@ -15,6 +15,7 @@ var (
 	ErrNotFound           = errors.New("memy: not found")
 	ErrUnavailable        = errors.New("memy: unavailable")
 	ErrStaleAcceptance    = errors.New("memy: stale acceptance")
+	ErrStaleCursor        = errors.New("memy: stale scan cursor")
 	ErrStaleInput         = errors.New("memy: stale input")
 	ErrPolicyDenied       = errors.New("memy: policy denied")
 	ErrMissingEvidence    = errors.New("memy: missing evidence")

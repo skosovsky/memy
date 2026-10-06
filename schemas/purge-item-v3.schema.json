@@ -1,0 +1,5 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/skosovsky/memy/schemas/purge-item-v3.schema.json",
+  "$ref": "document-v3.schema.json#/$defs/purge-item"
+}

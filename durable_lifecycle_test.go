@@ -70,7 +70,7 @@ func durableCommitStage(t *testing.T, stage sqlite.Stage) {
 	before, beforeErr := f.engine.Get(context.Background(), f.actor, f.scope, "timezone", memy.ReadOptions{})
 	recovered := f.commit(t, request)
 	repeated := f.commit(t, request)
-	state, transactionErr := f.engine.Snapshot(context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	state, transactionErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
 	if transactionErr != nil {
 		t.Fatal(transactionErr)
 	}
@@ -137,11 +137,11 @@ func durableForgetStage(t *testing.T, stage sqlite.Stage) {
 	}
 	armed.Store(true)
 	// Act.
-	_, faultErr := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", request)
+	_, faultErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
 	f = reopenFixture(t, f, path)
 	_, beforeErr := f.engine.Get(context.Background(), f.actor, f.scope, "timezone", memy.ReadOptions{})
 	summary.FailPurge(errors.New("summary unavailable"))
-	pending, transactionErr := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", request)
+	pending, transactionErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
 	if transactionErr != nil {
 		t.Fatal(transactionErr)
 	}
@@ -155,12 +155,12 @@ func durableForgetStage(t *testing.T, stage sqlite.Stage) {
 		func(context.Context) error { return errors.New("must not enter") },
 	)
 	summary.FailPurge(nil)
-	complete, transactionErr := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", request)
+	complete, transactionErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
 	if transactionErr != nil {
 		t.Fatal(transactionErr)
 	}
 	f = reopenFixture(t, f, path)
-	replayed, transactionErr := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", request)
+	replayed, transactionErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
 	if transactionErr != nil {
 		t.Fatal(transactionErr)
 	}

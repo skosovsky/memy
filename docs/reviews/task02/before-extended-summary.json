@@ -1,0 +1,1058 @@
+{
+  "BenchmarkGrowingLineage/memory/10/Get": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      6991917.0,
+      6737750.0,
+      6084042.0
+    ],
+    "complete_median": {
+      "B/op": 6175504.0,
+      "allocs/op": 67876.0,
+      "ns/op": 6737750.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 6991917.0,
+        "B/op": 6180416.0,
+        "allocs/op": 67876.0
+      },
+      {
+        "ns/op": 6737750.0,
+        "B/op": 6170984.0,
+        "allocs/op": 67847.0
+      },
+      {
+        "ns/op": 6084042.0,
+        "B/op": 6175504.0,
+        "allocs/op": 67877.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/10/Recall": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      20534958.0,
+      20989167.0,
+      19389708.0
+    ],
+    "complete_median": {
+      "B/op": 18673800.0,
+      "allocs/op": 207492.0,
+      "ns/op": 20534958.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 20534958.0,
+        "B/op": 18665968.0,
+        "allocs/op": 207492.0
+      },
+      {
+        "ns/op": 20989167.0,
+        "B/op": 18681552.0,
+        "allocs/op": 207518.0
+      },
+      {
+        "ns/op": 19389708.0,
+        "B/op": 18673800.0,
+        "allocs/op": 207468.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/10/Consolidate": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      20771958.0,
+      20498667.0,
+      22464459.0
+    ],
+    "complete_median": {
+      "B/op": 20207720.0,
+      "allocs/op": 223876.0,
+      "ns/op": 20771958.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 20771958.0,
+        "B/op": 20241600.0,
+        "allocs/op": 224252.0
+      },
+      {
+        "ns/op": 20498667.0,
+        "B/op": 20207720.0,
+        "allocs/op": 223876.0
+      },
+      {
+        "ns/op": 22464459.0,
+        "B/op": 20177640.0,
+        "allocs/op": 223804.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/10/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      7000458.0,
+      7904333.0,
+      7360751.0
+    ],
+    "complete_median": {
+      "B/op": 7139992.0,
+      "allocs/op": 75954.0,
+      "ns/op": 7360751.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 7000458.0,
+        "B/op": 7148080.0,
+        "allocs/op": 76096.0
+      },
+      {
+        "ns/op": 7904333.0,
+        "B/op": 7120016.0,
+        "allocs/op": 75835.0
+      },
+      {
+        "ns/op": 7360751.0,
+        "B/op": 7139992.0,
+        "allocs/op": 75954.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/10/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      2383751.0,
+      2417958.0,
+      2755584.0
+    ],
+    "complete_median": {
+      "B/op": 2483688.0,
+      "allocs/op": 26097.0,
+      "ns/op": 2417958.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 2383751.0,
+        "B/op": 2483688.0,
+        "allocs/op": 26100.0
+      },
+      {
+        "ns/op": 2417958.0,
+        "B/op": 2479976.0,
+        "allocs/op": 26084.0
+      },
+      {
+        "ns/op": 2755584.0,
+        "B/op": 2488880.0,
+        "allocs/op": 26097.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/100/Get": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      65831667.0,
+      69007333.0,
+      70921250.0
+    ],
+    "complete_median": {
+      "B/op": 58344776.0,
+      "allocs/op": 637769.0,
+      "ns/op": 69007333.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 65831667.0,
+        "B/op": 58344776.0,
+        "allocs/op": 637769.0
+      },
+      {
+        "ns/op": 69007333.0,
+        "B/op": 58322200.0,
+        "allocs/op": 637516.0
+      },
+      {
+        "ns/op": 70921250.0,
+        "B/op": 58444664.0,
+        "allocs/op": 638093.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/100/Recall": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      212678458.0,
+      204715708.0,
+      202360333.0
+    ],
+    "complete_median": {
+      "B/op": 176724304.0,
+      "allocs/op": 1951686.0,
+      "ns/op": 204715708.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 212678458.0,
+        "B/op": 176724304.0,
+        "allocs/op": 1951686.0
+      },
+      {
+        "ns/op": 204715708.0,
+        "B/op": 176984600.0,
+        "allocs/op": 1952614.0
+      },
+      {
+        "ns/op": 202360333.0,
+        "B/op": 176712072.0,
+        "allocs/op": 1951651.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/100/Consolidate": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      211608374.0,
+      215400833.0,
+      215083999.0
+    ],
+    "complete_median": {
+      "B/op": 181753056.0,
+      "allocs/op": 2000540.0,
+      "ns/op": 215083999.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 211608374.0,
+        "B/op": 181990552.0,
+        "allocs/op": 2001470.0
+      },
+      {
+        "ns/op": 215400833.0,
+        "B/op": 181671992.0,
+        "allocs/op": 2000188.0
+      },
+      {
+        "ns/op": 215083999.0,
+        "B/op": 181753056.0,
+        "allocs/op": 2000540.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/100/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      68224083.0,
+      67317875.0,
+      68927959.0
+    ],
+    "complete_median": {
+      "B/op": 59528520.0,
+      "allocs/op": 624498.0,
+      "ns/op": 68224083.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 68224083.0,
+        "B/op": 59503288.0,
+        "allocs/op": 624238.0
+      },
+      {
+        "ns/op": 67317875.0,
+        "B/op": 59550968.0,
+        "allocs/op": 624537.0
+      },
+      {
+        "ns/op": 68927959.0,
+        "B/op": 59528520.0,
+        "allocs/op": 624498.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/100/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      21671041.0,
+      23181333.0,
+      23902583.0
+    ],
+    "complete_median": {
+      "B/op": 20070016.0,
+      "allocs/op": 209567.0,
+      "ns/op": 23181333.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 21671041.0,
+        "B/op": 20008160.0,
+        "allocs/op": 209327.0
+      },
+      {
+        "ns/op": 23181333.0,
+        "B/op": 20070016.0,
+        "allocs/op": 209567.0
+      },
+      {
+        "ns/op": 23902583.0,
+        "B/op": 20114304.0,
+        "allocs/op": 209772.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/1000/Get": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      512643042.0,
+      510371417.0,
+      533889001.0
+    ],
+    "complete_median": {
+      "B/op": 574621352.0,
+      "allocs/op": 6313482.0,
+      "ns/op": 512643042.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 512643042.0,
+        "B/op": 574621352.0,
+        "allocs/op": 6313482.0
+      },
+      {
+        "ns/op": 510371417.0,
+        "B/op": 574642376.0,
+        "allocs/op": 6313607.0
+      },
+      {
+        "ns/op": 533889001.0,
+        "B/op": 574475584.0,
+        "allocs/op": 6313038.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/1000/Recall": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      1579679500.0,
+      1554634708.0,
+      1613103083.0
+    ],
+    "complete_median": {
+      "B/op": 1741344928.0,
+      "allocs/op": 19326208.0,
+      "ns/op": 1579679500.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 1579679500.0,
+        "B/op": 1741484320.0,
+        "allocs/op": 19326269.0
+      },
+      {
+        "ns/op": 1554634708.0,
+        "B/op": 1741344928.0,
+        "allocs/op": 19326208.0
+      },
+      {
+        "ns/op": 1613103083.0,
+        "B/op": 1741009208.0,
+        "allocs/op": 19324967.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/1000/Consolidate": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      1622883625.0,
+      1607021583.0,
+      1593938166.0
+    ],
+    "complete_median": {
+      "B/op": 1778318624.0,
+      "allocs/op": 19687762.0,
+      "ns/op": 1607021583.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 1622883625.0,
+        "B/op": 1778412096.0,
+        "allocs/op": 19687762.0
+      },
+      {
+        "ns/op": 1607021583.0,
+        "B/op": 1777747096.0,
+        "allocs/op": 19685765.0
+      },
+      {
+        "ns/op": 1593938166.0,
+        "B/op": 1778318624.0,
+        "allocs/op": 19687969.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/1000/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      542808416.0,
+      533002333.0,
+      528538792.0
+    ],
+    "complete_median": {
+      "B/op": 606179768.0,
+      "allocs/op": 6082504.0,
+      "ns/op": 533002333.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 542808416.0,
+        "B/op": 606179768.0,
+        "allocs/op": 6082328.0
+      },
+      {
+        "ns/op": 533002333.0,
+        "B/op": 606245992.0,
+        "allocs/op": 6082641.0
+      },
+      {
+        "ns/op": 528538792.0,
+        "B/op": 606157520.0,
+        "allocs/op": 6082504.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/memory/1000/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      166512624.0,
+      173596041.0,
+      173649292.0
+    ],
+    "complete_median": {
+      "B/op": 193990552.0,
+      "allocs/op": 2036815.0,
+      "ns/op": 173596041.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 166512624.0,
+        "B/op": 193943352.0,
+        "allocs/op": 2036657.0
+      },
+      {
+        "ns/op": 173596041.0,
+        "B/op": 194003888.0,
+        "allocs/op": 2036846.0
+      },
+      {
+        "ns/op": 173649292.0,
+        "B/op": 193990552.0,
+        "allocs/op": 2036815.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/10/Get": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      6616458.0,
+      6551249.0,
+      6586958.0
+    ],
+    "complete_median": {
+      "B/op": 6278664.0,
+      "allocs/op": 68146.0,
+      "ns/op": 6586958.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 6616458.0,
+        "B/op": 6278664.0,
+        "allocs/op": 68144.0
+      },
+      {
+        "ns/op": 6551249.0,
+        "B/op": 6275080.0,
+        "allocs/op": 68146.0
+      },
+      {
+        "ns/op": 6586958.0,
+        "B/op": 6314984.0,
+        "allocs/op": 68338.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/10/Recall": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      19891084.0,
+      19492084.0,
+      20034625.0
+    ],
+    "complete_median": {
+      "B/op": 18818192.0,
+      "allocs/op": 207931.0,
+      "ns/op": 19891084.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 19891084.0,
+        "B/op": 18799720.0,
+        "allocs/op": 207900.0
+      },
+      {
+        "ns/op": 19492084.0,
+        "B/op": 18818192.0,
+        "allocs/op": 207931.0
+      },
+      {
+        "ns/op": 20034625.0,
+        "B/op": 18823504.0,
+        "allocs/op": 208083.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/10/Consolidate": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      22762750.0,
+      22578583.0,
+      23591709.0
+    ],
+    "complete_median": {
+      "B/op": 20626768.0,
+      "allocs/op": 225179.0,
+      "ns/op": 22762750.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 22762750.0,
+        "B/op": 20645768.0,
+        "allocs/op": 225269.0
+      },
+      {
+        "ns/op": 22578583.0,
+        "B/op": 20612704.0,
+        "allocs/op": 225148.0
+      },
+      {
+        "ns/op": 23591709.0,
+        "B/op": 20626768.0,
+        "allocs/op": 225179.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/10/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      9019083.0,
+      9584791.0,
+      9622833.0
+    ],
+    "complete_median": {
+      "B/op": 7319856.0,
+      "allocs/op": 77124.0,
+      "ns/op": 9584791.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 9019083.0,
+        "B/op": 7345536.0,
+        "allocs/op": 77210.0
+      },
+      {
+        "ns/op": 9584791.0,
+        "B/op": 7319856.0,
+        "allocs/op": 77124.0
+      },
+      {
+        "ns/op": 9622833.0,
+        "B/op": 7304512.0,
+        "allocs/op": 77036.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/10/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      2776292.0,
+      2881499.0,
+      2617875.0
+    ],
+    "complete_median": {
+      "B/op": 2678176.0,
+      "allocs/op": 26624.0,
+      "ns/op": 2776292.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 2776292.0,
+        "B/op": 2678176.0,
+        "allocs/op": 26624.0
+      },
+      {
+        "ns/op": 2881499.0,
+        "B/op": 2679064.0,
+        "allocs/op": 26641.0
+      },
+      {
+        "ns/op": 2617875.0,
+        "B/op": 2673640.0,
+        "allocs/op": 26624.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/100/Get": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      68780667.0,
+      66896292.0,
+      68332667.0
+    ],
+    "complete_median": {
+      "B/op": 59184000.0,
+      "allocs/op": 639711.0,
+      "ns/op": 68332667.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 68780667.0,
+        "B/op": 59237120.0,
+        "allocs/op": 639711.0
+      },
+      {
+        "ns/op": 66896292.0,
+        "B/op": 59133712.0,
+        "allocs/op": 639359.0
+      },
+      {
+        "ns/op": 68332667.0,
+        "B/op": 59184000.0,
+        "allocs/op": 639906.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/100/Recall": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      210359208.0,
+      209550709.0,
+      209696292.0
+    ],
+    "complete_median": {
+      "B/op": 177919208.0,
+      "allocs/op": 1954898.0,
+      "ns/op": 209696292.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 210359208.0,
+        "B/op": 177651944.0,
+        "allocs/op": 1953682.0
+      },
+      {
+        "ns/op": 209550709.0,
+        "B/op": 177919208.0,
+        "allocs/op": 1954898.0
+      },
+      {
+        "ns/op": 209696292.0,
+        "B/op": 178013576.0,
+        "allocs/op": 1955277.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/100/Consolidate": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      232868042.0,
+      227826209.0,
+      229106250.0
+    ],
+    "complete_median": {
+      "B/op": 184887792.0,
+      "allocs/op": 2007636.0,
+      "ns/op": 229106250.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 232868042.0,
+        "B/op": 184830328.0,
+        "allocs/op": 2006994.0
+      },
+      {
+        "ns/op": 227826209.0,
+        "B/op": 184887792.0,
+        "allocs/op": 2007636.0
+      },
+      {
+        "ns/op": 229106250.0,
+        "B/op": 184971112.0,
+        "allocs/op": 2007751.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/100/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      74065792.0,
+      76488292.0,
+      76937625.0
+    ],
+    "complete_median": {
+      "B/op": 60927056.0,
+      "allocs/op": 631684.0,
+      "ns/op": 76488292.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 74065792.0,
+        "B/op": 60925832.0,
+        "allocs/op": 631684.0
+      },
+      {
+        "ns/op": 76488292.0,
+        "B/op": 60927056.0,
+        "allocs/op": 631502.0
+      },
+      {
+        "ns/op": 76937625.0,
+        "B/op": 60979552.0,
+        "allocs/op": 631775.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/100/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      24510042.0,
+      24161750.0,
+      24303834.0
+    ],
+    "complete_median": {
+      "B/op": 21597488.0,
+      "allocs/op": 212954.0,
+      "ns/op": 24303834.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 24510042.0,
+        "B/op": 21607608.0,
+        "allocs/op": 212982.0
+      },
+      {
+        "ns/op": 24161750.0,
+        "B/op": 21597488.0,
+        "allocs/op": 212870.0
+      },
+      {
+        "ns/op": 24303834.0,
+        "B/op": 21595648.0,
+        "allocs/op": 212954.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/1000/Get": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      547879416.0,
+      546370291.0,
+      530090959.0
+    ],
+    "complete_median": {
+      "B/op": 581988352.0,
+      "allocs/op": 6328096.0,
+      "ns/op": 546370291.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 547879416.0,
+        "B/op": 581919192.0,
+        "allocs/op": 6327653.0
+      },
+      {
+        "ns/op": 546370291.0,
+        "B/op": 581988352.0,
+        "allocs/op": 6328096.0
+      },
+      {
+        "ns/op": 530090959.0,
+        "B/op": 582033840.0,
+        "allocs/op": 6328447.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/1000/Recall": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      1588312208.0,
+      1585542875.0,
+      1618437042.0
+    ],
+    "complete_median": {
+      "B/op": 1749003232.0,
+      "allocs/op": 19341678.0,
+      "ns/op": 1588312208.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 1588312208.0,
+        "B/op": 1749193880.0,
+        "allocs/op": 19342724.0
+      },
+      {
+        "ns/op": 1585542875.0,
+        "B/op": 1749003232.0,
+        "allocs/op": 19341678.0
+      },
+      {
+        "ns/op": 1618437042.0,
+        "B/op": 1748699240.0,
+        "allocs/op": 19340152.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/1000/Consolidate": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      1646812209.0,
+      1651528166.0,
+      1648122458.0
+    ],
+    "complete_median": {
+      "B/op": 1807456376.0,
+      "allocs/op": 19744578.0,
+      "ns/op": 1648122458.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 1646812209.0,
+        "B/op": 1807487112.0,
+        "allocs/op": 19744570.0
+      },
+      {
+        "ns/op": 1651528166.0,
+        "B/op": 1807456376.0,
+        "allocs/op": 19745132.0
+      },
+      {
+        "ns/op": 1648122458.0,
+        "B/op": 1807412192.0,
+        "allocs/op": 19744578.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/1000/SourceForget": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      634097375.0,
+      618946458.0,
+      625155874.0
+    ],
+    "complete_median": {
+      "B/op": 620177992.0,
+      "allocs/op": 6148873.0,
+      "ns/op": 625155874.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 634097375.0,
+        "B/op": 620168912.0,
+        "allocs/op": 6148844.0
+      },
+      {
+        "ns/op": 618946458.0,
+        "B/op": 620177992.0,
+        "allocs/op": 6148873.0
+      },
+      {
+        "ns/op": 625155874.0,
+        "B/op": 620306248.0,
+        "allocs/op": 6149185.0
+      }
+    ]
+  },
+  "BenchmarkGrowingLineage/sqlite/1000/Sweep": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      179191834.0,
+      187948667.0,
+      187632333.0
+    ],
+    "complete_median": {
+      "B/op": 208572184.0,
+      "allocs/op": 2065074.0,
+      "ns/op": 187632333.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 179191834.0,
+        "B/op": 208607776.0,
+        "allocs/op": 2065217.0
+      },
+      {
+        "ns/op": 187948667.0,
+        "B/op": 208569984.0,
+        "allocs/op": 2065059.0
+      },
+      {
+        "ns/op": 187632333.0,
+        "B/op": 208572184.0,
+        "allocs/op": 2065074.0
+      }
+    ]
+  },
+  "BenchmarkSQLiteReopenGet/1000": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      9659042.0,
+      8379708.0,
+      8938166.0
+    ],
+    "complete_median": {
+      "B/op": 10724000.0,
+      "allocs/op": 20812.0,
+      "ns/op": 8938166.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 9659042.0,
+        "B/op": 10724000.0,
+        "allocs/op": 20812.0
+      },
+      {
+        "ns/op": 8379708.0,
+        "B/op": 10725920.0,
+        "allocs/op": 20818.0
+      },
+      {
+        "ns/op": 8938166.0,
+        "B/op": 10723984.0,
+        "allocs/op": 20811.0
+      }
+    ]
+  },
+  "BenchmarkSQLiteReopenGet/10000": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      82096876.0,
+      82274376.0,
+      84332041.0
+    ],
+    "complete_median": {
+      "B/op": 101951408.0,
+      "allocs/op": 164986.0,
+      "ns/op": 82274376.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 82096876.0,
+        "B/op": 101951408.0,
+        "allocs/op": 164986.0
+      },
+      {
+        "ns/op": 82274376.0,
+        "B/op": 101951552.0,
+        "allocs/op": 164986.0
+      },
+      {
+        "ns/op": 84332041.0,
+        "B/op": 101951376.0,
+        "allocs/op": 164984.0
+      }
+    ]
+  },
+  "BenchmarkSQLiteReopenGet/100000": {
+    "samples": 3,
+    "completed_samples": 3,
+    "censored_samples": 0,
+    "completed_latency_ns": [
+      801675292.0,
+      806223958.0,
+      805563708.0
+    ],
+    "complete_median": {
+      "B/op": 1004511168.0,
+      "allocs/op": 1606336.0,
+      "ns/op": 805563708.0
+    },
+    "all_samples": [
+      {
+        "ns/op": 801675292.0,
+        "B/op": 1004511168.0,
+        "allocs/op": 1606336.0
+      },
+      {
+        "ns/op": 806223958.0,
+        "B/op": 1004509232.0,
+        "allocs/op": 1606329.0
+      },
+      {
+        "ns/op": 805563708.0,
+        "B/op": 1004521400.0,
+        "allocs/op": 1606402.0
+      }
+    ]
+  }
+}

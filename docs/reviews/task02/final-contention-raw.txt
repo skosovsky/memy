@@ -1,0 +1,12 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/skosovsky/memy
+cpu: Apple M1 Max
+BenchmarkCallbackContention/memory-10         	      20	     10033 ns/op	  50000000 held-callback-ns	      8541 write-p50-ns	     16666 write-p95-ns	    3927 B/op	      50 allocs/op
+BenchmarkCallbackContention/memory-10         	      20	     11235 ns/op	  50000000 held-callback-ns	      9166 write-p50-ns	     18417 write-p95-ns	    4087 B/op	      50 allocs/op
+BenchmarkCallbackContention/memory-10         	      20	     10204 ns/op	  50000000 held-callback-ns	      7958 write-p50-ns	     16000 write-p95-ns	    4007 B/op	      50 allocs/op
+BenchmarkCallbackContention/sqlite-10         	      20	    709462 ns/op	  50000000 held-callback-ns	    659416 write-p50-ns	    854708 write-p95-ns	    9982 B/op	     205 allocs/op
+BenchmarkCallbackContention/sqlite-10         	      20	    726971 ns/op	  50000000 held-callback-ns	    708833 write-p50-ns	    845875 write-p95-ns	    9795 B/op	     203 allocs/op
+BenchmarkCallbackContention/sqlite-10         	      20	    598448 ns/op	  50000000 held-callback-ns	    584333 write-p50-ns	    770250 write-p95-ns	    9790 B/op	     203 allocs/op
+PASS
+ok  	github.com/skosovsky/memy	7.841s

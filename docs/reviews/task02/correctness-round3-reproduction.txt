@@ -1,0 +1,5 @@
+=== RUN   TestReviewCompletedReceiptDuringAck
+    review_round3_test.go:14: persist shortcut returns Complete despite unfinished job and retained active fence
+--- PASS: TestReviewCompletedReceiptDuringAck (0.01s)
+PASS
+ok  	github.com/skosovsky/memy	0.438s

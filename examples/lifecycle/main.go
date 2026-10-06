@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"time"
 
 	"github.com/skosovsky/memy"
@@ -275,7 +276,7 @@ func demonstrateProjectionAndForget(
 		Reason:        "user request",
 		PolicyVersion: "deletion/v1",
 	}
-	purge, operationErr := engine.Forget(ctx, actor, scope, examplePurpose, forget)
+	purge, operationErr := fullForget(engine, ctx, actor, scope, examplePurpose, forget)
 	if operationErr != nil {
 		return operationErr
 	}
@@ -283,7 +284,7 @@ func demonstrateProjectionAndForget(
 		return errors.New("partial deletion incorrectly reported complete")
 	}
 	summary.FailPurge(nil)
-	purge, operationErr = engine.Forget(ctx, actor, scope, examplePurpose, forget)
+	purge, operationErr = fullForget(engine, ctx, actor, scope, examplePurpose, forget)
 	if operationErr != nil {
 		return operationErr
 	}
@@ -431,4 +432,37 @@ func stageDerivedRecord(
 		return nil, err
 	}
 	return lineage, nil
+}
+
+func fullForget[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, purpose string, request memy.ForgetRequest) (memy.PurgeReceipt, error) {
+	if request.Limit == 0 {
+		request.Limit = 256
+	}
+	if request.MaxBytes == 0 {
+		request.MaxBytes = 64 << 20
+	}
+	ids := make(map[string]bool)
+	for {
+		receipt, err := e.Forget(ctx, authority, scope, purpose, request)
+		if err != nil {
+			return receipt, err
+		}
+		for _, id := range receipt.Batch.Records {
+			ids[id] = true
+		}
+		unattempted := false
+		for _, sink := range receipt.Sinks {
+			if !sink.Acknowledged && sink.ErrorCode == "" {
+				unattempted = true
+			}
+		}
+		if receipt.State != memy.RevocationCommitted && !(receipt.State == memy.PurgePending && unattempted) {
+			receipt.Batch.Records = make([]string, 0, len(ids))
+			for id := range ids {
+				receipt.Batch.Records = append(receipt.Batch.Records, id)
+			}
+			slices.Sort(receipt.Batch.Records)
+			return receipt, nil
+		}
+	}
 }

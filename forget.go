@@ -3,7 +3,6 @@ package memy
 import (
 	"context"
 	"errors"
-	"slices"
 	"time"
 )
 
@@ -30,6 +29,8 @@ type ForgetRequest struct {
 	Expected      []RevisionRef
 	Reason        string
 	PolicyVersion string
+	Limit         int
+	MaxBytes      int
 }
 
 // PurgeState describes the durable revocation and managed cleanup boundary.
@@ -49,6 +50,7 @@ type PurgeBatch struct {
 	Epoch       Version  `json:"epoch"`
 	Selector    Selector `json:"selector"`
 	Records     []string `json:"records"`
+	Chunk       uint64   `json:"chunk"`
 }
 
 // PurgeAck proves the sink applied this exact batch under its deletion contract.
@@ -56,6 +58,7 @@ type PurgeAck struct {
 	Sink        string  `json:"sink"`
 	OperationID string  `json:"operation_id"`
 	Epoch       Version `json:"epoch"`
+	Chunk       uint64  `json:"chunk"`
 }
 
 // Sink is an explicitly managed derived-data deletion participant. Its Purge
@@ -75,10 +78,11 @@ type SinkResult struct {
 // PurgeReceipt reports logical deletion from canonical and all registered sinks.
 // Unmanaged responses/backups and forensic disk erasure are outside its boundary.
 type PurgeReceipt struct {
-	Batch     PurgeBatch   `json:"batch"`
-	State     PurgeState   `json:"state"`
-	Sinks     []SinkResult `json:"sinks"`
-	RevokedAt time.Time    `json:"revoked_at"`
+	Batch             PurgeBatch   `json:"batch"`
+	State             PurgeState   `json:"state"`
+	Sinks             []SinkResult `json:"sinks"`
+	RevokedAt         time.Time    `json:"revoked_at"`
+	CanonicalComplete bool         `json:"canonical_complete"`
 }
 
 type revocationDisk struct {
@@ -101,7 +105,7 @@ func (e *Engine[P, R, A]) Fence(ctx context.Context, authority A, scope Scope, p
 		return EpochFence{}, operationErr
 	}
 	var result EpochFence
-	operationErr = e.config.Store.View(ctx, scope, func(b Bucket) error {
+	operationErr = e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
 		epoch, _, transactionErr := currentEpoch(b)
 		if transactionErr != nil {
 			return transactionErr
@@ -117,7 +121,7 @@ func (e *Engine[P, R, A]) Fence(ctx context.Context, authority A, scope Scope, p
 
 // WithDerivedWrite fences synchronous managed writes against concurrent revoke.
 // The callback must obey context and must not recursively call this store. It
-// executes while a canonical transaction excludes revocation; a later Forget
+// executes under explicit exact-scope exclusion against revocation; a later Forget
 // purges the artifact. Failure may mean an external effect occurred.
 func (e *Engine[P, R, A]) WithDerivedWrite(
 	ctx context.Context,
@@ -134,13 +138,19 @@ func (e *Engine[P, R, A]) WithDerivedWrite(
 	if operationErr != nil {
 		return operationErr
 	}
-	return e.config.Store.View(ctx, fence.Scope, func(b Bucket) error {
+	return e.raw.FencedView(ctx, fence.Scope, func(b Bucket) error {
 		epoch, _, transactionErr := currentEpoch(b)
 		if transactionErr != nil {
 			return transactionErr
 		}
 		if epoch.Value != fence.Epoch {
 			return ErrStaleInput
+		}
+		if err := activeSweepGate(b, fence.Scope); err != nil {
+			return err
+		}
+		if err := activePurgeGate(b, fence.Scope); err != nil {
+			return err
 		}
 		if err := e.validateReadLineage(ctx, b, lineage, fence.Scope); err != nil {
 			return err
@@ -175,17 +185,32 @@ func (e *Engine[P, R, A]) Forget(
 	if err := validateSelector(scope, request.Selector); err != nil {
 		return PurgeReceipt{}, err
 	}
-	requestDigest, operationErr := operationDigest(scope, decision.Actor, purpose, request)
+	if request.Limit < 1 || request.Limit > 1024 || request.MaxBytes <= 0 || len(request.Expected) > 256 {
+		return PurgeReceipt{}, ErrInvalid
+	}
+	semantic := request
+	semantic.Limit, semantic.MaxBytes = 0, 0
+	requestDigest, operationErr := operationDigest(scope, decision.Actor, purpose, semantic)
 	if operationErr != nil {
 		return PurgeReceipt{}, operationErr
 	}
-	operationErr = e.config.Store.Update(ctx, scope, func(b Bucket) error {
-		return e.revokeOperation(ctx, b, authority, scope, purpose, decision, request, requestDigest)
+	operationErr = e.raw.Update(ctx, scope, func(b Bucket) error {
+		if err := activeSweepGate(b, scope); err != nil {
+			return err
+		}
+		return e.beginPurge(ctx, b, authority, scope, purpose, decision, request, requestDigest)
 	})
 	if operationErr != nil {
 		return PurgeReceipt{}, operationErr
 	}
-	return e.finishPurge(ctx, authority, scope, purpose, request.OperationID)
+	receipt, used, operationErr := e.advancePurge(ctx, authority, scope, purpose, request)
+	if operationErr != nil {
+		return PurgeReceipt{}, operationErr
+	}
+	if receipt.State == RevocationCommitted {
+		return receipt, nil
+	}
+	return e.finishPurge(ctx, authority, scope, purpose, request.OperationID, request.Limit-used)
 }
 
 func validateSelector(scope Scope, selector Selector) error {
@@ -247,91 +272,8 @@ func selectedProposal(p proposalDisk, selector Selector, records map[string]bool
 	return false
 }
 
-func selectedRecord(r recordDisk, selector Selector, records map[string]bool) bool {
-	if selectedProposal(r.Proposal, selector, records) {
-		return true
-	}
-	for _, ref := range r.Lineage {
-		if records[ref.RecordID] {
-			return true
-		}
-	}
-	return false
-}
-
-func revokeRecords(b Bucket, scope Scope, selector Selector, now time.Time, policy string) ([]string, error) {
-	selection, selectionErr := selectRevocations(b, scope, selector)
-	if selectionErr != nil {
-		return nil, selectionErr
-	}
-	ids := make([]string, 0, len(selection.Selected))
-	for id := range selection.Selected {
-		record, exists := selection.Heads[id]
-		if !exists {
-			return nil, ErrSchema
-		}
-		if revokeErr := revokeRecord(b, record, selection.Versions[id], now, policy); revokeErr != nil {
-			return nil, revokeErr
-		}
-		ids = append(ids, id)
-	}
-	slices.Sort(ids)
-	return ids, nil
-}
-
-func purgeProposals(b Bucket, selector Selector, recordIDs []string, origins map[string]bool) error {
-	selected := make(map[string]bool, len(recordIDs))
-	for _, id := range recordIDs {
-		selected[id] = true
-	}
-	entries, operationErr := b.List("proposal_revision/")
-	if operationErr != nil {
-		return operationErr
-	}
-	for _, entry := range entries {
-		var p proposalDisk
-		if err := decodeDocument(entry.Value.Data, "proposal", &p); err != nil {
-			return err
-		}
-		if selectedProposal(p, selector, selected) {
-			origins[p.ID] = true
-		}
-	}
-	for id := range origins {
-		if err := purgeProposal(b, id); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func purgeProposal(b Bucket, id string) error {
-	history, operationErr := b.List(objectKey("proposal_revision", id) + "/")
-	if operationErr != nil {
-		return operationErr
-	}
-	for _, entry := range history {
-		if _, err := b.Delete(entry.Key, entry.Value.Version); err != nil {
-			return err
-		}
-	}
-	for _, kind := range []string{"proposal", "acceptance"} {
-		key := objectKey(kind, id)
-		value, err := b.Get(key)
-		if err != nil {
-			return err
-		}
-		if value.Data != nil {
-			if _, err := b.Delete(key, value.Version); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
 func (e *Engine[P, R, A]) finishPurge(
-	ctx context.Context, authority A, scope Scope, purpose, operationID string,
+	ctx context.Context, authority A, scope Scope, purpose, operationID string, limit int,
 ) (PurgeReceipt, error) {
 	original, authErr := e.authorize(ctx, authority, scope, ActionForget, purpose)
 	if authErr != nil {
@@ -341,21 +283,26 @@ func (e *Engine[P, R, A]) finishPurge(
 	if readErr != nil {
 		return PurgeReceipt{}, readErr
 	}
-	if receipt.State == PurgeComplete {
+	if receipt.State == PurgeComplete || receipt.State == RevocationCommitted {
 		if finalAuthErr := e.reauthorize(ctx, authority, scope, ActionForget, purpose, original); finalAuthErr != nil {
 			return PurgeReceipt{}, finalAuthErr
 		}
 		return receipt, nil
 	}
+	attempts := 0
 	for _, result := range receipt.Sinks {
 		if result.Acknowledged {
 			continue
 		}
+		if attempts >= limit {
+			break
+		}
+		attempts++
 		if cancellationErr := ctx.Err(); cancellationErr != nil {
 			return receipt, cancellationErr
 		}
 		status := e.purgeSink(ctx, receipt.Batch, result.Name)
-		updated, updateErr := e.persistSinkResult(ctx, authority, scope, purpose, operationID, status)
+		updated, updateErr := e.persistSinkResult(ctx, authority, scope, purpose, operationID, receipt.Batch.Chunk, status)
 		if updateErr != nil {
 			return receipt, updateErr
 		}
@@ -368,6 +315,7 @@ func (e *Engine[P, R, A]) finishPurge(
 			scope,
 			purpose,
 			operationID,
+			receipt.Batch.Chunk,
 			SinkResult{Name: "", Acknowledged: false, ErrorCode: ""},
 		)
 		if updateErr != nil {
@@ -381,86 +329,11 @@ func (e *Engine[P, R, A]) finishPurge(
 	return receipt, nil
 }
 
-func (e *Engine[P, R, A]) revokeOperation(
-	ctx context.Context, b Bucket, authority A, scope Scope, purpose string,
-	decision Decision, request ForgetRequest, requestDigest string,
-) error {
-	_, opVersion, exists, transactionErr := operation(b, request.OperationID, "forget", requestDigest)
-	if transactionErr != nil {
-		return transactionErr
-	}
-	if exists {
-		var receipt PurgeReceipt
-		if _, err := readDocument(b, objectKey("purge", request.OperationID), "purge", &receipt); err != nil {
-			return err
-		}
-		return e.reauthorize(ctx, authority, scope, ActionForget, purpose, decision)
-	}
-	if expectationErr := expectedForgetRevisions(b, scope, request.Expected); expectationErr != nil {
-		return expectationErr
-	}
-	epoch, epochVersion, transactionErr := currentEpoch(b)
-	if transactionErr != nil {
-		return transactionErr
-	}
-	if epoch.Value >= MaxVersion {
-		return ErrConflict
-	}
-	epoch.Value++
-	now := recordedTime(e.config.Clock.Now(), epoch.RecordedAt)
-	if now.IsZero() {
-		return ErrInvalid
-	}
-	epoch.RecordedAt = now
-	history, transactionErr := b.List("record/")
-	if transactionErr != nil {
-		return transactionErr
-	}
-	recordIDs, transactionErr := revokeRecords(b, scope, request.Selector, now, request.PolicyVersion)
-	if transactionErr != nil {
-		return transactionErr
-	}
-	origins, originErr := revokedOrigins(scope, history, recordIDs)
-	if originErr != nil {
-		return originErr
-	}
-	if err := purgeProposals(b, request.Selector, recordIDs, origins); err != nil {
-		return err
-	}
-	if err := e.reauthorize(ctx, authority, scope, ActionForget, purpose, decision); err != nil {
-		return err
-	}
-	if err := writeDocument(b, "epoch", "epoch", epochVersion, epoch); err != nil {
-		return err
-	}
-	if ledgerErr := persistRevocation(b, request, epoch.Value); ledgerErr != nil {
-		return ledgerErr
-	}
-	receipt := PurgeReceipt{
-		Batch: PurgeBatch{
-			OperationID: request.OperationID,
-			Scope:       scope,
-			Epoch:       epoch.Value,
-			Selector:    request.Selector,
-			Records:     recordIDs,
-		},
-		State:     RevocationCommitted,
-		RevokedAt: now,
-		Sinks:     make([]SinkResult, 0, len(e.config.Sinks)),
-	}
-	for _, sink := range e.config.Sinks {
-		receipt.Sinks = append(receipt.Sinks, SinkResult{Name: sink.Name(), Acknowledged: false, ErrorCode: ""})
-	}
-	if err := writeDocument(b, objectKey("purge", request.OperationID), "purge", 0, receipt); err != nil {
-		return err
-	}
-	transactionErr = writeDocument(b, objectKey("operation", request.OperationID), "operation", opVersion,
-		operationDisk{Action: "forget", Digest: requestDigest, Proposals: nil, Receipt: nil, Epoch: nil})
-	return transactionErr
-}
-
 func expectedForgetRevisions(b Bucket, scope Scope, expectedRefs []RevisionRef) error {
 	for _, expected := range expectedRefs {
+		if !validRef(expected) {
+			return ErrInvalid
+		}
 		var record recordDisk
 		if _, err := readDocument(b, objectKey("head", expected.RecordID), "record", &record); err != nil {
 			return errors.Join(ErrConflict, err)
@@ -470,27 +343,6 @@ func expectedForgetRevisions(b Bucket, scope Scope, expectedRefs []RevisionRef) 
 		}
 	}
 	return nil
-}
-
-func revokedOrigins(scope Scope, history []Entry, recordIDs []string) (map[string]bool, error) {
-	origins := make(map[string]bool)
-	selectedIDs := make(map[string]bool, len(recordIDs))
-	for _, id := range recordIDs {
-		selectedIDs[id] = true
-	}
-	for _, entry := range history {
-		var historical recordDisk
-		if err := decodeDocument(entry.Value.Data, "record", &historical); err != nil {
-			return nil, err
-		}
-		if historical.Scope != scope || entry.Key != revisionKey(historical.ID, historical.Revision) {
-			return nil, ErrSchema
-		}
-		if selectedIDs[historical.ID] {
-			origins[historical.Proposal.ID] = true
-		}
-	}
-	return origins, nil
 }
 
 func persistRevocation(b Bucket, request ForgetRequest, epoch Version) error {

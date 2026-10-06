@@ -40,7 +40,7 @@ func TestMalformedCanonicalDocumentsFailClosed(t *testing.T) {
 }
 
 func corruptCanonicalHead(b memy.Bucket, field string) error {
-	entries, listErr := b.List("head/")
+	entries, listErr := listEntries(b, "head/")
 	if listErr != nil {
 		return listErr
 	}
@@ -49,7 +49,7 @@ func corruptCanonicalHead(b memy.Bucket, field string) error {
 		return decodeErr
 	}
 	if field == "schema" {
-		document[field] = json.RawMessage(`3`)
+		document[field] = json.RawMessage(`4`)
 	} else {
 		changed, mutationErr := corruptCanonicalData(document["data"], field)
 		if mutationErr != nil {
@@ -96,7 +96,7 @@ func corruptCanonicalData(raw []byte, field string) ([]byte, error) {
 func TestNullRevocationEpochCannotResetFence(t *testing.T) {
 	// Arrange: a real forget has advanced the scope epoch.
 	f := newFixture(t, nil)
-	_, operationErr := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", memy.ForgetRequest{
+	_, operationErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", memy.ForgetRequest{
 		OperationID:   "forget-scope",
 		Selector:      memy.Selector{Kind: memy.SelectScope},
 		Reason:        "withdraw",
@@ -220,7 +220,7 @@ func TestMalformedLineageDoesNotBecomeEmptyRecall(t *testing.T) {
 		memy.ScoreRanker[preference, sourceRef]{},
 		memy.RecallOptions{Limit: 1},
 	)
-	snapshot, snapshotErr := f.engine.Snapshot(context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	snapshot, snapshotErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
 	// Assert: corruption is an explicit schema error, not complete empty coverage.
 	if !errors.Is(recallErr, memy.ErrSchema) || !errors.Is(snapshotErr, memy.ErrSchema) || len(recalled.Records) != 0 ||
 		len(snapshot) != 0 {
@@ -229,7 +229,7 @@ func TestMalformedLineageDoesNotBecomeEmptyRecall(t *testing.T) {
 }
 
 func corruptHeadSchema(b memy.Bucket, id string) error {
-	entries, listErr := b.List("head/")
+	entries, listErr := listEntries(b, "head/")
 	if listErr != nil {
 		return listErr
 	}
@@ -247,7 +247,7 @@ func corruptHeadSchema(b memy.Bucket, id string) error {
 		if data.ID != id {
 			continue
 		}
-		envelope["schema"] = json.RawMessage(`3`)
+		envelope["schema"] = json.RawMessage(`4`)
 		raw, encodeErr := json.Marshal(envelope)
 		if encodeErr != nil {
 			return encodeErr

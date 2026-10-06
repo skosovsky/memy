@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"path/filepath"
+	"slices"
 	"sync"
 	"testing"
 	"time"
@@ -35,7 +36,7 @@ type fixture struct {
 	source  memy.Source[sourceRef]
 }
 
-func newFixture(t *testing.T, store memy.Store) fixture {
+func newFixture(t testing.TB, store memy.Store) fixture {
 	t.Helper()
 	if store == nil {
 		store = memory.New()
@@ -100,7 +101,7 @@ func (f fixture) suggestion(value string, valid memy.Interval) memy.Suggestion[p
 	}
 }
 
-func (f fixture) propose(t *testing.T, op, value string, valid memy.Interval) memy.Proposal[preference, sourceRef] {
+func (f fixture) propose(t testing.TB, op, value string, valid memy.Interval) memy.Proposal[preference, sourceRef] {
 	t.Helper()
 	p, operationErr := f.engine.Remember(
 		context.Background(),
@@ -117,7 +118,7 @@ func (f fixture) propose(t *testing.T, op, value string, valid memy.Interval) me
 }
 
 func (f fixture) acceptedRequest(
-	t *testing.T,
+	t testing.TB,
 	op, id string,
 	expected memy.Version,
 	proposal memy.Proposal[preference, sourceRef],
@@ -152,7 +153,7 @@ func (f fixture) acceptedRequest(
 	}
 }
 
-func (f fixture) commit(t *testing.T, request memy.CommitRequest) memy.CommitReceipt {
+func (f fixture) commit(t testing.TB, request memy.CommitRequest) memy.CommitReceipt {
 	t.Helper()
 	r, operationErr := f.engine.Commit(context.Background(), f.actor, f.scope, "assist", request)
 	if operationErr != nil {
@@ -469,5 +470,116 @@ func TestUnknownValidityAndOverlappingClaims(t *testing.T) {
 	// Assert.
 	if !errors.Is(unknownErr, memy.ErrNotFound) || !errors.Is(overlapErr, memy.ErrUnresolvedConflict) {
 		t.Fatalf("unknown=%v overlap=%v", unknownErr, overlapErr)
+	}
+}
+
+func listEntries(b memy.Bucket, prefix string) ([]memy.Entry, error) {
+	var result []memy.Entry
+	options := memy.ScanOptions{Prefix: prefix, Limit: 256, MaxBytes: int(^uint(0) >> 1)}
+	for {
+		page, err := b.Scan(options)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, page.Entries...)
+		if page.Complete {
+			return result, nil
+		}
+		if page.Cursor == "" || len(page.Entries) == 0 {
+			return nil, memy.ErrSchema
+		}
+		options.Cursor = page.Cursor
+	}
+}
+
+func fullSnapshot[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, read memy.ReadOptions) ([]memy.Record[P, R], error) {
+	options := memy.SnapshotOptions{Read: read, Limit: 256, MaxBytes: int(^uint(0) >> 1)}
+	var records []memy.Record[P, R]
+	for {
+		page, err := e.Snapshot(ctx, authority, scope, options)
+		if err != nil {
+			return nil, err
+		}
+		records = append(records, page.Records...)
+		if page.Complete {
+			return records, nil
+		}
+		if page.Cursor == "" || page.Scanned == 0 {
+			return nil, memy.ErrSchema
+		}
+		options.Cursor = page.Cursor
+	}
+}
+
+func fullForget[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, purpose string, request memy.ForgetRequest) (memy.PurgeReceipt, error) {
+	if request.Limit == 0 {
+		request.Limit = 256
+	}
+	if request.MaxBytes == 0 {
+		request.MaxBytes = 64 << 20
+	}
+	ids := make(map[string]bool)
+	for {
+		receipt, err := e.Forget(ctx, authority, scope, purpose, request)
+		if err != nil {
+			return receipt, err
+		}
+		for _, id := range receipt.Batch.Records {
+			ids[id] = true
+		}
+		unattempted := false
+		for _, sink := range receipt.Sinks {
+			if !sink.Acknowledged && sink.ErrorCode == "" {
+				unattempted = true
+			}
+		}
+		if receipt.State != memy.RevocationCommitted && !(receipt.State == memy.PurgePending && unattempted) {
+			receipt.Batch.Records = make([]string, 0, len(ids))
+			for id := range ids {
+				receipt.Batch.Records = append(receipt.Batch.Records, id)
+			}
+			slices.Sort(receipt.Batch.Records)
+			return receipt, nil
+		}
+	}
+}
+
+func fullSweep[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, purpose, op string) (memy.SweepResult, error) {
+	var total memy.SweepResult
+	for {
+		page, err := e.Sweep(ctx, authority, scope, purpose, memy.SweepRequest{OperationID: op, Limit: 256, MaxBytes: 64 << 20})
+		if err != nil {
+			return total, err
+		}
+		total.ExpiredProposals += page.ExpiredProposals
+		total.Work += page.Work
+		for _, receipt := range page.Records {
+			found := false
+			for i := range total.Records {
+				if total.Records[i].Batch.OperationID == receipt.Batch.OperationID {
+					total.Records[i] = receipt
+					found = true
+				}
+			}
+			if !found {
+				total.Records = append(total.Records, receipt)
+			}
+		}
+		if page.Complete {
+			total.Complete = true
+			return total, nil
+		}
+		for _, r := range page.Records {
+			if r.State == memy.PurgeFailed {
+				return total, nil
+			}
+			if r.State == memy.PurgePending {
+				for _, sink := range r.Sinks {
+					if !sink.Acknowledged && sink.ErrorCode != "" {
+						return total, nil
+					}
+				}
+			}
+		}
 	}
 }

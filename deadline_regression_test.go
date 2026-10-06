@@ -41,7 +41,7 @@ func TestByteWireRepresentationFailsClosed(t *testing.T) {
 }
 
 func corruptByteRepresentation(b memy.Bucket, field, representation string) error {
-	entries, err := b.List("record/")
+	entries, err := listEntries(b, "record/")
 	if err != nil {
 		return err
 	}
@@ -171,7 +171,7 @@ func TestDeadlineCrossedDuringCanonicalDelivery(t *testing.T) {
 					}
 					return
 				}
-				records, err := f.engine.Snapshot(context.Background(), f.actor, f.scope, memy.ReadOptions{})
+				records, err := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
 				// Assert.
 				if !errors.Is(err, memy.ErrStaleInput) || len(records) != 0 {
 					t.Fatalf("records=%+v err=%v", records, err)
@@ -294,7 +294,7 @@ func TestSnapshotRechecksEarlierRecordAfterLaterSourceIO(t *testing.T) {
 			assertFirstHistoryID(t, f, "a")
 			sources.armed = true
 			// Act: only the later record's source call advances the clock.
-			records, err := f.engine.Snapshot(context.Background(), f.actor, f.scope, memy.ReadOptions{})
+			records, err := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
 			// Assert: a final batch gate withholds the earlier, now expired record.
 			if !errors.Is(err, memy.ErrStaleInput) || len(records) != 0 {
 				t.Fatalf("snapshot=%+v err=%v", records, err)
@@ -306,7 +306,7 @@ func TestSnapshotRechecksEarlierRecordAfterLaterSourceIO(t *testing.T) {
 func assertFirstHistoryID(t *testing.T, f fixture, want string) {
 	t.Helper()
 	if err := f.config.Store.View(context.Background(), f.scope, func(b memy.Bucket) error {
-		entries, err := b.List("record/")
+		entries, err := listEntries(b, "record/")
 		if err != nil {
 			return err
 		}
@@ -367,7 +367,7 @@ func timestampWireCase(t *testing.T, timestamp string, rejectSchema func([]byte)
 	p := f.propose(t, "remember", "private", memy.Interval{})
 	f.commit(t, f.acceptedRequest(t, "commit", "timezone", 0, p, memy.Append))
 	err := f.config.Store.Update(context.Background(), f.scope, func(b memy.Bucket) error {
-		entries, listErr := b.List("record/")
+		entries, listErr := listEntries(b, "record/")
 		if listErr != nil {
 			return listErr
 		}

@@ -25,7 +25,7 @@ func compileSchemas(t *testing.T) map[string]*jsonschema.Schema {
 	}})
 	compiler.AssertFormat()
 	compiler.AssertContent()
-	paths, operationErr := filepath.Glob("schemas/*-v2.schema.json")
+	paths, operationErr := filepath.Glob("schemas/*-v3.schema.json")
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
@@ -43,8 +43,8 @@ func compileSchemas(t *testing.T) map[string]*jsonschema.Schema {
 		}
 	}
 	compiled := make(map[string]*jsonschema.Schema)
-	for _, kind := range []string{"document", "proposal", "record", "acceptance", "operation", "epoch", "revocation", "purge"} {
-		schema, err := compiler.Compile("https://github.com/skosovsky/memy/schemas/" + kind + "-v2.schema.json")
+	for _, kind := range []string{"document", "proposal", "record", "acceptance", "operation", "epoch", "revocation", "purge", "membership", "purge-active", "purge-job", "purge-item", "purge-evidence", "sweep-active", "sweep-job"} {
+		schema, err := compiler.Compile("https://github.com/skosovsky/memy/schemas/" + kind + "-v3.schema.json")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -63,21 +63,34 @@ func TestPersistedLifecycleMatchesWireSchemas(t *testing.T) {
 
 	// Act: inspect content-bearing documents and content-free revocation.
 	inspectWireDocuments(t, f, schemas, seen)
-	_, operationErr := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", memy.ForgetRequest{
+	request := memy.ForgetRequest{
 		OperationID: "forget",
-		Selector:    memy.Selector{Kind: memy.SelectRecord, ID: "timezone"},
+		Selector:    memy.Selector{Kind: memy.SelectSource, ID: f.source.ID},
 		Expected: []memy.RevisionRef{
 			{RecordID: "timezone", Revision: 1},
 		},
 		Reason:        "withdraw",
 		PolicyVersion: "deletion/v1",
-	})
+	}
+	request.Limit, request.MaxBytes = 1, 10000
+	_, operationErr := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", request)
+	if operationErr != nil {
+		t.Fatal(operationErr)
+	}
+	inspectWireDocuments(t, f, schemas, seen)
+	request.Limit = 256
+	_, operationErr = fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
+	if operationErr != nil {
+		t.Fatal(operationErr)
+	}
+	inspectWireDocuments(t, f, schemas, seen)
+	_, operationErr = f.engine.Sweep(context.Background(), f.actor, f.scope, "assist", memy.SweepRequest{OperationID: "schema-sweep", Limit: 1, MaxBytes: 10000})
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
 	inspectWireDocuments(t, f, schemas, seen)
 	// Assert: every persisted kind has a real lifecycle-produced instance.
-	for _, kind := range []string{"proposal", "record", "acceptance", "operation", "epoch", "revocation", "purge"} {
+	for _, kind := range []string{"proposal", "record", "acceptance", "operation", "epoch", "revocation", "purge", "membership", "purge-active", "purge-job", "purge-item", "purge-evidence", "sweep-active", "sweep-job"} {
 		if !seen[kind] {
 			t.Errorf("no lifecycle instance for %s", kind)
 		}
@@ -87,7 +100,7 @@ func TestPersistedLifecycleMatchesWireSchemas(t *testing.T) {
 func inspectWireDocuments(t *testing.T, f fixture, schemas map[string]*jsonschema.Schema, seen map[string]bool) {
 	t.Helper()
 	viewErr := f.config.Store.View(context.Background(), f.scope, func(b memy.Bucket) error {
-		entries, listErr := b.List("")
+		entries, listErr := listEntries(b, "")
 		if listErr != nil {
 			return listErr
 		}
@@ -128,11 +141,11 @@ func TestWireSchemaRejectsMalformedEnvelope(t *testing.T) {
 	for _, input := range []string{
 		`{"kind":"epoch","data":{"value":1,"recorded_at":"2026-01-01T00:00:00Z"}}`,
 		`{"schema":1,"kind":"epoch","data":{"value":1,"recorded_at":"2026-01-01T00:00:00Z"}}`,
-		`{"schema":3,"kind":"epoch","data":{"value":1,"recorded_at":"2026-01-01T00:00:00Z"}}`,
-		`{"schema":2,"kind":"epoch","data":{"value":1}}`,
-		`{"schema":2,"kind":"epoch","data":{"value":-1,"recorded_at":"2026-01-01T00:00:00Z"}}`,
-		`{"schema":2,"kind":"epoch","data":{"value":1,"recorded_at":"bad"}}`,
-		`{"schema":2,"kind":"epoch","data":{"value":1,"recorded_at":"2026-01-01T00:00:00Z","unknown":true}}`,
+		`{"schema":4,"kind":"epoch","data":{"value":1,"recorded_at":"2026-01-01T00:00:00Z"}}`,
+		`{"schema":3,"kind":"epoch","data":{"value":1}}`,
+		`{"schema":3,"kind":"epoch","data":{"value":-1,"recorded_at":"2026-01-01T00:00:00Z"}}`,
+		`{"schema":3,"kind":"epoch","data":{"value":1,"recorded_at":"bad"}}`,
+		`{"schema":3,"kind":"epoch","data":{"value":1,"recorded_at":"2026-01-01T00:00:00Z","unknown":true}}`,
 	} {
 		var instance any
 		if err := json.Unmarshal([]byte(input), &instance); err != nil {

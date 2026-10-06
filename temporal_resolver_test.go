@@ -28,7 +28,7 @@ func TestTypedDomainResolverMapsClaimWithoutInferringScope(t *testing.T) {
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
-	snapshot, operationErr := f.engine.Snapshot(context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	snapshot, operationErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}

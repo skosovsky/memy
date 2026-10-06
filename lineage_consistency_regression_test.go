@@ -64,7 +64,7 @@ func reviewedLineageCase(t *testing.T, backend, fault string) {
 func assertReviewedLineageFailsClosed(t *testing.T, f fixture, index *reference.Index[string]) {
 	t.Helper()
 	record, getErr := f.engine.Get(context.Background(), f.actor, f.scope, "derived", memy.ReadOptions{})
-	snapshot, snapshotErr := f.engine.Snapshot(context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	snapshot, snapshotErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
 	recalled, recallErr := memy.Recall(context.Background(), f.engine, f.actor, f.scope, "all", index,
 		memy.ScoreRanker[preference, sourceRef]{}, memy.RecallOptions{Limit: 1})
 	called := false
@@ -88,7 +88,7 @@ func assertReviewedLineageFailsClosed(t *testing.T, f fixture, index *reference.
 }
 
 func corruptReviewedLineage(b memy.Bucket, id, fault string) error {
-	entries, err := b.List("")
+	entries, err := listEntries(b, "")
 	if err != nil {
 		return err
 	}

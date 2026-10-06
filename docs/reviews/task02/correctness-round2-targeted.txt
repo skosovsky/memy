@@ -1,0 +1,2 @@
+ok  	github.com/skosovsky/memy	1.597s
+ok  	github.com/skosovsky/memy/internal/membershipproof	1.199s

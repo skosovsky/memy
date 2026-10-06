@@ -1,6 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/skosovsky/memy/schemas/record-v2.schema.json",
-  "title": "memy record data v2",
-  "$ref": "document-v2.schema.json#/$defs/record"
-}

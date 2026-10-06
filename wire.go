@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/skosovsky/memy/internal/workcost"
 	"reflect"
 	"time"
 )
@@ -89,6 +90,7 @@ func encodeDocument(kind string, value any) ([]byte, error) {
 }
 
 func decodeDocument(raw []byte, kind string, value any) error {
+	workcost.Decode(len(raw))
 	if !strictWireText(raw) {
 		return ErrSchema
 	}

@@ -1,0 +1,11 @@
+ok  	github.com/skosovsky/memy	492.373s
+?   	github.com/skosovsky/memy/conformance	[no test files]
+ok  	github.com/skosovsky/memy/examples/lifecycle	2.173s
+?   	github.com/skosovsky/memy/examples/quality	[no test files]
+ok  	github.com/skosovsky/memy/internal/kv	2.398s
+ok  	github.com/skosovsky/memy/internal/membershipproof	1.551s
+ok  	github.com/skosovsky/memy/internal/quality	2.964s
+?   	github.com/skosovsky/memy/internal/workcost	[no test files]
+ok  	github.com/skosovsky/memy/reference	1.600s
+ok  	github.com/skosovsky/memy/store/memory	1.583s
+ok  	github.com/skosovsky/memy/store/sqlite	3.368s

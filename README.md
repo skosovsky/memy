@@ -87,7 +87,7 @@ projection scripts. Это reference adapters, не vendor integrations.
 ## Границы
 
 Host отвечает за authentication, provisioning, scheduler, backup restore и
-deployment. Field-restricted profiles в v2 отклоняются как unsupported;
+deployment. Field-restricted profiles в v3 отклоняются как unsupported;
 потребитель может разделить запись. Это предотвращает использование private
 поля при создании публичного summary.
 
@@ -130,3 +130,15 @@ make release VERSION=v0.1.0
 Target выполняет полную проверку, публикует ветку и annotated tag одним
 atomic push, затем создаёт GitHub Release. Повтор с тем же тегом допустим
 только для того же коммита; существующие теги не перезаписываются.
+
+`Snapshot` возвращает одну `SnapshotPage`: host задаёт `SnapshotOptions.Read`,
+`Limit` и `MaxBytes`, затем явно продолжает `Cursor` до `Complete`. Бюджет
+ограничивает просмотренные revisions, включая не прошедшие read predicates.
+Изменение данных или read policy отклоняет продолжение; старый cursor не
+означает полный актуальный обход.
+
+Store использует `Scan` вместо `List`. `View` даёт consistent read,
+`FencedView` исключает изменения в точном scope до завершения callback.
+SQLite fencing работает между процессами на поддерживаемых локальных Unix
+файловых системах; directory `.memy-fences` сохраняется, пока база используется.
+Текущий persisted формат — schema 3; переход описан в [migration](docs/migration.md).
