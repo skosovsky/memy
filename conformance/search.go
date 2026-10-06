@@ -3,6 +3,7 @@ package conformance
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 	"testing"
 	"time"
@@ -23,7 +24,10 @@ type SearchFixture[Q any] struct {
 // SearchSuite tests scoped retrieval, minimum visibility and candidate-return bounds.
 func SearchSuite[Q any](t *testing.T, factory func(*testing.T) SearchFixture[Q]) {
 	t.Helper()
-	t.Run("scope_coverage", func(t *testing.T) { searchScopeCoverage(t, factory) })
+	for i, foreign := range foreignScopes(scope()) {
+		t.Run(fmt.Sprintf("scope_coverage/%d", i), func(t *testing.T) { searchScopeCoverage(t, factory, foreign) })
+	}
+	t.Run("exact_visibility_bindings", func(t *testing.T) { searchExactVisibility(t, factory) })
 	t.Run("minimum_and_cancel", func(t *testing.T) { searchMinimumAndCancel(t, factory) })
 	t.Run("candidate_bound", func(t *testing.T) { searchCandidateBound(t, factory) })
 	t.Run("failure", func(t *testing.T) { searchFailure(t, factory) })
@@ -49,12 +53,10 @@ func checkCoverage(t *testing.T, result memy.SearchResult, minimum bool) {
 	}
 }
 
-func searchScopeCoverage[Q any](t *testing.T, factory func(*testing.T) SearchFixture[Q]) {
+func searchScopeCoverage[Q any](t *testing.T, factory func(*testing.T) SearchFixture[Q], b memy.Scope) {
 	// Arrange: matching metadata in two scopes; B is already published.
 	f := factory(t)
 	a := scope()
-	b := a
-	b.Tenant = "B"
 	candidate := memy.Candidate{RecordID: "record", Revision: 1, Score: 1, Signals: nil}
 	must(t, f.Seed(t.Context(), a, candidate))
 	must(t, f.Seed(t.Context(), b, memy.Candidate{RecordID: "private", Revision: 1, Score: 1, Signals: nil}))
@@ -86,7 +88,8 @@ func searchScopeCoverage[Q any](t *testing.T, factory func(*testing.T) SearchFix
 	// Assert: foreign metadata never enters A results.
 	must(t, err)
 	checkCoverage(t, visible, false)
-	if len(visible.Candidates) != 1 || visible.Candidates[0].RecordID != candidate.RecordID {
+	if len(visible.Candidates) != 1 || visible.Candidates[0].RecordID != candidate.RecordID ||
+		visible.Candidates[0].Revision != candidate.Revision {
 		t.Fatalf("scope result: %+v", visible)
 	}
 }
@@ -197,4 +200,94 @@ func checkCandidateEvidence(t *testing.T, candidate memy.Candidate, coverage []m
 			t.Fatalf("invalid search evidence: %+v", signal)
 		}
 	}
+}
+
+func searchExactVisibility[Q any](t *testing.T, factory func(*testing.T) SearchFixture[Q]) {
+	// Arrange: publish two exact revisions; revision 3 was never staged.
+	f := factory(t)
+	if !f.Adapter.Capabilities().Visibility {
+		t.Skip("adapter does not support minimum visibility")
+	}
+	a := scope()
+	for _, revision := range []memy.Version{1, 2} {
+		must(
+			t,
+			f.Seed(
+				t.Context(),
+				a,
+				memy.Candidate{RecordID: visibilityUpgradeRecord, Revision: revision, Score: 1, Signals: nil},
+			),
+		)
+		must(
+			t,
+			f.Publish(
+				t.Context(),
+				memy.VisibilityToken{Scope: a, RecordID: visibilityUpgradeRecord, Revision: revision},
+			),
+		)
+	}
+	token := memy.VisibilityToken{Scope: a, RecordID: visibilityUpgradeRecord, Revision: 2}
+	ctx, cancel := context.WithTimeout(t.Context(), time.Second)
+	defer cancel()
+	// Act: exact published revision must accompany its satisfied visibility claim.
+	result, err := f.Adapter.Search(
+		ctx,
+		a,
+		f.Query,
+		memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates, Minimum: &token},
+	)
+	must(t, err)
+	checkCoverage(t, result, true)
+	// Assert.
+	requireExactVisibleCandidate(t, result, token)
+	// A delayed acknowledgement of revision 1 cannot erase published revision 2.
+	stale := token
+	stale.Revision = 1
+	must(t, f.Publish(t.Context(), stale))
+	result, err = f.Adapter.Search(
+		ctx,
+		a,
+		f.Query,
+		memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates, Minimum: &token},
+	)
+	must(t, err)
+	checkCoverage(t, result, true)
+	requireExactVisibleCandidate(t, result, token)
+	for _, foreign := range foreignScopes(a) {
+		token.Scope = foreign
+		_, err = f.Adapter.Search(
+			ctx,
+			a,
+			f.Query,
+			memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates, Minimum: &token},
+		)
+		if !errors.Is(err, memy.ErrScopeViolation) {
+			t.Fatalf("foreign minimum: %v", err)
+		}
+	}
+	token.Scope, token.Revision = a, 3
+	if err = f.Publish(t.Context(), token); err == nil {
+		t.Fatal("unstaged acknowledgement accepted")
+	}
+	waiting, stop := context.WithTimeout(t.Context(), lockWaitDeadline)
+	defer stop()
+	result, err = f.Adapter.Search(
+		waiting,
+		a,
+		f.Query,
+		memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates, Minimum: &token},
+	)
+	if !errors.Is(err, memy.ErrVisibilityPending) {
+		t.Fatalf("unstaged minimum fabricated: %+v err=%v", result, err)
+	}
+}
+
+func requireExactVisibleCandidate(t *testing.T, result memy.SearchResult, token memy.VisibilityToken) {
+	t.Helper()
+	for _, candidate := range result.Candidates {
+		if candidate.RecordID == token.RecordID && candidate.Revision == token.Revision {
+			return
+		}
+	}
+	t.Fatalf("exact visible revision missing: %+v", result)
 }

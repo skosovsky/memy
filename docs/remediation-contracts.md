@@ -110,3 +110,35 @@ API cleanup stage. MaxBytes bounds each storage page, not the whole invocation.
 These reporting changes leave the durable pass schema and operation identity
 unchanged. Hosts must consume result plus error and aggregate confirmed progress;
 never discard the result solely because error is nonnil.
+
+## Quality harness applicability and conformance
+
+The internal harness remains a synthetic consumer fixture, without live efficacy,
+statistical significance or measured provider cost claims. Every successful
+procedure projection, including empty-context bodies and observations used by
+fixture oracles, must carry JSONPacking under the configured ContextBytes cap.
+The retrieval-specific smaller cap may tighten it, never widen it. Measure the
+actual delivered body including metadata; report mandatory context-budget evidence
+with the effective configured cap and maximum observed body bytes. A cap that
+cannot hold metadata returns an execution error, never a successful bound claim.
+
+Procedure port configuration requires Grade == nil iff GraderVersion == "none".
+Validate the corpus, registered case identity, repeat/seed and ports before store
+allocation or provider invocation, including RunProcedureCase. Record actual
+configured grader calls independently of the configured version: an uncalled
+configured grader is not_applicable, and execution evidence never credits it with
+a semantic pass. The controlled-error grader is separately identified as executed.
+
+A known failed execution invariant yields fail (exit 1). Missing checkpoints or
+unexpected execution errors yield unknown (exit 2), taking precedence over fail.
+Missing optional metrics are unavailable; malformed supplied metrics additionally
+produce a safe invalid_measurement diagnostic and unknown, never a fabricated zero.
+Schema consolidation through $defs must retain executable conformance. Corpus
+files remain trusted local inputs, with no unsupported untrusted-corpus claim.
+
+Conformance must independently exercise Tenant, Namespace and Subject isolation,
+exact visible revisions/upgrades, foreign minimum bindings and stale visibility
+acknowledgements. Sink checks exercise multiple selected references, chunk binding,
+replay and preservation of unrelated artifacts. CallbackSuite remains cooperative
+context/error checking; core lineage/chunk/ack validation needs explicit engine
+fixtures and cannot be inferred from a host Verify callback or coverage flag.

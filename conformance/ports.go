@@ -104,15 +104,20 @@ func AuthoritySuite[A any](t *testing.T, factory func(*testing.T) AuthorityFixtu
 	decision, err := f.Adapter.Check(t.Context(), f.Allowed, f.Access)
 	must(t, err)
 	denied, denyErr := f.Adapter.Check(t.Context(), f.Denied, f.Access)
-	other := f.Access
-	other.Scope.Tenant = "foreign"
-	foreign, foreignErr := f.Adapter.Check(t.Context(), f.Allowed, other)
+	for _, scope := range foreignScopes(f.Access.Scope) {
+		other := f.Access
+		other.Scope = scope
+		foreign, foreignErr := f.Adapter.Check(t.Context(), f.Allowed, other)
+		if foreignErr == nil && foreign.Allowed {
+			t.Fatalf("foreign scope authorized: %+v", scope)
+		}
+	}
 	// Assert: only the explicitly granted identity and scope succeed.
 	if !decision.Allowed || decision.Actor != f.Actor || decision.Scope != f.Access.Scope ||
 		decision.PolicyVersion == "" {
 		t.Fatalf("unbound decision: %+v", decision)
 	}
-	if (denyErr == nil && denied.Allowed) || (foreignErr == nil && foreign.Allowed) {
+	if denyErr == nil && denied.Allowed {
 		t.Fatal("foreign actor or scope authorized")
 	}
 	failure := errors.New("authority unavailable")
@@ -148,10 +153,10 @@ func SourcesSuite[R any](t *testing.T, factory func(*testing.T) SourcesFixture[R
 	must(t, f.Put(f.Scope, f.Original))
 	// Act and assert: initial success, isolated scope, then invalidated revision.
 	must(t, f.Adapter.Validate(t.Context(), f.Scope, f.Original))
-	other := f.Scope
-	other.Tenant = "foreign"
-	if err := f.Adapter.Validate(t.Context(), other, f.Original); err == nil {
-		t.Fatal("source crossed scope")
+	for _, other := range foreignScopes(f.Scope) {
+		if err := f.Adapter.Validate(t.Context(), other, f.Original); err == nil {
+			t.Fatalf("source crossed scope: %+v", other)
+		}
 	}
 	must(t, f.Put(f.Scope, f.Replacement))
 	if err := f.Adapter.Validate(t.Context(), f.Scope, f.Original); err == nil {

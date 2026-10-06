@@ -46,9 +46,6 @@ func TestFinalVerdictUsesEveryStage(t *testing.T) {
 			FinalizeScenario(&s)
 			// Assert.
 			want := VerdictFail
-			if name == "execution" {
-				want = VerdictUnknown
-			}
 			if s.Final != want {
 				t.Fatalf("got %s want %s", s.Final, want)
 			}

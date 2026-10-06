@@ -29,7 +29,7 @@ Every scenario/repeat has six independent stages and a final verdict:
 | `host_review` | The expected host acceptance/rejection and checked apply or preserved baseline |
 | `effective` | Actual recalled exact revisions, typed payloads, validity and provenance against the fixture oracle |
 | `canonical` | Separate public canonical reads of originals/history, scope, sources, lineage and current revoke/retention |
-| `rendered` | Actual `RecallProjected` body, selected identities, omissions, data trust and full JSON context budget |
+| `rendered` | Actual delivered `RecallProjected` body, selected identities, omissions, data trust and full JSON context budget |
 | `execution` | Required events/checkpoints executed and allowed failure classes observed |
 
 Each check has `pass`, `fail` or `unknown`, a mandatory flag and safe evidence.
@@ -37,6 +37,36 @@ An optional unused stage is explicitly `not_applicable`. Missing mandatory evide
 and unexpected adapter/evaluator errors make execution unknown; they cannot stand
 for zero violations or an expected host rejection. The runner enforces each plan's
 required check IDs and recorded port versions before finalization.
+`RunProcedureCase` validates the corpus, known case identity, repeat/seed and typed
+ports before allocating storage or calling the provider. Grade is nil exactly
+when GraderVersion is `none`. A version describes configuration; the mandatory
+`configured-grader` execution check separately reports `executed` or
+`not_applicable` with the actual invocation count. It never gives an uncalled
+grader credit for semantic quality. The controlled-error grader has its own
+versioned execution checkpoint.
+
+Every successful delivered procedure body uses JSONPacking with a cap no larger
+than manifest ContextBytes, including empty-context metadata and poison/cross-scope
+bodies. The mandatory `context-budget` check records the configured cap in Expected,
+the maximum actual body bytes in Observed, and the number of bounded observations.
+ContextJSONBytes reports that maximum for procedure scenarios. Retrieval may use a
+smaller effective packing cap; its BudgetUsage receipt is checked by the fixture.
+Only the retrieval baseline used internally to calculate packing expectations is
+unbounded; it is an oracle observation, not delivered context or a credited bound.
+If metadata cannot fit, execution returns ErrBudget and cannot pass. These rules
+also apply to the typed integration entry point. Provider cost and canonical storage
+size remain unavailable when not measured.
+
+A known failed execution invariant is fail (exit 1); incomplete execution or
+unexpected errors are unknown (exit 2). Missing optional metrics become unavailable.
+Malformed supplied metrics additionally set the safe `invalid_measurement`
+diagnostic and unknown verdict, preserving that diagnostic across finalization.
+The v2 JSON shapes retain their identities, with explicit additional execution
+checks and clarified verdict semantics; earlier saved reports remain historical.
+Schema $defs consolidate repeated definitions without relaxing required fields.
+Manifests are trusted local files; this runner does not advertise untrusted corpus
+processing or production statistical efficacy.
+
 
 The final scenario verdict is computed after all observations, including privacy
 and rendered-output checks. Matching record count alone cannot establish success:

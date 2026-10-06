@@ -278,3 +278,38 @@ func mergeInvocation(provider func(context.Context) error, verify func(bool)) fu
 		return err
 	}
 }
+
+func TestProjectionSinkMultipleLineageReferences(t *testing.T) {
+	// Arrange: one artifact depends on two exact inputs, another is unrelated.
+	sink := reference.NewProjectionSink("multi-lineage")
+	scope := memy.Scope{Tenant: "A", Namespace: "N", Subject: "S"}
+	refs := []memy.RevisionRef{{RecordID: "first", Revision: 1}, {RecordID: "second", Revision: 2}}
+	if err := sink.Put(t.Context(), "derived", scope, refs, []byte("private")); err != nil {
+		t.Fatal(err)
+	}
+	if err := sink.Put(
+		t.Context(),
+		"unrelated",
+		scope,
+		[]memy.RevisionRef{{RecordID: "other", Revision: 1}},
+		[]byte("other"),
+	); err != nil {
+		t.Fatal(err)
+	}
+	batch := memy.PurgeBatch{
+		OperationID: "multi",
+		Scope:       scope,
+		Epoch:       1,
+		Chunk:       1,
+		Selector:    memy.Selector{Kind: memy.SelectRecord, ID: "second"},
+		Records:     []string{"second"},
+	}
+	// Act: any selected lineage member invalidates the whole dependent artifact.
+	ack, err := sink.Purge(t.Context(), batch)
+	replay, replayErr := sink.Purge(t.Context(), batch)
+	// Assert: acknowledgements bind the exact chunk; replay preserves unrelated data.
+	if err != nil || replayErr != nil || ack != replay || ack.Chunk != batch.Chunk || sink.Contains("derived") ||
+		!sink.Contains("unrelated") {
+		t.Fatalf("ack=%+v replay=%+v err=%v replayErr=%v", ack, replay, err, replayErr)
+	}
+}

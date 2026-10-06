@@ -146,7 +146,7 @@ func scanCursorBinding(t *testing.T, store memy.Store) {
 		return nil
 	}))
 	other := scope()
-	other.Subject = "other"
+	other.Subject = conformanceOther
 	must(t, store.View(context.Background(), other, func(b memy.Bucket) error {
 		if _, err := b.Scan(options); !errors.Is(err, memy.ErrStaleCursor) {
 			t.Fatalf("scope: %v", err)
@@ -235,6 +235,21 @@ func scopeIsolation(t *testing.T, store memy.Store) {
 	// Assert.
 	if value.Version != 0 || value.Data != nil {
 		t.Fatalf("scope leaked: %+v", value)
+	}
+	for _, foreign := range foreignScopes(a) {
+		value = get(t, store, foreign, "record")
+		if value.Version != 0 || value.Data != nil {
+			t.Fatalf("scope leaked: %+v", foreign)
+		}
+		must(t, store.View(t.Context(), foreign, func(bucket memy.Bucket) error {
+			page, err := bucket.Scan(
+				memy.ScanOptions{Prefix: "", After: "", Plan: "", Cursor: "", Limit: 1, MaxBytes: boundedScanMaxBytes},
+			)
+			if err == nil && len(page.Entries) != 0 {
+				t.Fatalf("scope scan leaked: %+v", foreign)
+			}
+			return err
+		}))
 	}
 }
 

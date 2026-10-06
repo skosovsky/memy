@@ -22,52 +22,7 @@
           "maximum": 20
         },
         "versions": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "provider": {
-              "type": "string"
-            },
-            "model": {
-              "type": "string"
-            },
-            "host_review": {
-              "type": "string"
-            },
-            "retention": {
-              "type": "string"
-            },
-            "resolver": {
-              "type": "string"
-            },
-            "consolidation": {
-              "type": "string"
-            },
-            "search": {
-              "type": "string"
-            },
-            "projector": {
-              "type": "string"
-            },
-            "packing": {
-              "type": "string"
-            },
-            "grader": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "provider",
-            "model",
-            "host_review",
-            "retention",
-            "resolver",
-            "consolidation",
-            "search",
-            "projector",
-            "packing",
-            "grader"
-          ]
+          "$ref": "#/$defs/versions"
         },
         "budgets": {
           "type": "object",
@@ -126,52 +81,7 @@
                 "type": "string"
               },
               "versions": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "provider": {
-                    "type": "string"
-                  },
-                  "model": {
-                    "type": "string"
-                  },
-                  "host_review": {
-                    "type": "string"
-                  },
-                  "retention": {
-                    "type": "string"
-                  },
-                  "resolver": {
-                    "type": "string"
-                  },
-                  "consolidation": {
-                    "type": "string"
-                  },
-                  "search": {
-                    "type": "string"
-                  },
-                  "projector": {
-                    "type": "string"
-                  },
-                  "packing": {
-                    "type": "string"
-                  },
-                  "grader": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "provider",
-                  "model",
-                  "host_review",
-                  "retention",
-                  "resolver",
-                  "consolidation",
-                  "search",
-                  "projector",
-                  "packing",
-                  "grader"
-                ]
+                "$ref": "#/$defs/versions"
               }
             },
             "required": [
@@ -193,55 +103,60 @@
         "scenarios"
       ],
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "$id": "https://memy.dev/schemas/quality-corpus-v2.schema.json"
+      "$id": "https://memy.dev/schemas/quality-corpus-v2.schema.json",
+      "$defs": {
+        "versions": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "provider": {
+              "type": "string"
+            },
+            "model": {
+              "type": "string"
+            },
+            "host_review": {
+              "type": "string"
+            },
+            "retention": {
+              "type": "string"
+            },
+            "resolver": {
+              "type": "string"
+            },
+            "consolidation": {
+              "type": "string"
+            },
+            "search": {
+              "type": "string"
+            },
+            "projector": {
+              "type": "string"
+            },
+            "packing": {
+              "type": "string"
+            },
+            "grader": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "provider",
+            "model",
+            "host_review",
+            "retention",
+            "resolver",
+            "consolidation",
+            "search",
+            "projector",
+            "packing",
+            "grader"
+          ]
+        }
+      }
     },
     "versions": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "provider": {
-          "type": "string"
-        },
-        "model": {
-          "type": "string"
-        },
-        "host_review": {
-          "type": "string"
-        },
-        "retention": {
-          "type": "string"
-        },
-        "resolver": {
-          "type": "string"
-        },
-        "consolidation": {
-          "type": "string"
-        },
-        "search": {
-          "type": "string"
-        },
-        "projector": {
-          "type": "string"
-        },
-        "packing": {
-          "type": "string"
-        },
-        "grader": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "provider",
-        "model",
-        "host_review",
-        "retention",
-        "resolver",
-        "consolidation",
-        "search",
-        "projector",
-        "packing",
-        "grader"
-      ]
+      "$ref": "#/$defs/versions"
     },
     "scenarios": {
       "type": "array",
@@ -297,844 +212,44 @@
           "minimum": 0
         },
         "versions": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "provider": {
-              "type": "string"
-            },
-            "model": {
-              "type": "string"
-            },
-            "host_review": {
-              "type": "string"
-            },
-            "retention": {
-              "type": "string"
-            },
-            "resolver": {
-              "type": "string"
-            },
-            "consolidation": {
-              "type": "string"
-            },
-            "search": {
-              "type": "string"
-            },
-            "projector": {
-              "type": "string"
-            },
-            "packing": {
-              "type": "string"
-            },
-            "grader": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "provider",
-            "model",
-            "host_review",
-            "retention",
-            "resolver",
-            "consolidation",
-            "search",
-            "projector",
-            "packing",
-            "grader"
-          ]
+          "$ref": "#/$defs/versions"
         },
         "candidate": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "status": {
-              "enum": [
-                "pass",
-                "fail",
-                "unknown",
-                "not_applicable"
-              ]
-            },
-            "checks": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "mandatory": {
-                    "type": "boolean"
-                  },
-                  "status": {
-                    "enum": [
-                      "pass",
-                      "fail",
-                      "unknown"
-                    ]
-                  },
-                  "expected": {
-                    "type": "string"
-                  },
-                  "observed": {
-                    "type": "string"
-                  },
-                  "evidence": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "code": {
-                          "type": "string"
-                        },
-                        "count": {
-                          "type": "integer",
-                          "minimum": 0
-                        },
-                        "aliases": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        }
-                      },
-                      "required": [
-                        "code",
-                        "count"
-                      ]
-                    }
-                  }
-                },
-                "required": [
-                  "id",
-                  "mandatory",
-                  "status",
-                  "expected",
-                  "observed",
-                  "evidence"
-                ]
-              }
-            },
-            "version": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "status",
-            "checks"
-          ]
+          "$ref": "#/$defs/stage"
         },
         "host_review": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "status": {
-              "enum": [
-                "pass",
-                "fail",
-                "unknown",
-                "not_applicable"
-              ]
-            },
-            "checks": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "mandatory": {
-                    "type": "boolean"
-                  },
-                  "status": {
-                    "enum": [
-                      "pass",
-                      "fail",
-                      "unknown"
-                    ]
-                  },
-                  "expected": {
-                    "type": "string"
-                  },
-                  "observed": {
-                    "type": "string"
-                  },
-                  "evidence": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "code": {
-                          "type": "string"
-                        },
-                        "count": {
-                          "type": "integer",
-                          "minimum": 0
-                        },
-                        "aliases": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        }
-                      },
-                      "required": [
-                        "code",
-                        "count"
-                      ]
-                    }
-                  }
-                },
-                "required": [
-                  "id",
-                  "mandatory",
-                  "status",
-                  "expected",
-                  "observed",
-                  "evidence"
-                ]
-              }
-            },
-            "version": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "status",
-            "checks"
-          ]
+          "$ref": "#/$defs/stage"
         },
         "effective": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "status": {
-              "enum": [
-                "pass",
-                "fail",
-                "unknown",
-                "not_applicable"
-              ]
-            },
-            "checks": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "mandatory": {
-                    "type": "boolean"
-                  },
-                  "status": {
-                    "enum": [
-                      "pass",
-                      "fail",
-                      "unknown"
-                    ]
-                  },
-                  "expected": {
-                    "type": "string"
-                  },
-                  "observed": {
-                    "type": "string"
-                  },
-                  "evidence": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "code": {
-                          "type": "string"
-                        },
-                        "count": {
-                          "type": "integer",
-                          "minimum": 0
-                        },
-                        "aliases": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        }
-                      },
-                      "required": [
-                        "code",
-                        "count"
-                      ]
-                    }
-                  }
-                },
-                "required": [
-                  "id",
-                  "mandatory",
-                  "status",
-                  "expected",
-                  "observed",
-                  "evidence"
-                ]
-              }
-            },
-            "version": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "status",
-            "checks"
-          ]
+          "$ref": "#/$defs/stage"
         },
         "canonical": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "status": {
-              "enum": [
-                "pass",
-                "fail",
-                "unknown",
-                "not_applicable"
-              ]
-            },
-            "checks": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "mandatory": {
-                    "type": "boolean"
-                  },
-                  "status": {
-                    "enum": [
-                      "pass",
-                      "fail",
-                      "unknown"
-                    ]
-                  },
-                  "expected": {
-                    "type": "string"
-                  },
-                  "observed": {
-                    "type": "string"
-                  },
-                  "evidence": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "code": {
-                          "type": "string"
-                        },
-                        "count": {
-                          "type": "integer",
-                          "minimum": 0
-                        },
-                        "aliases": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        }
-                      },
-                      "required": [
-                        "code",
-                        "count"
-                      ]
-                    }
-                  }
-                },
-                "required": [
-                  "id",
-                  "mandatory",
-                  "status",
-                  "expected",
-                  "observed",
-                  "evidence"
-                ]
-              }
-            },
-            "version": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "status",
-            "checks"
-          ]
+          "$ref": "#/$defs/stage"
         },
         "rendered": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "status": {
-              "enum": [
-                "pass",
-                "fail",
-                "unknown",
-                "not_applicable"
-              ]
-            },
-            "checks": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "mandatory": {
-                    "type": "boolean"
-                  },
-                  "status": {
-                    "enum": [
-                      "pass",
-                      "fail",
-                      "unknown"
-                    ]
-                  },
-                  "expected": {
-                    "type": "string"
-                  },
-                  "observed": {
-                    "type": "string"
-                  },
-                  "evidence": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "code": {
-                          "type": "string"
-                        },
-                        "count": {
-                          "type": "integer",
-                          "minimum": 0
-                        },
-                        "aliases": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        }
-                      },
-                      "required": [
-                        "code",
-                        "count"
-                      ]
-                    }
-                  }
-                },
-                "required": [
-                  "id",
-                  "mandatory",
-                  "status",
-                  "expected",
-                  "observed",
-                  "evidence"
-                ]
-              }
-            },
-            "version": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "status",
-            "checks"
-          ]
+          "$ref": "#/$defs/stage"
         },
         "execution": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "status": {
-              "enum": [
-                "pass",
-                "fail",
-                "unknown",
-                "not_applicable"
-              ]
-            },
-            "checks": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "mandatory": {
-                    "type": "boolean"
-                  },
-                  "status": {
-                    "enum": [
-                      "pass",
-                      "fail",
-                      "unknown"
-                    ]
-                  },
-                  "expected": {
-                    "type": "string"
-                  },
-                  "observed": {
-                    "type": "string"
-                  },
-                  "evidence": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "code": {
-                          "type": "string"
-                        },
-                        "count": {
-                          "type": "integer",
-                          "minimum": 0
-                        },
-                        "aliases": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        }
-                      },
-                      "required": [
-                        "code",
-                        "count"
-                      ]
-                    }
-                  }
-                },
-                "required": [
-                  "id",
-                  "mandatory",
-                  "status",
-                  "expected",
-                  "observed",
-                  "evidence"
-                ]
-              }
-            },
-            "version": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "status",
-            "checks"
-          ]
+          "$ref": "#/$defs/stage"
         },
         "metrics": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
             "payload_bytes": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "status": {
-                  "enum": [
-                    "known",
-                    "unavailable"
-                  ]
-                },
-                "unit": {
-                  "type": "string"
-                },
-                "value": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "reason": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "status",
-                "unit"
-              ],
-              "oneOf": [
-                {
-                  "properties": {
-                    "status": {
-                      "const": "known"
-                    }
-                  },
-                  "required": [
-                    "value"
-                  ],
-                  "not": {
-                    "required": [
-                      "reason"
-                    ]
-                  }
-                },
-                {
-                  "properties": {
-                    "status": {
-                      "const": "unavailable"
-                    }
-                  },
-                  "required": [
-                    "reason"
-                  ],
-                  "not": {
-                    "required": [
-                      "value"
-                    ]
-                  }
-                }
-              ]
+              "$ref": "#/$defs/measurement"
             },
             "context_json_bytes": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "status": {
-                  "enum": [
-                    "known",
-                    "unavailable"
-                  ]
-                },
-                "unit": {
-                  "type": "string"
-                },
-                "value": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "reason": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "status",
-                "unit"
-              ],
-              "oneOf": [
-                {
-                  "properties": {
-                    "status": {
-                      "const": "known"
-                    }
-                  },
-                  "required": [
-                    "value"
-                  ],
-                  "not": {
-                    "required": [
-                      "reason"
-                    ]
-                  }
-                },
-                {
-                  "properties": {
-                    "status": {
-                      "const": "unavailable"
-                    }
-                  },
-                  "required": [
-                    "reason"
-                  ],
-                  "not": {
-                    "required": [
-                      "value"
-                    ]
-                  }
-                }
-              ]
+              "$ref": "#/$defs/measurement"
             },
             "canonical_serialized_bytes": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "status": {
-                  "enum": [
-                    "known",
-                    "unavailable"
-                  ]
-                },
-                "unit": {
-                  "type": "string"
-                },
-                "value": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "reason": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "status",
-                "unit"
-              ],
-              "oneOf": [
-                {
-                  "properties": {
-                    "status": {
-                      "const": "known"
-                    }
-                  },
-                  "required": [
-                    "value"
-                  ],
-                  "not": {
-                    "required": [
-                      "reason"
-                    ]
-                  }
-                },
-                {
-                  "properties": {
-                    "status": {
-                      "const": "unavailable"
-                    }
-                  },
-                  "required": [
-                    "reason"
-                  ],
-                  "not": {
-                    "required": [
-                      "value"
-                    ]
-                  }
-                }
-              ]
+              "$ref": "#/$defs/measurement"
             },
             "provider_abstract_cost": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "status": {
-                  "enum": [
-                    "known",
-                    "unavailable"
-                  ]
-                },
-                "unit": {
-                  "type": "string"
-                },
-                "value": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "reason": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "status",
-                "unit"
-              ],
-              "oneOf": [
-                {
-                  "properties": {
-                    "status": {
-                      "const": "known"
-                    }
-                  },
-                  "required": [
-                    "value"
-                  ],
-                  "not": {
-                    "required": [
-                      "reason"
-                    ]
-                  }
-                },
-                {
-                  "properties": {
-                    "status": {
-                      "const": "unavailable"
-                    }
-                  },
-                  "required": [
-                    "reason"
-                  ],
-                  "not": {
-                    "required": [
-                      "value"
-                    ]
-                  }
-                }
-              ]
+              "$ref": "#/$defs/measurement"
             },
             "real_provider_cost": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "status": {
-                  "enum": [
-                    "known",
-                    "unavailable"
-                  ]
-                },
-                "unit": {
-                  "type": "string"
-                },
-                "value": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "reason": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "status",
-                "unit"
-              ],
-              "oneOf": [
-                {
-                  "properties": {
-                    "status": {
-                      "const": "known"
-                    }
-                  },
-                  "required": [
-                    "value"
-                  ],
-                  "not": {
-                    "required": [
-                      "reason"
-                    ]
-                  }
-                },
-                {
-                  "properties": {
-                    "status": {
-                      "const": "unavailable"
-                    }
-                  },
-                  "required": [
-                    "reason"
-                  ],
-                  "not": {
-                    "required": [
-                      "value"
-                    ]
-                  }
-                }
-              ]
+              "$ref": "#/$defs/measurement"
             }
           },
           "required": [
@@ -1179,6 +294,195 @@
         "execution",
         "metrics",
         "final"
+      ]
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "host_review": {
+          "type": "string"
+        },
+        "retention": {
+          "type": "string"
+        },
+        "resolver": {
+          "type": "string"
+        },
+        "consolidation": {
+          "type": "string"
+        },
+        "search": {
+          "type": "string"
+        },
+        "projector": {
+          "type": "string"
+        },
+        "packing": {
+          "type": "string"
+        },
+        "grader": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "host_review",
+        "retention",
+        "resolver",
+        "consolidation",
+        "search",
+        "projector",
+        "packing",
+        "grader"
+      ]
+    },
+    "stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "unknown",
+            "not_applicable"
+          ]
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "mandatory": {
+                "type": "boolean"
+              },
+              "status": {
+                "enum": [
+                  "pass",
+                  "fail",
+                  "unknown"
+                ]
+              },
+              "expected": {
+                "type": "string"
+              },
+              "observed": {
+                "type": "string"
+              },
+              "evidence": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "aliases": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "count"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "mandatory",
+              "status",
+              "expected",
+              "observed",
+              "evidence"
+            ]
+          }
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "checks"
+      ]
+    },
+    "measurement": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "known",
+            "unavailable"
+          ]
+        },
+        "unit": {
+          "type": "string"
+        },
+        "value": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "unit"
+      ],
+      "oneOf": [
+        {
+          "properties": {
+            "status": {
+              "const": "known"
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "not": {
+            "required": [
+              "reason"
+            ]
+          }
+        },
+        {
+          "properties": {
+            "status": {
+              "const": "unavailable"
+            }
+          },
+          "required": [
+            "reason"
+          ],
+          "not": {
+            "required": [
+              "value"
+            ]
+          }
+        }
       ]
     }
   }

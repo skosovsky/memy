@@ -105,11 +105,14 @@ func FinalizeScenario(s *ScenarioReport) {
 	for _, stage := range stages(s) {
 		final = finalizeStage(stage, final)
 	}
-	if s.Execution.Status != Pass {
+	if s.Execution.Status != Pass && s.Execution.Status != Fail {
 		final = VerdictUnknown
 	}
 	s.Final = final
-	defaultMetrics(&s.Metrics)
+	if defaultMetrics(&s.Metrics) {
+		s.Diagnostic = "invalid_measurement"
+		s.Final = VerdictUnknown
+	}
 }
 func finalizeStage(stage *StageResult, final Verdict) Verdict {
 	if stage.Checks == nil {
@@ -171,14 +174,22 @@ func combineVerdict(current Verdict, observed Status) Verdict {
 	}
 	return current
 }
-func defaultMetrics(m *Metrics) {
+func defaultMetrics(m *Metrics) bool {
+	invalid := false
 	for _, p := range []*Measurement{&m.PayloadBytes, &m.ContextJSONBytes, &m.CanonicalBytes, &m.ProviderCost, &m.RealProviderCost} {
 		if p.Status == "" || p.Unit == "" || (p.Status == measurementKnown && (p.Value == nil || p.Reason != "")) ||
 			(p.Status == measurementUnavailable && (p.Value != nil || p.Reason == "")) ||
 			(p.Status != measurementKnown && p.Status != measurementUnavailable) {
-			*p = UnavailableMeasurement("unmeasured", "not_measured")
+			absent := *p == (Measurement{Status: "", Unit: "", Value: nil, Reason: ""})
+			reason := "not_measured"
+			if !absent {
+				invalid = true
+				reason = "invalid_measurement"
+			}
+			*p = UnavailableMeasurement("unmeasured", reason)
 		}
 	}
+	return invalid
 }
 func FinalizeReport(r *Report) {
 	r.Final = VerdictPass

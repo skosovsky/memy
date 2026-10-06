@@ -15,52 +15,7 @@
       "maximum": 20
     },
     "versions": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "provider": {
-          "type": "string"
-        },
-        "model": {
-          "type": "string"
-        },
-        "host_review": {
-          "type": "string"
-        },
-        "retention": {
-          "type": "string"
-        },
-        "resolver": {
-          "type": "string"
-        },
-        "consolidation": {
-          "type": "string"
-        },
-        "search": {
-          "type": "string"
-        },
-        "projector": {
-          "type": "string"
-        },
-        "packing": {
-          "type": "string"
-        },
-        "grader": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "provider",
-        "model",
-        "host_review",
-        "retention",
-        "resolver",
-        "consolidation",
-        "search",
-        "projector",
-        "packing",
-        "grader"
-      ]
+      "$ref": "#/$defs/versions"
     },
     "budgets": {
       "type": "object",
@@ -119,52 +74,7 @@
             "type": "string"
           },
           "versions": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "provider": {
-                "type": "string"
-              },
-              "model": {
-                "type": "string"
-              },
-              "host_review": {
-                "type": "string"
-              },
-              "retention": {
-                "type": "string"
-              },
-              "resolver": {
-                "type": "string"
-              },
-              "consolidation": {
-                "type": "string"
-              },
-              "search": {
-                "type": "string"
-              },
-              "projector": {
-                "type": "string"
-              },
-              "packing": {
-                "type": "string"
-              },
-              "grader": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "provider",
-              "model",
-              "host_review",
-              "retention",
-              "resolver",
-              "consolidation",
-              "search",
-              "projector",
-              "packing",
-              "grader"
-            ]
+            "$ref": "#/$defs/versions"
           }
         },
         "required": [
@@ -186,5 +96,55 @@
     "scenarios"
   ],
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://memy.dev/schemas/quality-corpus-v2.schema.json"
+  "$id": "https://memy.dev/schemas/quality-corpus-v2.schema.json",
+  "$defs": {
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "host_review": {
+          "type": "string"
+        },
+        "retention": {
+          "type": "string"
+        },
+        "resolver": {
+          "type": "string"
+        },
+        "consolidation": {
+          "type": "string"
+        },
+        "search": {
+          "type": "string"
+        },
+        "projector": {
+          "type": "string"
+        },
+        "packing": {
+          "type": "string"
+        },
+        "grader": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "host_review",
+        "retention",
+        "resolver",
+        "consolidation",
+        "search",
+        "projector",
+        "packing",
+        "grader"
+      ]
+    }
+  }
 }
