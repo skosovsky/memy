@@ -83,7 +83,8 @@ must satisfy this bound and be accepted at unchanged binding/generation. Scope,
 prefix, After and Plan maxima do not expand the wire. Limit and MaxBytes are
 transport budgets and may change on continuation.
 
-Old authenticated cursor formats are explicitly stale; callers restart a scan
+Oversized input is ErrInvalid before authentication, including oversized old
+cursors. Old authenticated formats within the new bound are explicitly stale; callers restart a scan
 or resume a durable lifecycle job. Oversized/malformed external cursors are
 ErrInvalid; changed authenticated bindings/generation or MAC are rejected without
 continuation. No database schema migration is required. Test both Memory and

@@ -108,7 +108,11 @@ func (b *Bucket) Scan(options memy.ScanOptions) (memy.ScanPage, error) {
 				return memy.ScanPage{}, memy.ErrBudget
 			}
 			page.Complete = false
-			page.Cursor = b.Binding.Next(options, page.Entries[len(page.Entries)-1].Key)
+			cursor, cursorErr := b.Binding.Next(options, page.Entries[len(page.Entries)-1].Key)
+			if cursorErr != nil {
+				return memy.ScanPage{}, cursorErr
+			}
+			page.Cursor = cursor
 			break
 		}
 		workcost.Copy(len(value.Data))

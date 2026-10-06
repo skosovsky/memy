@@ -191,7 +191,11 @@ func (b *sqlBucket) scanMetadata(rows *sql.Rows, options memy.ScanOptions) (memy
 				return memy.ScanPage{}, memy.ErrBudget
 			}
 			page.Complete = false
-			page.Cursor = b.binding.Next(options, page.Entries[len(page.Entries)-1].Key)
+			cursor, cursorErr := b.binding.Next(options, page.Entries[len(page.Entries)-1].Key)
+			if cursorErr != nil {
+				return memy.ScanPage{}, cursorErr
+			}
+			page.Cursor = cursor
 			break
 		}
 		page.Entries = append(page.Entries, entry)

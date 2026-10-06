@@ -49,6 +49,7 @@ func StoreSuite(t *testing.T, factory Factory) {
 		{"closed", closed},
 		{"bounded_scan", boundedScan},
 		{"scan_cursor_binding", scanCursorBinding},
+		{"scan_cursor_boundaries", scanCursorBoundaries},
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
@@ -139,7 +140,7 @@ func scanCursorBinding(t *testing.T, store memy.Store) {
 	changed := options
 	changed.Prefix = "b/"
 	must(t, store.View(context.Background(), scope(), func(b memy.Bucket) error {
-		if _, err := b.Scan(changed); !errors.Is(err, memy.ErrInvalid) {
+		if _, err := b.Scan(changed); !errors.Is(err, memy.ErrStaleCursor) {
 			t.Fatalf("prefix: %v", err)
 		}
 		return nil
@@ -147,7 +148,7 @@ func scanCursorBinding(t *testing.T, store memy.Store) {
 	other := scope()
 	other.Subject = "other"
 	must(t, store.View(context.Background(), other, func(b memy.Bucket) error {
-		if _, err := b.Scan(options); !errors.Is(err, memy.ErrInvalid) {
+		if _, err := b.Scan(options); !errors.Is(err, memy.ErrStaleCursor) {
 			t.Fatalf("scope: %v", err)
 		}
 		return nil

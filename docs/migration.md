@@ -142,3 +142,10 @@ An old consolidation operation ID with a json/v1-bound digest returns ErrConflic
 on a new request; no silent replay reinterpretation occurs. Recover the old
 receipt/state offline before issuing a newly reviewed operation identity. Old
 proposal/canonical content still requires the explicit import described above.
+
+Cursor v2 now uses the bounded binary representation specified in remediation
+contracts, maximum 5563 bytes. An authenticated binding mismatch (scope, prefix,
+After or Plan) is ErrStaleCursor, as is changed generation/old format within the
+new bound. Oversized input is ErrInvalid before authentication, including oversized
+old cursors. Restart old scans or continue durable maintenance jobs through their
+fresh scans; schema 3 and the existing database secrets/generations are unchanged.
