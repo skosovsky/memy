@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -14,19 +13,19 @@ import (
 
 	"github.com/skosovsky/memy"
 	"github.com/skosovsky/memy/internal/workcost"
-	"github.com/skosovsky/memy/store/memory"
-	"github.com/skosovsky/memy/store/sqlite"
 )
 
 // costStore counts the public storage work requested by Engine. These counters
 // intentionally do not claim to measure private adapter reads or JSON decodes.
 type costStore struct {
 	memy.Store
+
 	gets, entries, bytes int64
 }
 
 type costBucket struct {
 	memy.Bucket
+
 	owner *costStore
 }
 
@@ -50,11 +49,19 @@ func (s *costStore) View(ctx context.Context, scope memy.Scope, fn func(memy.Buc
 	return s.Store.View(ctx, scope, func(b memy.Bucket) error { return fn(costBucket{b, s}) })
 }
 
-func (s *costStore) Update(ctx context.Context, scope memy.Scope, fn func(memy.Bucket) error) error {
+func (s *costStore) Update(
+	ctx context.Context,
+	scope memy.Scope,
+	fn func(memy.Bucket) error,
+) error {
 	return s.Store.Update(ctx, scope, func(b memy.Bucket) error { return fn(costBucket{b, s}) })
 }
 
-func (s *costStore) FencedView(ctx context.Context, scope memy.Scope, fn func(memy.Bucket) error) error {
+func (s *costStore) FencedView(
+	ctx context.Context,
+	scope memy.Scope,
+	fn func(memy.Bucket) error,
+) error {
 	return s.Store.FencedView(ctx, scope, func(b memy.Bucket) error { return fn(costBucket{b, s}) })
 }
 
@@ -63,7 +70,13 @@ type costSearch struct{}
 func (costSearch) Capabilities() memy.SearchCapabilities {
 	return memy.SearchCapabilities{Scoped: true, BoundedCandidates: true}
 }
-func (costSearch) Search(ctx context.Context, _ memy.Scope, _ string, options memy.SearchOptions) (memy.SearchResult, error) {
+
+func (costSearch) Search(
+	ctx context.Context,
+	_ memy.Scope,
+	_ string,
+	options memy.SearchOptions,
+) (memy.SearchResult, error) {
 	if err := ctx.Err(); err != nil {
 		return memy.SearchResult{}, err
 	}
@@ -71,8 +84,16 @@ func (costSearch) Search(ctx context.Context, _ memy.Scope, _ string, options me
 		return memy.SearchResult{}, memy.ErrInvalid
 	}
 	candidates := []memy.Candidate{
-		{RecordID: "cost-0", Revision: 1, Signals: []memy.SearchSignal{{Backend: "fixed/v1", Rank: 1}}},
-		{RecordID: "cost-1", Revision: 1, Signals: []memy.SearchSignal{{Backend: "fixed/v1", Rank: 2}}},
+		{
+			RecordID: "cost-0",
+			Revision: 1,
+			Signals:  []memy.SearchSignal{{Backend: "fixed/v1", Rank: 1}},
+		},
+		{
+			RecordID: "cost-1",
+			Revision: 1,
+			Signals:  []memy.SearchSignal{{Backend: "fixed/v1", Rank: 2}},
+		},
 	}
 	truncated := len(candidates) > options.MaxCandidates
 	if truncated {
@@ -93,7 +114,7 @@ func seedCostCorpus(b testing.TB, f fixture, n int) {
 	p := f.propose(b, "cost-seed", strings.Repeat("x", 128), memy.Interval{Known: true})
 	f.commit(b, f.acceptedRequest(b, "cost-seed-commit", "cost-0", 0, p, memy.Append))
 	var template map[string]json.RawMessage
-	err := f.config.Store.View(context.Background(), f.scope, func(bucket memy.Bucket) error {
+	viewErr := f.config.Store.View(context.Background(), f.scope, func(bucket memy.Bucket) error {
 		entries, err := listEntries(bucket, "record/")
 		if err != nil {
 			return err
@@ -103,37 +124,27 @@ func seedCostCorpus(b testing.TB, f fixture, n int) {
 		}
 		return json.Unmarshal(entries[0].Value.Data, &template)
 	})
-	if err != nil {
-		b.Fatal(err)
+	if viewErr != nil {
+		b.Fatal(viewErr)
 	}
 	var record map[string]json.RawMessage
 	if err := json.Unmarshal(template["data"], &record); err != nil {
 		b.Fatal(err)
 	}
-	err = f.config.Store.Update(context.Background(), f.scope, func(bucket memy.Bucket) error {
-		for i := 1; i < n; i++ {
-			id := fmt.Sprintf("cost-%d", i)
-			encodedID, _ := json.Marshal(id)
-			record["id"] = encodedID
-			template["data"], _ = json.Marshal(record)
-			raw, err := json.Marshal(template)
-			if err != nil {
-				return err
-			}
-			hash := sha256.Sum256(encodedID)
-			for _, key := range []string{fmt.Sprintf("head/%x", hash), fmt.Sprintf("record/%x/%020d", hash, 1)} {
-				if _, err := bucket.Put(key, 0, raw); err != nil {
+	updateErr := f.config.Store.Update(
+		context.Background(),
+		f.scope,
+		func(bucket memy.Bucket) error {
+			for i := 1; i < n; i++ {
+				if err := cloneCostRecord(bucket, f.scope, fmt.Sprintf("cost-%d", i), record, template); err != nil {
 					return err
 				}
 			}
-			if err := rewriteFixtureMemberships(bucket, f.scope, id, 1); err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		b.Fatal(err)
+			return nil
+		},
+	)
+	if updateErr != nil {
+		b.Fatal(updateErr)
 	}
 }
 
@@ -145,82 +156,150 @@ func BenchmarkLifecycleCost(b *testing.B) {
 		for _, n := range []int{1000, 10000, 100000} {
 			for _, operation := range []string{"Get", "Recall", "Consolidate", "SourceForget", "Sweep"} {
 				b.Run(fmt.Sprintf("%s/%d/%s", adapter, n, operation), func(b *testing.B) {
-					b.ReportAllocs()
-					var gets, entries, bytesRead, censored int64
-					var decoded, decodeBytes, nodes, copied, sqlRows, sqlValues, sqlBytes int64
-					var latencies []time.Duration
-					for iteration := 0; iteration < b.N; iteration++ {
-						b.StopTimer()
-						var store memy.Store = memory.New()
-						if adapter == "sqlite" {
-							var err error
-							store, err = sqlite.Open(context.Background(), filepath.Join(b.TempDir(), "cost.db"), sqlite.Options{})
-							if err != nil {
-								b.Fatal(err)
-							}
-						}
-						counted := &costStore{Store: store}
-						f := newFixture(b, counted)
-						seedCostCorpus(b, f, n)
-						counted.gets, counted.entries, counted.bytes = 0, 0, 0
-						ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-						metrics := &workcost.Counters{}
-						workcost.Start(metrics)
-						started := time.Now()
-						b.StartTimer()
-						var err error
-						switch operation {
-						case "Get":
-							_, err = f.engine.Get(ctx, f.actor, f.scope, "cost-0", memy.ReadOptions{})
-						case "Recall":
-							_, err = memy.Recall(ctx, f.engine, f.actor, f.scope, "fixed", costSearch{}, memy.ScoreRanker[preference, sourceRef]{}, memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 2})
-						case "Consolidate":
-							request := consolidationRequest([]memy.RevisionRef{{RecordID: "cost-0", Revision: 1}, {RecordID: "cost-1", Revision: 1}}, memy.ExactDedup)
-							_, err = memy.Consolidate(ctx, f.engine, f.actor, f.scope, request, nil)
-						case "SourceForget":
-							var receipt memy.PurgeReceipt
-							receipt, err = fullForget(f.engine, ctx, f.actor, f.scope, "assist", memy.ForgetRequest{OperationID: "cost-forget", Selector: memy.Selector{Kind: memy.SelectSource, ID: f.source.ID}, Reason: "benchmark", PolicyVersion: "cost/v1"})
-							if err == nil && (receipt.State != memy.PurgeComplete || len(receipt.Batch.Records) != n) {
-								b.Fatalf("incomplete source purge: state=%s records=%d want=%d", receipt.State, len(receipt.Batch.Records), n)
-							}
-						case "Sweep":
-							_, err = fullSweep(f.engine, ctx, f.actor, f.scope, "assist", "cost-sweep")
-						}
-						b.StopTimer()
-						latencies = append(latencies, time.Since(started))
-						workcost.Stop(metrics)
-						decoded += metrics.DecodedDocs.Load()
-						decodeBytes += metrics.DecodedBytes.Load()
-						nodes += metrics.IndexNodes.Load()
-						copied += metrics.MemoryCopiedBytes.Load()
-						sqlRows += metrics.SQLMetadataRows.Load()
-						sqlValues += metrics.SQLValueRows.Load()
-						sqlBytes += metrics.SQLValueBytes.Load()
-						cancel()
-						if errors.Is(err, context.DeadlineExceeded) {
-							censored++
-						} else if err != nil {
-							b.Fatal(err)
-						}
-						gets += counted.gets
-						entries += counted.entries
-						bytesRead += counted.bytes
-						if err := store.Close(); err != nil {
-							b.Fatal(err)
-						}
-					}
-					b.ReportMetric(float64(gets)/float64(b.N), "get-requests/op")
-					b.ReportMetric(float64(entries)/float64(b.N), "listed-entries/op")
-					b.ReportMetric(float64(bytesRead)/float64(b.N), "returned-bytes/op")
-					b.ReportMetric(float64(censored)/float64(b.N), "censored/op")
-					for unit, value := range map[string]int64{"decoded-docs/op": decoded, "decoded-bytes/op": decodeBytes, "index-nodes/op": nodes, "memory-copy-bytes/op": copied, "sql-metadata-rows/op": sqlRows, "sql-value-rows/op": sqlValues, "sql-value-bytes/op": sqlBytes} {
-						b.ReportMetric(float64(value)/float64(b.N), unit)
-					}
-					slices.Sort(latencies)
-					b.ReportMetric(float64(latencies[len(latencies)/2]), "p50-ns")
-					b.ReportMetric(float64(latencies[(len(latencies)-1)*95/100]), "p95-ns")
+					benchmarkLifecycleCase(b, adapter, n, operation)
 				})
 			}
 		}
 	}
+}
+
+func benchmarkLifecycleCase(b *testing.B, adapter string, n int, operation string) {
+	b.ReportAllocs()
+	var gets, entries, bytesRead, censored int64
+	var decoded, decodeBytes, nodes, copied, sqlRows, sqlValues, sqlBytes int64
+	var latencies []time.Duration
+	for range b.N {
+		b.StopTimer()
+		store, _ := costAdapter(b, adapter)
+		counted := &costStore{Store: store}
+		f := newFixture(b, counted)
+		seedCostCorpus(b, f, n)
+		counted.gets, counted.entries, counted.bytes = 0, 0, 0
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		metrics := &workcost.Counters{}
+		workcost.Start(metrics)
+		started := time.Now()
+		b.StartTimer()
+		err := runLifecycleCostOperation(ctx, b, f, n, operation)
+		b.StopTimer()
+		latencies = append(latencies, time.Since(started))
+		workcost.Stop(metrics)
+		decoded += metrics.DecodedDocs.Load()
+		decodeBytes += metrics.DecodedBytes.Load()
+		nodes += metrics.IndexNodes.Load()
+		copied += metrics.MemoryCopiedBytes.Load()
+		sqlRows += metrics.SQLMetadataRows.Load()
+		sqlValues += metrics.SQLValueRows.Load()
+		sqlBytes += metrics.SQLValueBytes.Load()
+		cancel()
+		if errors.Is(err, context.DeadlineExceeded) {
+			censored++
+		} else if err != nil {
+			b.Fatal(err)
+		}
+		gets += counted.gets
+		entries += counted.entries
+		bytesRead += counted.bytes
+		if err := store.Close(); err != nil {
+			b.Fatal(err)
+		}
+	}
+	b.ReportMetric(float64(gets)/float64(b.N), "get-requests/op")
+	b.ReportMetric(float64(entries)/float64(b.N), "listed-entries/op")
+	b.ReportMetric(float64(bytesRead)/float64(b.N), "returned-bytes/op")
+	b.ReportMetric(float64(censored)/float64(b.N), "censored/op")
+	for unit, value := range map[string]int64{"decoded-docs/op": decoded, "decoded-bytes/op": decodeBytes, "index-nodes/op": nodes, "memory-copy-bytes/op": copied, "sql-metadata-rows/op": sqlRows, "sql-value-rows/op": sqlValues, "sql-value-bytes/op": sqlBytes} {
+		b.ReportMetric(float64(value)/float64(b.N), unit)
+	}
+	slices.Sort(latencies)
+	b.ReportMetric(float64(latencies[len(latencies)/2]), "p50-ns")
+	b.ReportMetric(float64(latencies[(len(latencies)-1)*95/100]), "p95-ns")
+}
+
+func runLifecycleCostOperation(
+	ctx context.Context,
+	b *testing.B,
+	f fixture,
+	n int,
+	operation string,
+) error {
+	var err error
+	switch operation {
+	case "Get":
+		_, err = f.engine.Get(ctx, f.actor, f.scope, "cost-0", memy.ReadOptions{})
+	case "Recall":
+		_, err = memy.Recall(
+			ctx,
+			f.engine,
+			f.actor,
+			f.scope,
+			"fixed",
+			costSearch{},
+			memy.ScoreRanker[preference, sourceRef]{},
+			memy.RecallOptions{
+				Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates},
+				Limit:  2,
+			},
+		)
+	case "Consolidate":
+		request := consolidationRequest(
+			[]memy.RevisionRef{
+				{RecordID: "cost-0", Revision: 1},
+				{RecordID: "cost-1", Revision: 1},
+			},
+			memy.ExactDedup,
+		)
+		_, err = memy.Consolidate(ctx, f.engine, f.actor, f.scope, request, nil)
+	case "SourceForget":
+		var receipt memy.PurgeReceipt
+		receipt, err = fullForget(
+			ctx,
+			f.engine,
+			f.actor,
+			f.scope,
+			"assist",
+			memy.ForgetRequest{
+				OperationID:   "cost-forget",
+				Selector:      memy.Selector{Kind: memy.SelectSource, ID: f.source.ID},
+				Reason:        "benchmark",
+				PolicyVersion: "cost/v1",
+			},
+		)
+		if err == nil && (receipt.State != memy.PurgeComplete || len(receipt.Batch.Records) != n) {
+			b.Fatalf(
+				"incomplete source purge: state=%s records=%d want=%d",
+				receipt.State,
+				len(receipt.Batch.Records),
+				n,
+			)
+		}
+	case "Sweep":
+		_, err = fullSweep(ctx, f.engine, f.actor, f.scope, "assist", "cost-sweep")
+	}
+	return err
+}
+
+func cloneCostRecord(
+	bucket memy.Bucket,
+	scope memy.Scope,
+	id string,
+	record, template map[string]json.RawMessage,
+) error {
+	encodedID, _ := json.Marshal(id)
+	record["id"] = encodedID
+	template["data"], _ = json.Marshal(record)
+	raw, err := json.Marshal(template)
+	if err != nil {
+		return err
+	}
+	hash := sha256.Sum256(encodedID)
+	for _, key := range []string{fmt.Sprintf("head/%x", hash), fmt.Sprintf("record/%x/%020d", hash, 1)} {
+		if _, err := bucket.Put(key, 0, raw); err != nil {
+			return err
+		}
+	}
+	if err := rewriteFixtureMemberships(bucket, scope, id, 1); err != nil {
+		return err
+	}
+	return nil
 }

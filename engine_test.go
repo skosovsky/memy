@@ -60,7 +60,11 @@ func newFixture(t testing.TB, store memy.Store) fixture {
 		memy.ActionConsolidate,
 	)
 	sources := reference.NewRegistry[sourceRef](memy.JSONCodec[sourceRef]{})
-	source := memy.Source[sourceRef]{ID: "source-1", Revision: "r1", Reference: sourceRef{URI: "host://source-1"}}
+	source := memy.Source[sourceRef]{
+		ID:        "source-1",
+		Revision:  "r1",
+		Reference: sourceRef{URI: "host://source-1"},
+	}
 	if err := sources.Put(scope, source); err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +94,10 @@ func newFixture(t testing.TB, store memy.Store) fixture {
 	}
 }
 
-func (f fixture) suggestion(value string, valid memy.Interval) memy.Suggestion[preference, sourceRef] {
+func (f fixture) suggestion(
+	value string,
+	valid memy.Interval,
+) memy.Suggestion[preference, sourceRef] {
 	return memy.Suggestion[preference, sourceRef]{
 		Payload:    preference{Key: "timezone", Value: value},
 		Sources:    []memy.Source[sourceRef]{f.source},
@@ -101,7 +108,11 @@ func (f fixture) suggestion(value string, valid memy.Interval) memy.Suggestion[p
 	}
 }
 
-func (f fixture) propose(t testing.TB, op, value string, valid memy.Interval) memy.Proposal[preference, sourceRef] {
+func (f fixture) propose(
+	t testing.TB,
+	op, value string,
+	valid memy.Interval,
+) memy.Proposal[preference, sourceRef] {
 	t.Helper()
 	p, operationErr := f.engine.Remember(
 		context.Background(),
@@ -175,7 +186,11 @@ func TestProposalAcceptanceIsolation(t *testing.T) {
 			}, nil
 		},
 	)
-	job := memy.ExtractionJob{OperationID: "extract-1", ProviderVersion: "script/v1", Purpose: "assist"}
+	job := memy.ExtractionJob{
+		OperationID:     "extract-1",
+		ProviderVersion: "script/v1",
+		Purpose:         "assist",
+	}
 	// Act.
 	proposals, operationErr := memy.Extract(
 		context.Background(),
@@ -190,14 +205,29 @@ func TestProposalAcceptanceIsolation(t *testing.T) {
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
-	_, before := f.engine.Get(context.Background(), f.actor, f.scope, "address", memy.ReadOptions{Purpose: "assist"})
-	r := f.commit(t, f.acceptedRequest(t, "commit-address", "address", 0, proposals[0], memy.Append))
-	_, sibling := f.engine.Commit(context.Background(), f.actor, f.scope, "assist", memy.CommitRequest{
-		OperationID: "commit-payment",
-		ProposalID:  proposals[1].ID,
-		Acceptance:  memy.Acceptance{},
-		RecordID:    "permission",
-	})
+	_, before := f.engine.Get(
+		context.Background(),
+		f.actor,
+		f.scope,
+		"address",
+		memy.ReadOptions{Purpose: "assist"},
+	)
+	r := f.commit(
+		t,
+		f.acceptedRequest(t, "commit-address", "address", 0, proposals[0], memy.Append),
+	)
+	_, sibling := f.engine.Commit(
+		context.Background(),
+		f.actor,
+		f.scope,
+		"assist",
+		memy.CommitRequest{
+			OperationID: "commit-payment",
+			ProposalID:  proposals[1].ID,
+			Acceptance:  memy.Acceptance{},
+			RecordID:    "permission",
+		},
+	)
 	retried, retryErr := memy.Extract(
 		context.Background(),
 		f.engine,
@@ -209,10 +239,12 @@ func TestProposalAcceptanceIsolation(t *testing.T) {
 		provider,
 	)
 	// Assert.
-	if !errors.Is(before, memy.ErrNotFound) || !r.CanonicalCommitted || !errors.Is(sibling, memy.ErrStaleAcceptance) {
+	if !errors.Is(before, memy.ErrNotFound) || !r.CanonicalCommitted ||
+		!errors.Is(sibling, memy.ErrStaleAcceptance) {
 		t.Fatalf("before=%v receipt=%+v sibling=%v", before, r, sibling)
 	}
-	if retryErr != nil || providerCalls != 1 || len(retried) != 2 || retried[0].ID != proposals[0].ID {
+	if retryErr != nil || providerCalls != 1 || len(retried) != 2 ||
+		retried[0].ID != proposals[0].ID {
 		t.Fatalf("extraction retry: %v calls=%d", retryErr, providerCalls)
 	}
 }
@@ -238,10 +270,17 @@ func TestChangedProposalInvalidatesAcceptance(t *testing.T) {
 	}
 	_, commitErr := f.engine.Commit(context.Background(), f.actor, f.scope, "assist", request)
 	// Assert.
-	if changed.Digest == p.Digest || changed.Revision != 2 || !errors.Is(commitErr, memy.ErrStaleAcceptance) {
+	if changed.Digest == p.Digest || changed.Revision != 2 ||
+		!errors.Is(commitErr, memy.ErrStaleAcceptance) {
 		t.Fatalf("revision=%d commit=%v", changed.Revision, commitErr)
 	}
-	_, readErr := f.engine.Get(context.Background(), f.actor, f.scope, "timezone", memy.ReadOptions{})
+	_, readErr := f.engine.Get(
+		context.Background(),
+		f.actor,
+		f.scope,
+		"timezone",
+		memy.ReadOptions{},
+	)
 	if !errors.Is(readErr, memy.ErrNotFound) {
 		t.Fatalf("stale commit changed state: %v", readErr)
 	}
@@ -252,7 +291,14 @@ func TestAuthorityAndFieldProfilesFailClosed(t *testing.T) {
 	f := newFixture(t, nil)
 	s := f.suggestion("private", memy.Interval{})
 	s.Payload.Tenant = "B"
-	p, operationErr := f.engine.Remember(context.Background(), f.actor, f.scope, "remember", "assist", s)
+	p, operationErr := f.engine.Remember(
+		context.Background(),
+		f.actor,
+		f.scope,
+		"remember",
+		"assist",
+		s,
+	)
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
@@ -273,19 +319,44 @@ func TestAuthorityAndFieldProfilesFailClosed(t *testing.T) {
 		memy.ReadOptions{},
 	)
 	f.policy.Fail(errors.New("IAM down"))
-	_, unavailableRead := f.engine.Get(context.Background(), f.actor, f.scope, "private", memy.ReadOptions{})
-	_, unavailableWrite := f.engine.Remember(context.Background(), f.actor, f.scope, "write", "assist", s)
+	_, unavailableRead := f.engine.Get(
+		context.Background(),
+		f.actor,
+		f.scope,
+		"private",
+		memy.ReadOptions{},
+	)
+	_, unavailableWrite := f.engine.Remember(
+		context.Background(),
+		f.actor,
+		f.scope,
+		"write",
+		"assist",
+		s,
+	)
 	f.policy.Fail(nil)
 	f.policy.RestrictFields("alice", f.scope, []string{"key"})
-	_, restricted := f.engine.Get(context.Background(), f.actor, f.scope, "private", memy.ReadOptions{})
+	_, restricted := f.engine.Get(
+		context.Background(),
+		f.actor,
+		f.scope,
+		"private",
+		memy.ReadOptions{},
+	)
 	// Assert.
 	if p.Scope != f.scope || !errors.Is(strangerExisting, memy.ErrUnauthorized) ||
 		!errors.Is(strangerAbsent, memy.ErrUnauthorized) {
 		t.Fatal("scope/authority violated")
 	}
-	if !errors.Is(unavailableRead, memy.ErrUnavailable) || !errors.Is(unavailableWrite, memy.ErrUnavailable) ||
+	if !errors.Is(unavailableRead, memy.ErrUnavailable) ||
+		!errors.Is(unavailableWrite, memy.ErrUnavailable) ||
 		!errors.Is(restricted, memy.ErrUnsupported) {
-		t.Fatalf("fail-closed read=%v write=%v field=%v", unavailableRead, unavailableWrite, restricted)
+		t.Fatalf(
+			"fail-closed read=%v write=%v field=%v",
+			unavailableRead,
+			unavailableWrite,
+			restricted,
+		)
 	}
 }
 
@@ -314,7 +385,13 @@ func TestPolicyAndSourceChangesRejectCommit(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			_, transactionErr := f.engine.Commit(context.Background(), f.actor, f.scope, "assist", request)
+			_, transactionErr := f.engine.Commit(
+				context.Background(),
+				f.actor,
+				f.scope,
+				"assist",
+				request,
+			)
 			// Assert.
 			if scenario == "policy" && !errors.Is(transactionErr, memy.ErrStaleAcceptance) {
 				t.Fatalf("stale policy accepted: %v", transactionErr)
@@ -354,7 +431,13 @@ func TestConcurrentCommitAndDurableIdempotency(t *testing.T) {
 	for i, request := range requests {
 		group.Go(func() {
 			<-start
-			r, transactionErr := f.engine.Commit(context.Background(), f.actor, f.scope, "assist", request)
+			r, transactionErr := f.engine.Commit(
+				context.Background(),
+				f.actor,
+				f.scope,
+				"assist",
+				request,
+			)
 			results <- outcome{i, r, transactionErr}
 		})
 	}
@@ -392,13 +475,26 @@ func TestConcurrentCommitAndDurableIdempotency(t *testing.T) {
 	if winner.index < 0 {
 		t.Fatal("no winner")
 	}
-	receipt, retryErr := f.engine.Commit(context.Background(), f.actor, f.scope, "assist", requests[winner.index])
+	receipt, retryErr := f.engine.Commit(
+		context.Background(),
+		f.actor,
+		f.scope,
+		"assist",
+		requests[winner.index],
+	)
 	changed := requests[winner.index]
 	changed.RecordID = "different"
 	_, differentErr := f.engine.Commit(context.Background(), f.actor, f.scope, "assist", changed)
-	read, readErr := f.engine.Get(context.Background(), f.actor, f.scope, "timezone", memy.ReadOptions{})
+	read, readErr := f.engine.Get(
+		context.Background(),
+		f.actor,
+		f.scope,
+		"timezone",
+		memy.ReadOptions{},
+	)
 	// Assert.
-	if conflicts != 1 || retryErr != nil || receipt != winner.receipt || !errors.Is(differentErr, memy.ErrConflict) ||
+	if conflicts != 1 || retryErr != nil || receipt != winner.receipt ||
+		!errors.Is(differentErr, memy.ErrConflict) ||
 		readErr != nil ||
 		read.Revision != 2 {
 		t.Fatalf(
@@ -445,9 +541,17 @@ func TestValidAndRecordedTime(t *testing.T) {
 		memy.ReadOptions{ValidAsOf: august.Add(time.Hour), RecordedAsOf: recordedBeforeCorrection},
 	)
 	// Assert.
-	if julyErr != nil || septErr != nil || july.Payload.Value != "UTC+3" || september.Payload.Value != "UTC+7" ||
+	if julyErr != nil || septErr != nil || july.Payload.Value != "UTC+3" ||
+		september.Payload.Value != "UTC+7" ||
 		!errors.Is(unseenErr, memy.ErrNotFound) {
-		t.Fatalf("july=%+v %v september=%+v %v unseen=%v", july, julyErr, september, septErr, unseenErr)
+		t.Fatalf(
+			"july=%+v %v september=%+v %v unseen=%v",
+			july,
+			julyErr,
+			september,
+			septErr,
+			unseenErr,
+		)
 	}
 }
 
@@ -466,9 +570,16 @@ func TestUnknownValidityAndOverlappingClaims(t *testing.T) {
 	)
 	p = f.propose(t, "overlap", "UTC+7", memy.Interval{})
 	f.commit(t, f.acceptedRequest(t, "commit-overlap", "timezone", 1, p, memy.Append))
-	_, overlapErr := f.engine.Get(context.Background(), f.actor, f.scope, "timezone", memy.ReadOptions{})
+	_, overlapErr := f.engine.Get(
+		context.Background(),
+		f.actor,
+		f.scope,
+		"timezone",
+		memy.ReadOptions{},
+	)
 	// Assert.
-	if !errors.Is(unknownErr, memy.ErrNotFound) || !errors.Is(overlapErr, memy.ErrUnresolvedConflict) {
+	if !errors.Is(unknownErr, memy.ErrNotFound) ||
+		!errors.Is(overlapErr, memy.ErrUnresolvedConflict) {
 		t.Fatalf("unknown=%v overlap=%v", unknownErr, overlapErr)
 	}
 }
@@ -492,7 +603,13 @@ func listEntries(b memy.Bucket, prefix string) ([]memy.Entry, error) {
 	}
 }
 
-func fullSnapshot[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, read memy.ReadOptions) ([]memy.Record[P, R], error) {
+func fullSnapshot[P, R, A any](
+	ctx context.Context,
+	e *memy.Engine[P, R, A],
+	authority A,
+	scope memy.Scope,
+	read memy.ReadOptions,
+) ([]memy.Record[P, R], error) {
 	options := memy.SnapshotOptions{Read: read, Limit: 256, MaxBytes: int(^uint(0) >> 1)}
 	var records []memy.Record[P, R]
 	for {
@@ -511,7 +628,14 @@ func fullSnapshot[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, aut
 	}
 }
 
-func fullForget[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, purpose string, request memy.ForgetRequest) (memy.PurgeReceipt, error) {
+func fullForget[P, R, A any](
+	ctx context.Context,
+	e *memy.Engine[P, R, A],
+	authority A,
+	scope memy.Scope,
+	purpose string,
+	request memy.ForgetRequest,
+) (memy.PurgeReceipt, error) {
 	if request.Limit == 0 {
 		request.Limit = 256
 	}
@@ -533,7 +657,8 @@ func fullForget[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, autho
 				unattempted = true
 			}
 		}
-		if receipt.State != memy.RevocationCommitted && !(receipt.State == memy.PurgePending && unattempted) {
+		if receipt.State != memy.RevocationCommitted &&
+			(receipt.State != memy.PurgePending || !unattempted) {
 			receipt.Batch.Records = make([]string, 0, len(ids))
 			for id := range ids {
 				receipt.Batch.Records = append(receipt.Batch.Records, id)
@@ -544,42 +669,66 @@ func fullForget[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, autho
 	}
 }
 
-func fullSweep[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, purpose, op string) (memy.SweepResult, error) {
+func fullSweep[P, R, A any](
+	ctx context.Context,
+	e *memy.Engine[P, R, A],
+	authority A,
+	scope memy.Scope,
+	purpose, op string,
+) (memy.SweepResult, error) {
 	var total memy.SweepResult
 	for {
-		page, err := e.Sweep(ctx, authority, scope, purpose, memy.SweepRequest{OperationID: op, Limit: 256, MaxBytes: 64 << 20})
+		page, err := e.Sweep(
+			ctx,
+			authority,
+			scope,
+			purpose,
+			memy.SweepRequest{OperationID: op, Limit: 256, MaxBytes: 64 << 20},
+		)
 		if err != nil {
 			return total, err
 		}
 		total.ExpiredProposals += page.ExpiredProposals
 		total.Work += page.Work
-		for _, receipt := range page.Records {
-			found := false
-			for i := range total.Records {
-				if total.Records[i].Batch.OperationID == receipt.Batch.OperationID {
-					total.Records[i] = receipt
-					found = true
-				}
-			}
-			if !found {
-				total.Records = append(total.Records, receipt)
-			}
-		}
+		total.Records = mergeSweepReceipts(total.Records, page.Records)
 		if page.Complete {
 			total.Complete = true
 			return total, nil
 		}
-		for _, r := range page.Records {
-			if r.State == memy.PurgeFailed {
-				return total, nil
+		if sweepHasBlockedPurge(page.Records) {
+			return total, nil
+		}
+	}
+}
+
+func mergeSweepReceipts(records, receipts []memy.PurgeReceipt) []memy.PurgeReceipt {
+	for _, receipt := range receipts {
+		found := false
+		for i := range records {
+			if records[i].Batch.OperationID == receipt.Batch.OperationID {
+				records[i] = receipt
+				found = true
 			}
-			if r.State == memy.PurgePending {
-				for _, sink := range r.Sinks {
-					if !sink.Acknowledged && sink.ErrorCode != "" {
-						return total, nil
-					}
+		}
+		if !found {
+			records = append(records, receipt)
+		}
+	}
+	return records
+}
+
+func sweepHasBlockedPurge(receipts []memy.PurgeReceipt) bool {
+	for _, r := range receipts {
+		if r.State == memy.PurgeFailed {
+			return true
+		}
+		if r.State == memy.PurgePending {
+			for _, sink := range r.Sinks {
+				if !sink.Acknowledged && sink.ErrorCode != "" {
+					return true
 				}
 			}
 		}
 	}
+	return false
 }

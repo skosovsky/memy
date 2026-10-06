@@ -20,9 +20,16 @@ go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 make test
 make race
 make vet
+make lint
 make examples
 make validate
 ```
+
+`make test` выполняет свежий verbose race-прогон всех найденных Go modules;
+timeout по умолчанию — 30 минут (`TEST_TIMEOUT`), дополнительные параметры
+переопределяются через `TEST_FLAGS`. `make fix` запускает go fix/tidy и
+автоматические исправления строгого lint. Используется обычный GOPATH Go;
+`GOCACHE` и `GOLANGCI_LINT_CACHE` можно переопределить.
 
 Offline quality protocol v2 проверяет два typed domain: preferences и знания о
 процедурах/наблюдаемых результатах. Candidate, host review, фактические revisions,
@@ -32,7 +39,8 @@ canonical state и полный JSON-контекст оцениваются о�
 `go run ./examples/quality-integration` заменяет consumer ports и выполняет те же
 checkpoints. Оба примера scripted; результат не является LLM benchmark.
 
-`make examples` запускает полный offline сценарий на временном SQLite-файле:
+`make examples` запускает lifecycle, quality, retrieval и quality-integration.
+Lifecycle выполняет полный offline сценарий на временном SQLite-файле:
 extraction, acceptance одного proposal, commit, corrected revision, close/reopen,
 canonical read в новой сессии, search visibility, typed projection и forget
 со сбоем одного sink и повтором очистки. Данные и файл удаляются после примера.
@@ -178,12 +186,16 @@ go get github.com/skosovsky/memy@v0.1.0
 Для публикации из чистой ветки `main` с настроенным GitHub remote:
 
 ```sh
-make release VERSION=v0.1.0
+make release # patch по умолчанию; также доступен make release-patch
+# Для несовместимого изменения API:
+make release RELEASE_TYPE=break # также доступен make release-break
 ```
 
-Target выполняет полную проверку, публикует ветку и annotated tag одним
-atomic push, затем создаёт GitHub Release. Повтор с тем же тегом допустим
-только для того же коммита; существующие теги не перезаписываются.
+Targets сначала выполняют `make validate`, затем передают тип релиза и список
+modules в `scripts/release.sh`. Скрипт рассчитывает следующую версию, запрашивает
+подтверждение и публикует теги из detached HEAD. Для major 0 breaking change
+увеличивает minor; для major ≥1 — major. Рабочая ветка не публикуется, GitHub
+Release автоматически не создаётся.
 
 `Snapshot` возвращает одну `SnapshotPage`: host задаёт `SnapshotOptions.Read`,
 `Limit` и `MaxBytes`, затем явно продолжает `Cursor` до `Complete`. Бюджет

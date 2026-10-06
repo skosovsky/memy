@@ -18,7 +18,10 @@ func TestMixedSearchPreservesCoverageAndRejectsStrongerProfile(t *testing.T) {
 	}
 	eventual := reference.NewIndex[string]("eventual", nil)
 	mixed := reference.Composite[string]{
-		Backends:      []reference.Backend[string]{{ID: "index/v1", Search: index}, {ID: "eventual", Search: reference.Eventual[string]{Index: eventual}}},
+		Backends: []reference.Backend[string]{
+			{ID: "index/v1", Search: index},
+			{ID: "eventual", Search: reference.Eventual[string]{Index: eventual}},
+		},
 		AllowDegraded: true,
 		RRF:           reference.RRFConfig{K: 60},
 	}
@@ -41,7 +44,10 @@ func TestMixedSearchPreservesCoverageAndRejectsStrongerProfile(t *testing.T) {
 		"timezone",
 		mixed,
 		memy.ScoreRanker[preference, sourceRef]{},
-		memy.RecallOptions{Limit: 5, Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates, Minimum: &receipt.Visibility}},
+		memy.RecallOptions{
+			Limit:  5,
+			Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates, Minimum: &receipt.Visibility},
+		},
 	)
 	// Assert: eventual coverage remains explicit and rejects stronger visibility.
 	if operationErr != nil || len(recalled.Records) != 1 || len(recalled.Coverage) != 2 ||
@@ -61,7 +67,11 @@ func TestCompositePartialFailureRequiresExplicitDegradedMode(t *testing.T) {
 	}
 	failed := reference.NewIndex[string]("failed", nil)
 	failed.Fail(errors.New("outage"))
-	mixed := reference.Composite[string]{Backends: []reference.Backend[string]{{ID: "index/v1", Search: index}, {ID: "failed", Search: failed}}, AllowDegraded: false, RRF: reference.RRFConfig{K: 60}}
+	mixed := reference.Composite[string]{
+		Backends:      []reference.Backend[string]{{ID: "index/v1", Search: index}, {ID: "failed", Search: failed}},
+		AllowDegraded: false,
+		RRF:           reference.RRFConfig{K: 60},
+	}
 	// Act.
 	_, strictErr := memy.Recall(
 		context.Background(),
@@ -110,7 +120,10 @@ func TestCompositeRejectsTypedNilBackend(t *testing.T) {
 	// Arrange: the interface itself is nonnil but carries a missing adapter.
 	f := newFixture(t, nil)
 	var absent *reference.Index[string]
-	composite := reference.Composite[string]{Backends: []reference.Backend[string]{{ID: "absent", Search: absent}}, RRF: reference.RRFConfig{K: 60}}
+	composite := reference.Composite[string]{
+		Backends: []reference.Backend[string]{{ID: "absent", Search: absent}},
+		RRF:      reference.RRFConfig{K: 60},
+	}
 	// Act.
 	coverage := composite.Capabilities()
 	result, err := memy.Recall(

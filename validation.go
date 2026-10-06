@@ -3,8 +3,9 @@ package memy
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/skosovsky/memy/internal/membershipproof"
 	"reflect"
+
+	"github.com/skosovsky/memy/internal/membershipproof"
 )
 
 func validDigest(value string) bool {
@@ -53,7 +54,8 @@ func validProposal(p *proposalDisk) bool {
 }
 
 func validRecord(r *recordDisk) bool {
-	if !validIdentifier(r.ID) || r.Revision == 0 || r.Revision > MaxVersion || r.Scope.Validate() != nil || r.RecordedAt.IsZero() ||
+	if !validIdentifier(r.ID) || r.Revision == 0 || r.Revision > MaxVersion || r.Scope.Validate() != nil ||
+		r.RecordedAt.IsZero() ||
 		(r.State != Revoked && !validIdentifier(r.AuthorityPolicyVersion)) {
 		return false
 	}
@@ -67,7 +69,10 @@ func validRecord(r *recordDisk) bool {
 	if !validProposal(&r.Proposal) || r.Proposal.Scope != r.Scope || r.Proposal.State != Accepted {
 		return false
 	}
-	return r.Reconciliation != nil && (r.InitialState == Conflicted) == (r.Reconciliation.Mode == Conflict) && validReconciliation(*r.Reconciliation) == nil && validTransitions(r) && validRevisionRefs(r.Lineage) &&
+	return r.Reconciliation != nil && (r.InitialState == Conflicted) == (r.Reconciliation.Mode == Conflict) &&
+		validReconciliation(*r.Reconciliation) == nil &&
+		validTransitions(r) &&
+		validRevisionRefs(r.Lineage) &&
 		containsReviewedLineage(r)
 }
 
@@ -141,15 +146,21 @@ func validProposalRefs(refs []ProposalRef) bool {
 }
 
 func validCommitReceipt(receipt *CommitReceipt) bool {
-	return receipt != nil && receipt.CanonicalCommitted && validIdentifier(receipt.OperationID) && validIdentifier(receipt.RecordID) &&
-		receipt.Revision > 0 && receipt.Revision <= MaxVersion && receipt.Visibility.Scope.Validate() == nil &&
-		receipt.Visibility.RecordID == receipt.RecordID && receipt.Visibility.Revision == receipt.Revision
+	return receipt != nil && receipt.CanonicalCommitted && validIdentifier(receipt.OperationID) &&
+		validIdentifier(receipt.RecordID) &&
+		receipt.Revision > 0 &&
+		receipt.Revision <= MaxVersion &&
+		receipt.Visibility.Scope.Validate() == nil &&
+		receipt.Visibility.RecordID == receipt.RecordID &&
+		receipt.Visibility.Revision == receipt.Revision
 }
 
 func validPurge(p *PurgeReceipt) bool {
 	if !validIdentifier(p.Batch.OperationID) || p.Batch.Scope.Validate() != nil || p.Batch.Epoch == 0 ||
 		p.Batch.Epoch > MaxVersion || p.Batch.Chunk > uint64(MaxVersion) || (p.State == PurgeComplete && !p.CanonicalComplete) ||
-		len(p.Batch.Records) > 1024 || (p.State != RevocationCommitted && (p.Batch.Chunk == 0 || !p.CanonicalComplete)) ||
+		len(
+			p.Batch.Records,
+		) > 1024 || (p.State != RevocationCommitted && (p.Batch.Chunk == 0 || !p.CanonicalComplete)) ||
 		p.RevokedAt.IsZero() ||
 		validateSelector(p.Batch.Scope, p.Batch.Selector) != nil {
 		return false
@@ -184,73 +195,129 @@ func validDocument(value any) bool {
 	case *operationDisk:
 		return validOperation(data)
 	case *Acceptance:
-		return validIdentifier(data.ProposalID) && data.ProposalRevision > 0 && data.ProposalRevision <= MaxVersion &&
-			validDigest(data.Digest) &&
-			validIdentifier(data.Actor) &&
-			validIdentifier(data.PolicyVersion) &&
-			data.Scope.Validate() == nil
+		return validAcceptance(data)
 	case *epochDisk:
 		return data.Value <= MaxVersion && !data.RecordedAt.IsZero()
 	case *revocationDisk:
-		return data.Epoch > 0 && data.Epoch <= MaxVersion && validIdentifier(data.PolicyVersion) &&
-			validDigest(data.ReasonDigest) &&
-			(data.Selector.Kind == SelectScope || data.Selector.ID != "") &&
-			validateSelector(Scope{Subject: data.Selector.ID, Tenant: "", Namespace: ""}, data.Selector) == nil
+		return validRevocation(data)
 	case *PurgeReceipt:
 		return validPurge(data)
 	case *sweepJobDisk:
-		return data.Scope.Validate() == nil && validIdentifier(data.OperationID) && validDigest(data.Digest) && (data.Phase == "records" || data.Phase == "proposals" || data.Phase == "origin" || data.Phase == "done") && len(data.After) <= 4096 && (data.Origin == "" || validIdentifier(data.Origin)) && (data.PurgeOperation == "" || validIdentifier(data.PurgeOperation))
+		return validSweepJob(data)
 	case *activePurgeDisk:
 		return data.Scope.Validate() == nil && validIdentifier(data.OperationID)
 	case *purgeJobDisk:
 		return validPurgeJob(data)
 	case *purgeItemDisk:
-		return data.Scope.Validate() == nil && validIdentifier(data.OperationID) && validIdentifier(data.ID) && data.Revision <= MaxVersion && ((data.Kind == "record" && data.Revision > 0) || (data.Kind == "proposal" && data.Revision == 0))
+		return validPurgeItem(data)
 	case *purgeEvidenceDisk:
-		return data.Scope.Validate() == nil && validIdentifier(data.OperationID) && validRef(data.Ref) && validDigest(data.Root)
+		return validPurgeEvidence(data)
 	case *membershipDisk:
-		return data.Scope.Validate() == nil && validRef(data.Ref) && validIdentifier(data.MatchID) && (data.Relation == "source" || data.Relation == "lineage") && membershipproof.Shape(data.Proof)
+		return validMembership(data)
 	default:
 		return false
 	}
 }
 
+func validPurgeJob(job *purgeJobDisk) bool {
+	if job.Scope.Validate() != nil || !validIdentifier(job.OperationID) || !validPurgePhase(job.Phase) ||
+		job.Queued > uint64(MaxVersion) ||
+		job.Next == 0 ||
+		job.Clean == 0 ||
+		job.Next > job.Queued+1 ||
+		job.Clean > job.Queued+1 {
+		return false
+	}
+	if job.Part != purgePartHistory && job.Part != purgePartMembers && job.Part != purgePartFinish {
+		return false
+	}
+	if !validPurgeResume(job) {
+		return false
+	}
+	if (job.Phase == lifecyclePhaseProposals || job.Phase == purgePhaseOrigins) &&
+		(job.Clean != job.Queued+1 || job.Next != job.Queued+1) {
+		return false
+	}
+	if (job.Phase == purgePhaseEmit || job.Phase == purgePhaseAck || job.Phase == lifecyclePhaseDone) &&
+		job.Clean != job.Queued+1 {
+		return false
+	}
+	if job.Origin != "" && (job.Phase != purgePhaseOrigins || !validIdentifier(job.Origin)) {
+		return false
+	}
+	return len(job.After) <= maxJobCursorLength
+}
+
+func validAcceptance(data *Acceptance) bool {
+	return validIdentifier(data.ProposalID) && data.ProposalRevision > 0 && data.ProposalRevision <= MaxVersion &&
+		validDigest(data.Digest) &&
+		validIdentifier(data.Actor) &&
+		validIdentifier(data.PolicyVersion) &&
+		data.Scope.Validate() == nil
+}
+
+func validRevocation(data *revocationDisk) bool {
+	return data.Epoch > 0 && data.Epoch <= MaxVersion && validIdentifier(data.PolicyVersion) &&
+		validDigest(data.ReasonDigest) &&
+		(data.Selector.Kind == SelectScope || data.Selector.ID != "") &&
+		validateSelector(Scope{Subject: data.Selector.ID, Tenant: "", Namespace: ""}, data.Selector) == nil
+}
+
+func validSweepJob(data *sweepJobDisk) bool {
+	return data.Scope.Validate() == nil && validIdentifier(data.OperationID) && validDigest(data.Digest) &&
+		(data.Phase == lifecyclePhaseRecords || data.Phase == lifecyclePhaseProposals || data.Phase == sweepPhaseOrigin || data.Phase == lifecyclePhaseDone) &&
+		len(data.After) <= maxJobCursorLength &&
+		(data.Origin == "" || validIdentifier(data.Origin)) &&
+		(data.PurgeOperation == "" || validIdentifier(data.PurgeOperation))
+}
+
+func validPurgeItem(data *purgeItemDisk) bool {
+	return data.Scope.Validate() == nil && validIdentifier(data.OperationID) && validIdentifier(data.ID) &&
+		data.Revision <= MaxVersion &&
+		((data.Kind == lifecycleRecordKind && data.Revision > 0) || (data.Kind == lifecycleProposalKind && data.Revision == 0))
+}
+
+func validPurgeEvidence(data *purgeEvidenceDisk) bool {
+	return data.Scope.Validate() == nil && validIdentifier(data.OperationID) && validRef(data.Ref) &&
+		validDigest(data.Root)
+}
+
+func validMembership(data *membershipDisk) bool {
+	return data.Scope.Validate() == nil && validRef(data.Ref) && validIdentifier(data.MatchID) &&
+		(data.Relation == "source" || data.Relation == "lineage") &&
+		membershipproof.Shape(data.Proof)
+}
+
 func validPurgePhase(phase string) bool {
 	switch phase {
-	case "seed", "expand", "records", "proposals", "origins", "ack", "done", "emit":
+	case purgePhaseSeed,
+		purgePhaseExpand,
+		lifecyclePhaseRecords,
+		lifecyclePhaseProposals,
+		purgePhaseOrigins,
+		purgePhaseAck,
+		lifecyclePhaseDone,
+		purgePhaseEmit:
 		return true
 	}
 	return false
 }
 
-func validPurgeJob(job *purgeJobDisk) bool {
-	if job.Scope.Validate() != nil || !validIdentifier(job.OperationID) || !validPurgePhase(job.Phase) || job.Queued > uint64(MaxVersion) || job.Next == 0 || job.Clean == 0 || job.Next > job.Queued+1 || job.Clean > job.Queued+1 {
-		return false
-	}
-	if job.Part != "history" && job.Part != "members" && job.Part != "finish" {
-		return false
-	}
-	if job.Phase == "ack" {
-		if job.Resume == "done" && job.Next != job.Queued+1 {
+func validPurgeResume(job *purgeJobDisk) bool {
+	if job.Phase == purgePhaseAck {
+		if job.Resume == lifecyclePhaseDone && job.Next != job.Queued+1 {
 			return false
 		}
-		if job.Resume == "emit" && job.Next > job.Queued {
+		if job.Resume == purgePhaseEmit && job.Next > job.Queued {
 			return false
 		}
-		if job.Resume != "emit" && job.Resume != "done" {
+		if job.Resume != purgePhaseEmit && job.Resume != lifecyclePhaseDone {
 			return false
 		}
 	} else if job.Resume != "" {
 		return false
 	}
-	if (job.Phase == "proposals" || job.Phase == "origins") && (job.Clean != job.Queued+1 || job.Next != job.Queued+1) {
-		return false
-	}
-	if (job.Phase == "emit" || job.Phase == "ack" || job.Phase == "done") && job.Clean != job.Queued+1 {
-		return false
-	}
-	if job.Origin != "" && (job.Phase != "origins" || !validIdentifier(job.Origin)) {
-		return false
-	}
-	return len(job.After) <= 4096
+	return true
 }
+
+const maxJobCursorLength = 4096

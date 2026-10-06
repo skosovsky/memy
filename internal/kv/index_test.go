@@ -30,7 +30,7 @@ func TestIndexMaintainsOrderedRangesThroughMutation(t *testing.T) {
 	random := rand.New(rand.NewPCG(17, 31))
 
 	// Act: mutate repeatedly, exercising rotations, duplicate adds and absent deletes.
-	for operation := 0; operation < 10000; operation++ {
+	for operation := range 10000 {
 		key := fmt.Sprintf("prefix-%02d/%05d", random.IntN(10), random.IntN(2000))
 		if random.IntN(3) == 0 {
 			index.Remove(key)
@@ -66,14 +66,14 @@ func TestIndexMaintainsOrderedRangesThroughMutation(t *testing.T) {
 func TestIndexSnapshotSurvivesRotationsAndRemovals(t *testing.T) {
 	// Arrange: a retained root represents a transaction that may roll back.
 	var original Index
-	for i := 0; i < 1000; i++ {
+	for i := range 1000 {
 		original.Add(fmt.Sprintf("key/%04d", i))
 	}
 	want := original.Keys("key/", "", 0)
 	changed := original
 
 	// Act: independently mutate the shared initial tree through many rotations.
-	for i := 0; i < 1000; i++ {
+	for i := range 1000 {
 		changed.Remove(fmt.Sprintf("key/%04d", i))
 		changed.Add(fmt.Sprintf("other/%04d", 1000-i))
 	}

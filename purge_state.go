@@ -46,7 +46,7 @@ func (e *Engine[P, R, A]) purgeSink(ctx context.Context, batch PurgeBatch, name 
 		input := batch
 		input.Records = slices.Clone(batch.Records)
 		ack, purgeErr := sink.Purge(ctx, input)
-		result.ErrorCode = "unavailable"
+		result.ErrorCode = coverageUnavailable
 		result.Acknowledged = purgeErr == nil && ack.Sink == name && ack.OperationID == batch.OperationID &&
 			ack.Epoch == batch.Epoch && ack.Chunk == batch.Chunk
 		switch {

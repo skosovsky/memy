@@ -3,6 +3,7 @@ package quality
 import (
 	"context"
 	"errors"
+
 	"github.com/skosovsky/memy"
 )
 
@@ -85,10 +86,10 @@ type Report struct {
 }
 
 func KnownMeasurement(unit string, value uint64) Measurement {
-	return Measurement{Status: "known", Unit: unit, Value: &value}
+	return Measurement{Status: measurementKnown, Unit: unit, Value: &value, Reason: ""}
 }
 func UnavailableMeasurement(unit, reason string) Measurement {
-	return Measurement{Status: "unavailable", Unit: unit, Reason: reason}
+	return Measurement{Status: measurementUnavailable, Unit: unit, Reason: reason, Value: nil}
 }
 func stages(s *ScenarioReport) []*StageResult {
 	return []*StageResult{&s.Candidate, &s.HostReview, &s.Effective, &s.Canonical, &s.Rendered, &s.Execution}
@@ -102,50 +103,7 @@ func FinalizeScenario(s *ScenarioReport) {
 		final = VerdictUnknown
 	}
 	for _, stage := range stages(s) {
-		if stage.Checks == nil {
-			stage.Checks = []Check{}
-		}
-		if stage.Status == NotApplicable {
-			if len(stage.Checks) > 0 {
-				final = VerdictUnknown
-			}
-			continue
-		}
-		if len(stage.Checks) == 0 {
-			stage.Status = Unknown
-			final = VerdictUnknown
-			continue
-		}
-		stage.Status = Pass
-		seenIDs := map[string]bool{}
-		for i := range stage.Checks {
-			c := &stage.Checks[i]
-			if c.Evidence == nil {
-				c.Evidence = []Evidence{}
-			}
-			invalidEvidence := seenIDs[c.ID]
-			seenIDs[c.ID] = true
-			for _, e := range c.Evidence {
-				if e.Code == "" || e.Count < 0 {
-					invalidEvidence = true
-				}
-			}
-			if invalidEvidence || c.ID == "" || c.Expected == "" || c.Observed == "" || len(c.Evidence) == 0 || (c.Status != Pass && c.Status != Fail && c.Status != Unknown) {
-				c.Status = Unknown
-			}
-			if c.Status == Unknown {
-				stage.Status = Unknown
-			} else if c.Status == Fail && stage.Status != Unknown {
-				stage.Status = Fail
-			}
-			if c.Mandatory {
-				if c.Status == Unknown {
-					final = VerdictUnknown
-				} else if c.Status == Fail && final != VerdictUnknown {
-					final = VerdictFail
-				}
-			}
-		}
+		final = finalizeStage(stage, final)
 	}
 	if s.Execution.Status != Pass {
 		final = VerdictUnknown
@@ -153,9 +111,71 @@ func FinalizeScenario(s *ScenarioReport) {
 	s.Final = final
 	defaultMetrics(&s.Metrics)
 }
+func finalizeStage(stage *StageResult, final Verdict) Verdict {
+	if stage.Checks == nil {
+		stage.Checks = []Check{}
+	}
+	if stage.Status == NotApplicable {
+		if len(stage.Checks) > 0 {
+			return VerdictUnknown
+		}
+		return final
+	}
+	if len(stage.Checks) == 0 {
+		stage.Status = Unknown
+		return VerdictUnknown
+	}
+	stage.Status = Pass
+	seenIDs := map[string]bool{}
+	for i := range stage.Checks {
+		c := &stage.Checks[i]
+		finalizeCheck(c, seenIDs)
+		stage.Status = combineStatus(stage.Status, c.Status)
+		if c.Mandatory {
+			final = combineVerdict(final, c.Status)
+		}
+	}
+	return final
+}
+func finalizeCheck(c *Check, seenIDs map[string]bool) {
+	if c.Evidence == nil {
+		c.Evidence = []Evidence{}
+	}
+	invalid := seenIDs[c.ID]
+	seenIDs[c.ID] = true
+	for _, e := range c.Evidence {
+		if e.Code == "" || e.Count < 0 {
+			invalid = true
+		}
+	}
+	if invalid || c.ID == "" || c.Expected == "" || c.Observed == "" || len(c.Evidence) == 0 ||
+		(c.Status != Pass && c.Status != Fail && c.Status != Unknown) {
+		c.Status = Unknown
+	}
+}
+func combineStatus(current, observed Status) Status {
+	if observed == Unknown {
+		return Unknown
+	}
+	if observed == Fail && current != Unknown {
+		return Fail
+	}
+	return current
+}
+func combineVerdict(current Verdict, observed Status) Verdict {
+	if observed == Unknown {
+		return VerdictUnknown
+	}
+	if observed == Fail && current != VerdictUnknown {
+		return VerdictFail
+	}
+	return current
+}
 func defaultMetrics(m *Metrics) {
 	for _, p := range []*Measurement{&m.PayloadBytes, &m.ContextJSONBytes, &m.CanonicalBytes, &m.ProviderCost, &m.RealProviderCost} {
-		if p.Status == "" || p.Unit == "" || (p.Status == "known" && (p.Value == nil || p.Reason != "")) || (p.Status == "unavailable" && (p.Value != nil || p.Reason == "")) || (p.Status != "known" && p.Status != "unavailable") {
+		if p.Status == "" || p.Unit == "" || (p.Status == measurementKnown && (p.Value == nil || p.Reason != "")) ||
+			(p.Status == measurementUnavailable && (p.Value != nil || p.Reason == "")) ||
+			(p.Status != measurementKnown && p.Status != measurementUnavailable) {
 			*p = UnavailableMeasurement("unmeasured", "not_measured")
 		}
 	}
@@ -196,19 +216,39 @@ func (r Report) ExitCode() int {
 		return 0
 	case VerdictFail:
 		return 1
+	case VerdictUnknown:
+		return 2
 	default:
 		return 2
 	}
 }
 func FailureReport(err error) Report {
-	return Report{Schema: "memy-quality/v2", Scenarios: []ScenarioReport{}, Final: VerdictUnknown, Diagnostic: ErrorClass(err)}
+	return Report{
+		Schema:     reportSchema,
+		Scenarios:  []ScenarioReport{},
+		Final:      VerdictUnknown,
+		Diagnostic: ErrorClass(err),
+		Manifest:   nil,
+		Versions: PortVersions{
+			Provider:      "",
+			Model:         "",
+			HostReview:    "",
+			Retention:     "",
+			Resolver:      "",
+			Consolidation: "",
+			Search:        "",
+			Projector:     "",
+			Packing:       "",
+			Grader:        "",
+		},
+	}
 }
 
 // ErrorClass intentionally never incorporates err.Error().
 func ErrorClass(err error) string {
 	switch {
 	case err == nil:
-		return "none"
+		return portNone
 	case errors.Is(err, context.Canceled):
 		return "cancelled"
 	case errors.Is(err, context.DeadlineExceeded):
@@ -218,7 +258,7 @@ func ErrorClass(err error) string {
 	case errors.Is(err, memy.ErrUnauthorized):
 		return "unauthorized"
 	case errors.Is(err, memy.ErrUnavailable):
-		return "unavailable"
+		return measurementUnavailable
 	case errors.Is(err, memy.ErrBudget):
 		return "budget"
 	case errors.Is(err, memy.ErrSourceUnavailable):

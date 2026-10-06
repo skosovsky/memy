@@ -36,7 +36,7 @@ func consolidationGateCase(t *testing.T, gate string) {
 	)
 	// Act.
 	proposals, consolidationErr := memy.Consolidate(context.Background(), f.engine, f.actor, f.scope, request, provider)
-	state, stateErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	state, stateErr := fullSnapshot(context.Background(), f.engine, f.actor, f.scope, memy.ReadOptions{})
 	// Assert: failed utility/evidence/budget cannot publish a derived record or erase originals.
 	if !errors.Is(consolidationErr, gateError(gate)) || len(proposals) != 0 || stateErr != nil ||
 		len(state) != len(refs) {

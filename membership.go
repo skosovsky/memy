@@ -3,6 +3,7 @@ package memy
 import (
 	"errors"
 	"fmt"
+
 	"github.com/skosovsky/memy/internal/membershipproof"
 )
 
@@ -18,10 +19,21 @@ func membershipIdentity(id string) string { hash, _ := digest(id); return hash }
 
 func membershipPrefix(relation, id string) string { return objectKey("edge/"+relation, id) + "/" }
 func membershipKey(m membershipDisk) string {
-	return fmt.Sprintf("%s%s/%020d", membershipPrefix(m.Relation, m.MatchID), membershipIdentity(m.Ref.RecordID), m.Ref.Revision)
+	return fmt.Sprintf(
+		"%s%s/%020d",
+		membershipPrefix(m.Relation, m.MatchID),
+		membershipIdentity(m.Ref.RecordID),
+		m.Ref.Revision,
+	)
 }
 func membershipRecordKey(m membershipDisk) string {
-	return fmt.Sprintf("%s%s/%s/%020d", membershipPrefix("record", m.Ref.RecordID), m.Relation, membershipIdentity(m.MatchID), m.Ref.Revision)
+	return fmt.Sprintf(
+		"%s%s/%s/%020d",
+		membershipPrefix("record", m.Ref.RecordID),
+		m.Relation,
+		membershipIdentity(m.MatchID),
+		m.Ref.Revision,
+	)
 }
 
 func revisionMemberships(r recordDisk) []membershipDisk {
@@ -33,7 +45,15 @@ func revisionMemberships(r recordDisk) []membershipDisk {
 			return
 		}
 		seen[key] = true
-		members = append(members, membershipDisk{Scope: r.Scope, Ref: RevisionRef{RecordID: r.ID, Revision: r.Revision}, Relation: relation, MatchID: id})
+		members = append(
+			members,
+			membershipDisk{
+				Scope:    r.Scope,
+				Ref:      RevisionRef{RecordID: r.ID, Revision: r.Revision},
+				Relation: relation, Proof: membershipproof.Witness{Index: 0, Count: 0, Siblings: nil},
+				MatchID: id,
+			},
+		)
 	}
 	for _, source := range r.Proposal.Sources {
 		add("source", source.ID)
@@ -44,7 +64,13 @@ func revisionMemberships(r recordDisk) []membershipDisk {
 	return members
 }
 func membershipBinding(m membershipDisk) membershipproof.Binding {
-	return membershipproof.Binding{Scope: m.Scope.Key(), RecordID: m.Ref.RecordID, Revision: uint64(m.Ref.Revision), Relation: m.Relation, MatchID: m.MatchID}
+	return membershipproof.Binding{
+		Scope:    m.Scope.Key(),
+		RecordID: m.Ref.RecordID,
+		Revision: uint64(m.Ref.Revision),
+		Relation: m.Relation,
+		MatchID:  m.MatchID,
+	}
 }
 func membershipRoot(r recordDisk) (string, []membershipDisk) {
 	members := revisionMemberships(r)
@@ -71,7 +97,7 @@ func persistMemberships(b Bucket, r recordDisk) error {
 	return nil
 }
 
-func readMembership(b Bucket, scope Scope, entry Entry, relation, id string) (membershipDisk, error) {
+func readMembership(_ Bucket, scope Scope, entry Entry, relation, id string) (membershipDisk, error) {
 	var m membershipDisk
 	if err := decodeDocument(entry.Value.Data, "membership", &m); err != nil {
 		return m, err
@@ -90,7 +116,12 @@ type purgeEvidenceDisk struct {
 }
 
 func validateMembership(b Bucket, scope Scope, m membershipDisk, job purgeJobDisk) error {
-	key := jobPrefix(job.OperationID) + objectKey("evidence", fmt.Sprintf("%s/%020d", membershipIdentity(m.Ref.RecordID), m.Ref.Revision))
+	key := jobPrefix(
+		job.OperationID,
+	) + objectKey(
+		"evidence",
+		fmt.Sprintf("%s/%020d", membershipIdentity(m.Ref.RecordID), m.Ref.Revision),
+	)
 	var evidence purgeEvidenceDisk
 	version, err := readDocument(b, key, "purge-evidence", &evidence)
 	if errors.Is(err, ErrNotFound) {
@@ -111,7 +142,8 @@ func validateMembership(b Bucket, scope Scope, m membershipDisk, job purgeJobDis
 	if err != nil {
 		return err
 	}
-	if evidence.Scope != scope || evidence.OperationID != job.OperationID || evidence.Ref != m.Ref || !membershipproof.Verify(membershipBinding(m), m.Proof, evidence.Root) {
+	if evidence.Scope != scope || evidence.OperationID != job.OperationID || evidence.Ref != m.Ref ||
+		!membershipproof.Verify(membershipBinding(m), m.Proof, evidence.Root) {
 		return ErrSchema
 	}
 	return nil

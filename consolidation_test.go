@@ -82,7 +82,7 @@ func TestExactDedupPreservesNegationValidityLineageAndOriginals(t *testing.T) {
 	f := newFixture(t, nil)
 	c := readCorpus(t)
 	refs := seedCorpus(t, f, c)
-	before, operationErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	before, operationErr := fullSnapshot(context.Background(), f.engine, f.actor, f.scope, memy.ReadOptions{})
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
@@ -98,7 +98,7 @@ func TestExactDedupPreservesNegationValidityLineageAndOriginals(t *testing.T) {
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
-	after, operationErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	after, operationErr := fullSnapshot(context.Background(), f.engine, f.actor, f.scope, memy.ReadOptions{})
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
@@ -166,12 +166,12 @@ func TestSemanticProposalReviewAndSourceRevocation(t *testing.T) {
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
-	state, operationErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	state, operationErr := fullSnapshot(context.Background(), f.engine, f.actor, f.scope, memy.ReadOptions{})
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
-	_, operationErr = fullForget(f.engine,
-		context.Background(),
+	_, operationErr = fullForget(context.Background(),
+		f.engine,
 		f.actor,
 		f.scope,
 		"assist",
@@ -229,7 +229,7 @@ func TestDomainMergeAndBudgetFailureAreNonDestructive(t *testing.T) {
 	request.OperationID = "too-expensive"
 	request.Budget.CostUnits = 0
 	_, budgetErr := memy.Consolidate(context.Background(), f.engine, f.actor, f.scope, request, provider)
-	state, operationErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	state, operationErr := fullSnapshot(context.Background(), f.engine, f.actor, f.scope, memy.ReadOptions{})
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
@@ -253,13 +253,13 @@ func TestRetentionUsesManagedPurgeAndResumesPending(t *testing.T) {
 	summary.FailPurge(errors.New("summary down"))
 	f.clock.Advance(2 * time.Hour)
 	// Act.
-	first, operationErr := fullSweep(f.engine, context.Background(), f.actor, f.scope, "assist", "expiry-run")
+	first, operationErr := fullSweep(context.Background(), f.engine, f.actor, f.scope, "assist", "expiry-run")
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
 	_, readErr := f.engine.Get(context.Background(), f.actor, f.scope, "timezone", memy.ReadOptions{})
 	summary.FailPurge(nil)
-	retried, operationErr := fullSweep(f.engine, context.Background(), f.actor, f.scope, "assist", "expiry-run")
+	retried, operationErr := fullSweep(context.Background(), f.engine, f.actor, f.scope, "assist", "expiry-run")
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
@@ -276,8 +276,8 @@ func TestRetentionUsesManagedPurgeAndResumesPending(t *testing.T) {
 func TestReintroductionNeedsExplicitHostPolicy(t *testing.T) {
 	// Arrange.
 	f := newFixture(t, nil)
-	_, operationErr := fullForget(f.engine,
-		context.Background(),
+	_, operationErr := fullForget(context.Background(),
+		f.engine,
 		f.actor,
 		f.scope,
 		"assist",
@@ -391,13 +391,13 @@ func TestReviewedSemanticSummaryCommitsAndRetainsOriginals(t *testing.T) {
 	if consolidationErr != nil || len(proposals) != 1 {
 		t.Fatalf("proposals=%+v err=%v", proposals, consolidationErr)
 	}
-	before, beforeErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	before, beforeErr := fullSnapshot(context.Background(), f.engine, f.actor, f.scope, memy.ReadOptions{})
 	if beforeErr != nil || len(before) != len(refs) {
 		t.Fatalf("semantic provider changed canonical state: %v %v", before, beforeErr)
 	}
 	receipt := f.commit(t, f.acceptedRequest(t, "commit-summary", "drink-summary", 0, proposals[0], memy.Append))
 	record, readErr := f.engine.Get(context.Background(), f.actor, f.scope, receipt.RecordID, memy.ReadOptions{})
-	after, afterErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	after, afterErr := fullSnapshot(context.Background(), f.engine, f.actor, f.scope, memy.ReadOptions{})
 	// Assert: review applies a new derived record; source identities survive intact.
 	if readErr != nil || afterErr != nil || record.Payload.Value != summary || len(after) != len(refs)+1 ||
 		!slices.Equal(record.Provenance.Lineage, refs) || record.Valid.To != corpus.Records[0].To ||

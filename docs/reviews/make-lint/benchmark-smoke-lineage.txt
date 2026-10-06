@@ -1,0 +1,8 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/skosovsky/memy
+cpu: Apple M1 Max
+BenchmarkGrowingLineage/memory/10/Get-10         	       1	  23296375 ns/op	     46516 decoded-bytes/op	        32.00 decoded-docs/op	         7.000 index-nodes/op	         0 sql-returned-rows/op	 6097784 B/op	   67680 allocs/op
+BenchmarkGrowingLineage/memory/10/SourceForget-10         	       1	  63393708 ns/op	    119804 decoded-bytes/op	       207.0 decoded-docs/op	       384.0 index-nodes/op	         0 sql-returned-rows/op	11691744 B/op	  139110 allocs/op
+PASS
+ok  	github.com/skosovsky/memy	0.688s

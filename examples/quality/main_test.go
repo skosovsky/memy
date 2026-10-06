@@ -28,7 +28,12 @@ func TestCommandSavesReportBeforeNegativeExit(t *testing.T) {
 			out := filepath.Join(t.TempDir(), "report.json")
 			var stdout, stderr bytes.Buffer
 			// Act.
-			code := execute(t.Context(), []string{"-corpus", "../../testdata/quality-v2.json", "-probe", tc.probe, "-out", out}, &stdout, &stderr)
+			code := execute(
+				t.Context(),
+				[]string{"-corpus", "../../testdata/quality-v2.json", "-probe", tc.probe, "-out", out},
+				&stdout,
+				&stderr,
+			)
 			raw, err := os.ReadFile(out)
 			// Assert: failures remain machine-readable evidence, never a missing report.
 			if err != nil || code != tc.code || !bytes.Equal(raw, stdout.Bytes()) {
@@ -85,10 +90,16 @@ func TestCommandOutputFailureIsUnknownAndRedacted(t *testing.T) {
 	// Arrange: report creation succeeds, but its requested destination cannot.
 	var stdout, stderr bytes.Buffer
 	// Act.
-	code := execute(t.Context(), []string{"-corpus", "missing-input", "-out", filepath.Join(t.TempDir(), "missing", "report.json")}, &stdout, &stderr)
+	code := execute(
+		t.Context(),
+		[]string{"-corpus", "missing-input", "-out", filepath.Join(t.TempDir(), "missing", "report.json")},
+		&stdout,
+		&stderr,
+	)
 	streamCode := execute(t.Context(), []string{"-corpus", "missing-input"}, failedWriter{}, &stderr)
 	// Assert: no claim of saved evidence or raw error text is printed.
-	if code != 2 || streamCode != 2 || strings.Contains(stderr.String(), "private writer details") || !strings.Contains(stderr.String(), "destination unavailable") {
+	if code != 2 || streamCode != 2 || strings.Contains(stderr.String(), "private writer details") ||
+		!strings.Contains(stderr.String(), "destination unavailable") {
 		t.Fatalf("codes=%d,%d diagnostics=%q", code, streamCode, stderr.String())
 	}
 }
@@ -108,7 +119,8 @@ func TestCommandReplacesPublicReportWithPrivateCompleteFile(t *testing.T) {
 	info, statErr := os.Stat(out)
 	raw, readErr := os.ReadFile(out)
 	// Assert.
-	if code != 2 || statErr != nil || readErr != nil || info.Mode().Perm() != 0o600 || !bytes.Equal(raw, stdout.Bytes()) {
+	if code != 2 || statErr != nil || readErr != nil || info.Mode().Perm() != 0o600 ||
+		!bytes.Equal(raw, stdout.Bytes()) {
 		t.Fatalf("code=%d stat=%v read=%v", code, statErr, readErr)
 	}
 	var report quality.Report

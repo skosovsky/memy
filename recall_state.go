@@ -9,30 +9,48 @@ import (
 
 func recallCoverage[P, R any](found SearchResult, minimum *VisibilityToken) (RecallResult[P, R], error) {
 	result := RecallResult[P, R]{
-		Records:  make([]Ranked[P, R], 0),
-		Coverage: slices.Clone(found.Coverage),
+		Records: make([]Ranked[P, R], 0),
+		Coverage: slices.Clone(
+			found.Coverage,
+		),
+		Progress: RecallProgress{
+			ReturnedCandidates:  0,
+			CanonicalChecked:    0,
+			CanonicalFiltered:   0,
+			RankingOmitted:      0,
+			CandidatesTruncated: false,
+		},
 	}
 	available := false
 	for _, coverage := range found.Coverage {
-		if coverage.Status != "unavailable" {
+		if coverage.Status != coverageUnavailable {
 			available = true
 		}
 		if !validIdentifier(coverage.Backend) {
 			return RecallResult[P, R]{}, ErrInvalid
 		}
 		switch coverage.Status {
-		case "ready", "degraded", "pending", "unavailable", "eventual":
+		case "ready", "degraded", "pending", coverageUnavailable, "eventual":
 		default:
 			return RecallResult[P, R]{}, ErrInvalid
 		}
-
 	}
 	if !available {
 		return result, ErrUnavailable
 	}
 	for _, coverage := range found.Coverage {
 		if minimum != nil && !coverage.MinimumSatisfied {
-			return RecallResult[P, R]{Coverage: result.Coverage, Records: nil}, ErrVisibilityPending
+			return RecallResult[P, R]{
+				Coverage: result.Coverage,
+				Records:  nil,
+				Progress: RecallProgress{
+					ReturnedCandidates:  0,
+					CanonicalChecked:    0,
+					CanonicalFiltered:   0,
+					RankingOmitted:      0,
+					CandidatesTruncated: false,
+				},
+			}, ErrVisibilityPending
 		}
 	}
 	return result, nil
@@ -52,7 +70,15 @@ func (e *Engine[P, R, A]) recallCandidates(
 			return nil, candidateErr
 		}
 		if eligible {
-			records = append(records, Ranked[P, R]{Record: record, Score: candidate.Score, Explanation: "", Signals: slices.Clone(candidate.Signals)})
+			records = append(
+				records,
+				Ranked[P, R]{
+					Record:      record,
+					Score:       candidate.Score,
+					Explanation: "",
+					Signals:     slices.Clone(candidate.Signals),
+				},
+			)
 		}
 	}
 	return records, nil
@@ -206,7 +232,7 @@ func validateSearchResult(found SearchResult, limit int) error {
 			return ErrInvalid
 		}
 		switch c.Status {
-		case "ready", "degraded", "pending", "unavailable", "eventual":
+		case "ready", "degraded", "pending", coverageUnavailable, "eventual":
 		default:
 			return ErrInvalid
 		}
@@ -215,13 +241,18 @@ func validateSearchResult(found SearchResult, limit int) error {
 	refs := make(map[RevisionRef]bool, len(found.Candidates))
 	for _, c := range found.Candidates {
 		ref := RevisionRef{c.RecordID, c.Revision}
-		if !validRef(ref) || !finiteScore(c.Score) || refs[ref] || len(c.Signals) < 1 || len(c.Signals) > MaxSearchBackends {
+		if !validRef(ref) || !finiteScore(c.Score) || refs[ref] || len(c.Signals) < 1 ||
+			len(c.Signals) > MaxSearchBackends {
 			return ErrInvalid
 		}
 		refs[ref] = true
 		signals := make(map[string]bool, len(c.Signals))
 		for _, signal := range c.Signals {
-			if backends[signal.Backend] == "" || backends[signal.Backend] == "unavailable" || signals[signal.Backend] || signal.Rank < 1 || signal.Rank > limit || !finiteScore(signal.Score) {
+			if backends[signal.Backend] == "" || backends[signal.Backend] == coverageUnavailable ||
+				signals[signal.Backend] ||
+				signal.Rank < 1 ||
+				signal.Rank > limit ||
+				!finiteScore(signal.Score) {
 				return ErrInvalid
 			}
 			signals[signal.Backend] = true

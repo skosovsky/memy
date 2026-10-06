@@ -9,10 +9,14 @@ import (
 	"encoding/json"
 )
 
+const maxProofDepth = 64
+
 type Binding struct {
-	Scope, RecordID   string
-	Revision          uint64
-	Relation, MatchID string
+	Scope    string `json:"Scope"`
+	RecordID string `json:"RecordID"`
+	Revision uint64 `json:"Revision"`
+	Relation string `json:"Relation"`
+	MatchID  string `json:"MatchID"`
 }
 type Witness struct {
 	Index    uint64   `json:"index"`
@@ -40,7 +44,7 @@ func counted(root [32]byte, n uint64) string {
 	return hex.EncodeToString(h[:])
 }
 func Shape(p Witness) bool {
-	if p.Count == 0 || p.Index >= p.Count || p.Siblings == nil || len(p.Siblings) > 64 {
+	if p.Count == 0 || p.Index >= p.Count || p.Siblings == nil || len(p.Siblings) > maxProofDepth {
 		return false
 	}
 	n := p.Count
@@ -53,7 +57,7 @@ func Shape(p Witness) bool {
 		return false
 	}
 	for _, s := range p.Siblings {
-		if len(s) != 64 {
+		if len(s) != sha256.Size*2 {
 			return false
 		}
 		if _, err := hex.DecodeString(s); err != nil {

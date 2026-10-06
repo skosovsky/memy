@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/skosovsky/memy"
 	"testing"
+
+	"github.com/skosovsky/memy"
 )
 
 type receiptCorruptingSink struct {
@@ -43,29 +44,27 @@ func TestPurgeRejectsCompletedReceiptDuringSinkCallback(t *testing.T) {
 	f.config.Sinks = []memy.Sink{&receiptCorruptingSink{store: f.config.Store, scope: f.scope}}
 	var e error
 	f.engine, e = memy.New(f.config)
-	if e != nil {
-		t.Fatal(e)
-	}
+	checkLifecycleFailuref(t, e != nil, "%v", e)
 	seedCostCorpus(t, f, 1)
-	q := memy.ForgetRequest{OperationID: "round3", Selector: memy.Selector{Kind: memy.SelectScope}, Reason: "review", PolicyVersion: "v1", Limit: 1, MaxBytes: 1 << 20}
+	q := memy.ForgetRequest{
+		OperationID:   "round3",
+		Selector:      memy.Selector{Kind: memy.SelectScope},
+		Reason:        "review",
+		PolicyVersion: "v1",
+		Limit:         1,
+		MaxBytes:      1 << 20,
+	}
 	var r memy.PurgeReceipt
-	for i := 0; i < 100; i++ {
+	for range 100 {
 		r, e = f.engine.Forget(t.Context(), f.actor, f.scope, "assist", q)
-		if e != nil {
-			t.Fatal(e)
-		}
+		checkLifecycleFailuref(t, e != nil, "%v", e)
 		if r.State == memy.PurgePending {
 			break
 		}
 	}
 	// Act and assert: reject the inconsistent completion and retain the fence.
 	r, e = f.engine.Forget(t.Context(), f.actor, f.scope, "assist", q)
-	if !errors.Is(e, memy.ErrSchema) || r.State == memy.PurgeComplete {
-		t.Fatal(r, e)
-	}
+	checkLifecycleFailuref(t, !errors.Is(e, memy.ErrSchema) || r.State == memy.PurgeComplete, "%v %v", r, e)
 	_, e = f.engine.Fence(t.Context(), f.actor, f.scope, "assist")
-	if !errors.Is(e, memy.ErrRevoked) {
-		t.Fatal(e)
-	}
-
+	checkLifecycleFailuref(t, !errors.Is(e, memy.ErrRevoked), "%v", e)
 }

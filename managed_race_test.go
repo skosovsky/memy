@@ -54,11 +54,11 @@ func managedRaceCase(t *testing.T, backend string) {
 	}
 	// Act: revoke cannot commit while the managed writer holds canonical exclusion.
 	probe, probeCancel := context.WithTimeout(ctx, revokeProbeDeadline)
-	_, blockedErr := fullForget(f.engine, probe, f.actor, f.scope, "assist", request)
+	_, blockedErr := fullForget(probe, f.engine, f.actor, f.scope, "assist", request)
 	probeCancel()
 	close(release)
 	writeErr := <-writeDone
-	purged, purgeErr := fullForget(f.engine, ctx, f.actor, f.scope, "assist", request)
+	purged, purgeErr := fullForget(ctx, f.engine, f.actor, f.scope, "assist", request)
 	lateAckErr := index.Acknowledge(ctx, receipt.Visibility)
 	lateWriteErr := f.engine.WithDerivedWrite(ctx, f.actor, fence, "assist", lineage,
 		func(context.Context) error { return errors.New("stale callback must not run") })

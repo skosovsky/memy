@@ -26,7 +26,13 @@ type fixtureSearch struct {
 func (f *fixtureSearch) Capabilities() memy.SearchCapabilities {
 	return memy.SearchCapabilities{Scoped: true, Visibility: true, BoundedCandidates: !f.unsupported}
 }
-func (f *fixtureSearch) Search(_ context.Context, _ memy.Scope, _ int, options memy.SearchOptions) (memy.SearchResult, error) {
+
+func (f *fixtureSearch) Search(
+	_ context.Context,
+	_ memy.Scope,
+	_ int,
+	options memy.SearchOptions,
+) (memy.SearchResult, error) {
 	f.options = append(f.options, options)
 	if f.order != nil {
 		*f.order = append(*f.order, f.id)
@@ -37,7 +43,16 @@ func (f *fixtureSearch) Search(_ context.Context, _ memy.Scope, _ int, options m
 	return f.result, f.err
 }
 func backend(id string, candidates ...memy.Candidate) reference.Backend[int] {
-	return reference.Backend[int]{ID: id, Search: &fixtureSearch{id: id, result: memy.SearchResult{Candidates: candidates, Coverage: []memy.Coverage{{Backend: id, Status: "ready", MinimumSatisfied: true}}}}}
+	return reference.Backend[int]{
+		ID: id,
+		Search: &fixtureSearch{
+			id: id,
+			result: memy.SearchResult{
+				Candidates: candidates,
+				Coverage:   []memy.Coverage{{Backend: id, Status: "ready", MinimumSatisfied: true}},
+			},
+		},
+	}
 }
 func candidate(id string, score float64) memy.Candidate {
 	return memy.Candidate{RecordID: id, Revision: 1, Score: score}
@@ -88,11 +103,16 @@ func TestCompositeWeightsAndGlobalBound(t *testing.T) {
 	// Arrange.
 	a := backend("a", candidate("x", 1), candidate("y", 2))
 	b := backend("b", candidate("z", 1), candidate("y", 2))
-	c := reference.Composite[int]{Backends: []reference.Backend[int]{b, a}, RRF: reference.RRFConfig{K: 1, Weights: map[string]float64{"b": 2}}}
+	c := reference.Composite[int]{
+		Backends: []reference.Backend[int]{b, a},
+		RRF:      reference.RRFConfig{K: 1, Weights: map[string]float64{"b": 2}},
+	}
 	// Act.
 	result, err := c.Search(context.Background(), portScope(), 0, memy.SearchOptions{MaxCandidates: 2})
 	// Assert: y's second ranks fuse before global truncation.
-	if err != nil || !result.CandidatesTruncated || len(result.Candidates) != 2 || result.Candidates[0].RecordID != "y" || result.Candidates[1].RecordID != "z" {
+	if err != nil || !result.CandidatesTruncated || len(result.Candidates) != 2 ||
+		result.Candidates[0].RecordID != "y" ||
+		result.Candidates[1].RecordID != "z" {
 		t.Fatalf("%+v %v", result, err)
 	}
 }
@@ -105,12 +125,31 @@ func TestCompositeRejectsMalformedBeforeFusion(t *testing.T) {
 	}{
 		{"zero K", func(c *reference.Composite[int]) { c.RRF.K = 0 }, memy.ErrInvalid},
 		{"infinite K", func(c *reference.Composite[int]) { c.RRF.K = math.Inf(1) }, memy.ErrInvalid},
-		{"unknown weight", func(c *reference.Composite[int]) { c.RRF.Weights = map[string]float64{"unknown": 1} }, memy.ErrInvalid},
-		{"negative weight", func(c *reference.Composite[int]) { c.RRF.Weights = map[string]float64{"a": -1} }, memy.ErrInvalid},
-		{"nan weight", func(c *reference.Composite[int]) { c.RRF.Weights = map[string]float64{"a": math.NaN()} }, memy.ErrInvalid},
-		{"duplicate names", func(c *reference.Composite[int]) { c.Backends = append(c.Backends, c.Backends[0]) }, memy.ErrInvalid},
+		{
+			"unknown weight",
+			func(c *reference.Composite[int]) { c.RRF.Weights = map[string]float64{"unknown": 1} },
+			memy.ErrInvalid,
+		},
+		{
+			"negative weight",
+			func(c *reference.Composite[int]) { c.RRF.Weights = map[string]float64{"a": -1} },
+			memy.ErrInvalid,
+		},
+		{
+			"nan weight",
+			func(c *reference.Composite[int]) { c.RRF.Weights = map[string]float64{"a": math.NaN()} },
+			memy.ErrInvalid,
+		},
+		{
+			"duplicate names",
+			func(c *reference.Composite[int]) { c.Backends = append(c.Backends, c.Backends[0]) },
+			memy.ErrInvalid,
+		},
 		{"oversized", func(c *reference.Composite[int]) {
-			c.Backends[0].Search.(*fixtureSearch).result.Candidates = append(c.Backends[0].Search.(*fixtureSearch).result.Candidates, candidate("b", 1))
+			c.Backends[0].Search.(*fixtureSearch).result.Candidates = append(
+				c.Backends[0].Search.(*fixtureSearch).result.Candidates,
+				candidate("b", 1),
+			)
 		}, memy.ErrBudget},
 		{"malformed ref", func(c *reference.Composite[int]) {
 			c.Backends[0].Search.(*fixtureSearch).result.Candidates[0].RecordID = "bad\x00id"
@@ -122,20 +161,33 @@ func TestCompositeRejectsMalformedBeforeFusion(t *testing.T) {
 			c.Backends[0].Search.(*fixtureSearch).result.Coverage[0].Backend = "foreign"
 		}, memy.ErrInvalid},
 		{"foreign signal", func(c *reference.Composite[int]) {
-			c.Backends[0].Search.(*fixtureSearch).result.Candidates[0].Signals = []memy.SearchSignal{{Backend: "foreign", Rank: 1, Score: 1}}
+			c.Backends[0].Search.(*fixtureSearch).result.Candidates[0].Signals = []memy.SearchSignal{
+				{Backend: "foreign", Rank: 1, Score: 1},
+			}
 		}, memy.ErrInvalid},
 		{"invalid signal rank", func(c *reference.Composite[int]) {
-			c.Backends[0].Search.(*fixtureSearch).result.Candidates[0].Signals = []memy.SearchSignal{{Backend: "a", Rank: 0, Score: 1}}
+			c.Backends[0].Search.(*fixtureSearch).result.Candidates[0].Signals = []memy.SearchSignal{
+				{Backend: "a", Rank: 0, Score: 1},
+			}
 		}, memy.ErrInvalid},
 		{"infinite signal", func(c *reference.Composite[int]) {
-			c.Backends[0].Search.(*fixtureSearch).result.Candidates[0].Signals = []memy.SearchSignal{{Backend: "a", Rank: 1, Score: math.Inf(-1)}}
+			c.Backends[0].Search.(*fixtureSearch).result.Candidates[0].Signals = []memy.SearchSignal{
+				{Backend: "a", Rank: 1, Score: math.Inf(-1)},
+			}
 		}, memy.ErrInvalid},
-		{"unsupported bound", func(c *reference.Composite[int]) { c.Backends[0].Search.(*fixtureSearch).unsupported = true }, memy.ErrUnsupported},
+		{
+			"unsupported bound",
+			func(c *reference.Composite[int]) { c.Backends[0].Search.(*fixtureSearch).unsupported = true },
+			memy.ErrUnsupported,
+		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			// Arrange.
-			c := reference.Composite[int]{Backends: []reference.Backend[int]{backend("a", candidate("x", 1))}, RRF: reference.RRFConfig{K: 60}}
+			c := reference.Composite[int]{
+				Backends: []reference.Backend[int]{backend("a", candidate("x", 1))},
+				RRF:      reference.RRFConfig{K: 60},
+			}
 			tc.mutate(&c)
 			// Act.
 			_, err := c.Search(context.Background(), portScope(), 0, memy.SearchOptions{MaxCandidates: 1})
@@ -156,7 +208,11 @@ func TestCompositeDegradedMinimumAndCancellation(t *testing.T) {
 			failed := b.Search.(*fixtureSearch)
 			failed.err = memy.ErrUnavailable
 			failed.result.Coverage[0].Status = "unavailable"
-			c := reference.Composite[int]{Backends: []reference.Backend[int]{a, b}, RRF: reference.RRFConfig{K: 60}, AllowDegraded: true}
+			c := reference.Composite[int]{
+				Backends:      []reference.Backend[int]{a, b},
+				RRF:           reference.RRFConfig{K: 60},
+				AllowDegraded: true,
+			}
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 			options := memy.SearchOptions{MaxCandidates: 2}
@@ -178,7 +234,8 @@ func TestCompositeDegradedMinimumAndCancellation(t *testing.T) {
 			if !errors.Is(err, want) {
 				t.Fatalf("%+v %v want %v", result, err, want)
 			}
-			if scenario == "partial" && (len(result.Candidates) != 1 || len(result.Coverage) != 2 || result.Coverage[1].Status != "unavailable") {
+			if scenario == "partial" &&
+				(len(result.Candidates) != 1 || len(result.Coverage) != 2 || result.Coverage[1].Status != "unavailable") {
 				t.Fatalf("%+v", result)
 			}
 		})
@@ -195,7 +252,10 @@ func TestIndexBoundAndDetachedSignals(t *testing.T) {
 		if err := index.Stage(ctx, portScope(), value); err != nil {
 			t.Fatal(err)
 		}
-		if err := index.Acknowledge(ctx, memy.VisibilityToken{Scope: portScope(), RecordID: value.RecordID, Revision: 1}); err != nil {
+		if err := index.Acknowledge(
+			ctx,
+			memy.VisibilityToken{Scope: portScope(), RecordID: value.RecordID, Revision: 1},
+		); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -205,7 +265,11 @@ func TestIndexBoundAndDetachedSignals(t *testing.T) {
 	first.Candidates[0].Signals[0].Score = -1
 	second, secondErr := index.Search(ctx, portScope(), 0, memy.SearchOptions{MaxCandidates: 2})
 	// Assert.
-	if err != nil || secondErr != nil || !second.CandidatesTruncated || len(second.Candidates) != 2 || second.Candidates[0].RecordID != "c" || second.Candidates[1].RecordID != "a" || second.Candidates[0].Signals[0].Score != 20 || second.Candidates[1].Signals[0].Rank != 2 {
+	if err != nil || secondErr != nil || !second.CandidatesTruncated || len(second.Candidates) != 2 ||
+		second.Candidates[0].RecordID != "c" ||
+		second.Candidates[1].RecordID != "a" ||
+		second.Candidates[0].Signals[0].Score != 20 ||
+		second.Candidates[1].Signals[0].Rank != 2 {
 		t.Fatalf("%+v %v %v", second, err, secondErr)
 	}
 }
@@ -225,19 +289,43 @@ func TestIndexValidationAndEventualMinimum(t *testing.T) {
 		}
 	}
 	for _, maximum := range []int{0, -1, memy.MaxSearchCandidates + 1} {
-		if _, err := index.Search(ctx, portScope(), 0, memy.SearchOptions{MaxCandidates: maximum}); !errors.Is(err, memy.ErrInvalid) {
+		if _, err := index.Search(
+			ctx,
+			portScope(),
+			0,
+			memy.SearchOptions{MaxCandidates: maximum},
+		); !errors.Is(
+			err,
+			memy.ErrInvalid,
+		) {
 			t.Fatalf("bound %d %v", maximum, err)
 		}
 	}
 	token := &memy.VisibilityToken{Scope: portScope(), RecordID: "x", Revision: 1}
-	if _, err := index.Search(ctx, portScope(), 0, memy.SearchOptions{Minimum: token, MaxCandidates: 1}); !errors.Is(err, memy.ErrInvalid) {
+	if _, err := index.Search(
+		ctx,
+		portScope(),
+		0,
+		memy.SearchOptions{Minimum: token, MaxCandidates: 1},
+	); !errors.Is(
+		err,
+		memy.ErrInvalid,
+	) {
 		t.Fatal(err)
 	}
 	eventual := reference.Eventual[int]{Index: index}
 	if !eventual.Capabilities().BoundedCandidates || eventual.Capabilities().Visibility {
 		t.Fatal("eventual profile")
 	}
-	if _, err := eventual.Search(ctx, portScope(), 0, memy.SearchOptions{Minimum: token, MaxCandidates: 1}); !errors.Is(err, memy.ErrUnsupported) {
+	if _, err := eventual.Search(
+		ctx,
+		portScope(),
+		0,
+		memy.SearchOptions{Minimum: token, MaxCandidates: 1},
+	); !errors.Is(
+		err,
+		memy.ErrUnsupported,
+	) {
 		t.Fatal(err)
 	}
 }
@@ -250,11 +338,15 @@ func TestCompositeMinimumSatisfiedWithOtherPendingEntries(t *testing.T) {
 	c := reference.Composite[int]{Backends: []reference.Backend[int]{b}, RRF: reference.RRFConfig{K: 60}}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	options := memy.SearchOptions{MaxCandidates: 1, Minimum: &memy.VisibilityToken{Scope: portScope(), RecordID: "x", Revision: 1}}
+	options := memy.SearchOptions{
+		MaxCandidates: 1,
+		Minimum:       &memy.VisibilityToken{Scope: portScope(), RecordID: "x", Revision: 1},
+	}
 	// Act.
 	result, err := c.Search(ctx, portScope(), 0, options)
 	// Assert.
-	if err != nil || !result.CandidatesTruncated || !result.Coverage[0].MinimumSatisfied || len(result.Candidates) != 1 {
+	if err != nil || !result.CandidatesTruncated || !result.Coverage[0].MinimumSatisfied ||
+		len(result.Candidates) != 1 {
 		t.Fatalf("%+v %v", result, err)
 	}
 }
@@ -296,7 +388,7 @@ func TestCompositeCancellationPrecedesChildMetadataValidation(t *testing.T) {
 			child := b.Search.(*fixtureSearch)
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
-			want := error(context.Canceled)
+			want := context.Canceled
 			switch scenario {
 			case "empty canceled":
 				child.result = memy.SearchResult{}
@@ -314,14 +406,19 @@ func TestCompositeCancellationPrecedesChildMetadataValidation(t *testing.T) {
 				child.err = errors.Join(memy.ErrVisibilityPending, context.DeadlineExceeded)
 				want = context.DeadlineExceeded
 			}
-			c := reference.Composite[int]{Backends: []reference.Backend[int]{b}, RRF: reference.RRFConfig{K: 60}, AllowDegraded: true}
+			c := reference.Composite[int]{
+				Backends:      []reference.Backend[int]{b},
+				RRF:           reference.RRFConfig{K: 60},
+				AllowDegraded: true,
+			}
 			// Act.
 			result, err := c.Search(ctx, portScope(), 0, memy.SearchOptions{MaxCandidates: 1})
 			// Assert: neither degraded mode nor malformed metadata hides cancellation.
 			if !errors.Is(err, want) || errors.Is(err, memy.ErrInvalid) || len(result.Candidates) != 0 {
 				t.Fatalf("%+v %v want %v", result, err, want)
 			}
-			if scenario == "joined visibility deadline" && (!errors.Is(err, memy.ErrVisibilityPending) || len(result.Coverage) != 1 || result.Coverage[0].Status != "pending") {
+			if scenario == "joined visibility deadline" &&
+				(!errors.Is(err, memy.ErrVisibilityPending) || len(result.Coverage) != 1 || result.Coverage[0].Status != "pending") {
 				t.Fatalf("lost pending guarantee: %+v %v", result, err)
 			}
 		})

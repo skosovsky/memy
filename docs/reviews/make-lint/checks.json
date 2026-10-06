@@ -1,0 +1,37 @@
+[
+  {
+    "command": [
+      "golangci-lint",
+      "version"
+    ],
+    "exit": 0,
+    "output": "check-0.txt"
+  },
+  {
+    "command": [
+      "golangci-lint",
+      "config",
+      "verify"
+    ],
+    "exit": 0,
+    "output": "check-1.txt"
+  },
+  {
+    "command": [
+      "bash",
+      "-n",
+      "scripts/release.sh"
+    ],
+    "exit": 0,
+    "output": "check-2.txt"
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit": 0,
+    "output": "check-3.txt"
+  }
+]

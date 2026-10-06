@@ -17,7 +17,11 @@ func TestConsolidationReadsOnlySelectedEvidence(t *testing.T) {
 			var store memy.Store = memory.New()
 			if adapter == "sqlite" {
 				var err error
-				store, err = sqlite.Open(context.Background(), filepath.Join(t.TempDir(), "addressed.db"), sqlite.Options{})
+				store, err = sqlite.Open(
+					context.Background(),
+					filepath.Join(t.TempDir(), "addressed.db"),
+					sqlite.Options{},
+				)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -31,7 +35,11 @@ func TestConsolidationReadsOnlySelectedEvidence(t *testing.T) {
 				inputs = append(inputs, memy.RevisionRef{RecordID: id, Revision: r.Revision})
 			}
 			other := f
-			other.source = memy.Source[sourceRef]{ID: "unrelated", Revision: "r1", Reference: sourceRef{URI: "host://unrelated"}}
+			other.source = memy.Source[sourceRef]{
+				ID:        "unrelated",
+				Revision:  "r1",
+				Reference: sourceRef{URI: "host://unrelated"},
+			}
 			if err := f.sources.Put(f.scope, other.source); err != nil {
 				t.Fatal(err)
 			}

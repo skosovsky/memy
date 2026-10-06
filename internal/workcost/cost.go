@@ -14,6 +14,9 @@ type Counters struct {
 	SQLValueBytes     atomic.Int64
 }
 
+// The private benchmark observer must aggregate concurrent adapter work in one process.
+//
+//nolint:gochecknoglobals // Process-wide opt-in instrumentation; Start/Stop serialize ownership.
 var active atomic.Pointer[Counters]
 
 // Start installs process-wide measurement. Callers must serialize sessions and

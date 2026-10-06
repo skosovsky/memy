@@ -112,7 +112,9 @@ func TestCanonicalCommitAndSearchVisibility(t *testing.T) {
 		len(pending.Records) != 0 {
 		t.Fatalf("canonical=%v pending=%v", canonicalErr, pendingErr)
 	}
-	if visibleErr != nil || len(visible.Coverage) != 1 || visible.Coverage[0].Status != "ready" || !visible.Coverage[0].MinimumSatisfied || len(visible.Records) != 1 ||
+	if visibleErr != nil || len(visible.Coverage) != 1 || visible.Coverage[0].Status != "ready" ||
+		!visible.Coverage[0].MinimumSatisfied ||
+		len(visible.Records) != 1 ||
 		visible.Records[0].Record.Revision != receipt.Revision {
 		t.Fatalf("visible=%+v err=%v", visible, visibleErr)
 	}
@@ -181,7 +183,7 @@ func TestForgetPartialPurgeRetryAndLateJobs(t *testing.T) {
 		PolicyVersion: "deletion/v1",
 	}
 	// Act.
-	pending, operationErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
+	pending, operationErr := fullForget(context.Background(), f.engine, f.actor, f.scope, "assist", request)
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
@@ -203,8 +205,8 @@ func TestForgetPartialPurgeRetryAndLateJobs(t *testing.T) {
 		},
 	)
 	summary.FailPurge(nil)
-	complete, completeErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
-	repeated, repeatErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
+	complete, completeErr := fullForget(context.Background(), f.engine, f.actor, f.scope, "assist", request)
+	repeated, repeatErr := fullForget(context.Background(), f.engine, f.actor, f.scope, "assist", request)
 	// A privileged stale index restoration still cannot expose canonical payload.
 	if err := index.Stage(
 		context.Background(),
@@ -297,8 +299,8 @@ func TestSourceForgetPurgesHistoricalPayloadAfterCorrection(t *testing.T) {
 		),
 	)
 	// Act.
-	receipt, operationErr := fullForget(f.engine,
-		context.Background(),
+	receipt, operationErr := fullForget(context.Background(),
+		f.engine,
 		f.actor,
 		f.scope,
 		"assist",
@@ -363,8 +365,8 @@ func TestLateExtractionFencedByForget(t *testing.T) {
 		result <- transactionErr
 	}()
 	<-entered
-	_, operationErr := fullForget(f.engine,
-		context.Background(),
+	_, operationErr := fullForget(context.Background(),
+		f.engine,
 		f.actor,
 		f.scope,
 		"assist",

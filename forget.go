@@ -302,7 +302,15 @@ func (e *Engine[P, R, A]) finishPurge(
 			return receipt, cancellationErr
 		}
 		status := e.purgeSink(ctx, receipt.Batch, result.Name)
-		updated, updateErr := e.persistSinkResult(ctx, authority, scope, purpose, operationID, receipt.Batch.Chunk, status)
+		updated, updateErr := e.persistSinkResult(
+			ctx,
+			authority,
+			scope,
+			purpose,
+			operationID,
+			receipt.Batch.Chunk,
+			status,
+		)
 		if updateErr != nil {
 			return receipt, updateErr
 		}

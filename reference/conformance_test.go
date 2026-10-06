@@ -23,7 +23,11 @@ func TestSearchConformance(t *testing.T) {
 				case "eventual":
 					adapter = reference.Eventual[string]{Index: index}
 				case "composite":
-					adapter = reference.Composite[string]{Backends: []reference.Backend[string]{{ID: "index", Search: index}}, RRF: reference.RRFConfig{K: 60}, AllowDegraded: false}
+					adapter = reference.Composite[string]{
+						Backends:      []reference.Backend[string]{{ID: "index", Search: index}},
+						RRF:           reference.RRFConfig{K: 60},
+						AllowDegraded: false,
+					}
 				}
 				return conformance.SearchFixture[string]{
 					Adapter: adapter,
@@ -56,7 +60,12 @@ func TestSinkConformance(t *testing.T) {
 					)
 				},
 				Contains: func(ctx context.Context, _ string, sc memy.Scope, ref memy.RevisionRef) (bool, error) {
-					result, err := index.Search(ctx, sc, "all", memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates})
+					result, err := index.Search(
+						ctx,
+						sc,
+						"all",
+						memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates},
+					)
 					if err != nil {
 						return false, err
 					}

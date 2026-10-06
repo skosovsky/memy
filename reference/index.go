@@ -58,7 +58,8 @@ func (i *Index[Q]) Stage(ctx context.Context, scope memy.Scope, candidate memy.C
 	if err := scope.Validate(); err != nil {
 		return err
 	}
-	if i == nil || (memy.RevisionRef{RecordID: candidate.RecordID, Revision: candidate.Revision}).Validate() != nil || !finite(candidate.Score) {
+	if i == nil || (memy.RevisionRef{RecordID: candidate.RecordID, Revision: candidate.Revision}).Validate() != nil ||
+		!finite(candidate.Score) {
 		return memy.ErrInvalid
 	}
 	i.mu.Lock()
@@ -130,9 +131,9 @@ func (i *Index[Q]) Search(
 			i.mu.Unlock()
 			return memy.SearchResult{
 				Coverage: []memy.Coverage{
-					{Backend: i.name, Status: "unavailable", MinimumSatisfied: false},
+					{Backend: i.name, Status: coverageUnavailable, MinimumSatisfied: false},
 				},
-				Candidates: nil,
+				Candidates: nil, CandidatesTruncated: false,
 			}, errors.Join(
 				memy.ErrUnavailable,
 				failure,
@@ -144,8 +145,8 @@ func (i *Index[Q]) Search(
 		}
 		if minimumSatisfied {
 			result := i.visibleResult(scope, query, options.MaxCandidates)
-			if options.Minimum == nil && result.Coverage[0].Status == "ready" {
-				result.Coverage[0].Status = "eventual"
+			if options.Minimum == nil && result.Coverage[0].Status == coverageReady {
+				result.Coverage[0].Status = coverageEventual
 			}
 			i.mu.Unlock()
 			if err := ctx.Err(); err != nil {
@@ -185,12 +186,12 @@ func validateMinimum(ctx context.Context, scope memy.Scope, token *memy.Visibili
 // visibleResult requires the caller to hold the index mutex.
 func (i *Index[Q]) visibleResult(scope memy.Scope, query Q, maximum int) memy.SearchResult {
 	result := memy.SearchResult{
-		Candidates: make([]memy.Candidate, 0),
-		Coverage:   []memy.Coverage{{Backend: i.name, Status: "ready", MinimumSatisfied: true}},
+		Candidates: make([]memy.Candidate, 0), CandidatesTruncated: false,
+		Coverage: []memy.Coverage{{Backend: i.name, Status: coverageReady, MinimumSatisfied: true}},
 	}
 	for key, candidate := range i.pending {
 		if key.scope == scope && (i.match == nil || i.match(query, candidate)) {
-			result.Coverage[0].Status = "pending"
+			result.Coverage[0].Status = coveragePending
 			break
 		}
 	}
@@ -205,15 +206,17 @@ func (i *Index[Q]) visibleResult(scope memy.Scope, query Q, maximum int) memy.Se
 		result.CandidatesTruncated = true
 	}
 	for n := range result.Candidates {
-		result.Candidates[n].Signals = []memy.SearchSignal{{Backend: i.name, Rank: n + 1, Score: result.Candidates[n].Score}}
+		result.Candidates[n].Signals = []memy.SearchSignal{
+			{Backend: i.name, Rank: n + 1, Score: result.Candidates[n].Score},
+		}
 	}
 	return result
 }
 
 func (i *Index[Q]) pendingResult(err error) (memy.SearchResult, error) {
 	result := memy.SearchResult{
-		Coverage:   []memy.Coverage{{Backend: i.name, Status: "pending", MinimumSatisfied: false}},
-		Candidates: nil,
+		Coverage:   []memy.Coverage{{Backend: i.name, Status: coveragePending, MinimumSatisfied: false}},
+		Candidates: nil, CandidatesTruncated: false,
 	}
 	if errors.Is(err, context.DeadlineExceeded) {
 		return result, errors.Join(memy.ErrVisibilityPending, err)

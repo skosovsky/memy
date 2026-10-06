@@ -16,12 +16,16 @@ import (
 	"github.com/skosovsky/memy/internal/quality"
 )
 
-func main() {
+const commandTimeout = 5 * time.Minute
+
+func main() { os.Exit(runMain()) }
+
+func runMain() int {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
+	ctx, cancel := context.WithTimeout(ctx, commandTimeout)
 	defer cancel()
-	os.Exit(execute(ctx, os.Args[1:], os.Stdout, os.Stderr))
+	return execute(ctx, os.Args[1:], os.Stdout, os.Stderr)
 }
 
 func execute(ctx context.Context, args []string, stdout, stderr io.Writer) int {
@@ -39,10 +43,13 @@ func execute(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		corpus, err := quality.Load(*corpusPath)
 		if err != nil {
 			report = quality.FailureReport(err)
-		} else if *probe != "" {
-			report, _ = quality.RunProbe(ctx, corpus, *probe)
 		} else {
-			report, _ = quality.Run(ctx, corpus)
+			switch {
+			case *probe != "":
+				report, _ = quality.RunProbe(ctx, corpus, *probe)
+			default:
+				report, _ = quality.Run(ctx, corpus)
+			}
 		}
 	}
 	raw, err := json.MarshalIndent(report, "", "  ")
@@ -66,9 +73,10 @@ func execute(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	code := report.ExitCode()
-	if code == 1 {
+	switch code {
+	case 1:
 		fmt.Fprintln(stderr, "quality: mandatory checkpoint failed")
-	} else if code == 2 {
+	case 2:
 		fmt.Fprintln(stderr, "quality: execution or evaluation unknown")
 	}
 	return code

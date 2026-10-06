@@ -79,7 +79,7 @@ func TestHistoryKeyAndExactWireFieldBinding(t *testing.T) {
 			}
 			// Act.
 			record, getErr := f.engine.Get(context.Background(), f.actor, f.scope, "timezone", memy.ReadOptions{})
-			snapshot, snapshotErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
+			snapshot, snapshotErr := fullSnapshot(context.Background(), f.engine, f.actor, f.scope, memy.ReadOptions{})
 			// Assert: phantom revisions and case aliases cannot enter canonical output.
 			if !errors.Is(getErr, memy.ErrSchema) || !errors.Is(snapshotErr, memy.ErrSchema) ||
 				record.Payload.Value != "" ||
@@ -132,7 +132,7 @@ func TestConsolidationBudgetIncludesProviderAnnotations(t *testing.T) {
 	)
 	// Act.
 	proposals, err := memy.Consolidate(context.Background(), f.engine, f.actor, f.scope, request, provider)
-	state, stateErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	state, stateErr := fullSnapshot(context.Background(), f.engine, f.actor, f.scope, memy.ReadOptions{})
 	// Assert: provider annotations count, and failed review leaves originals intact.
 	if !called || !errors.Is(err, memy.ErrBudget) || len(proposals) != 0 || stateErr != nil || len(state) != len(refs) {
 		t.Fatalf("called=%t proposals=%d err=%v state=%d/%v", called, len(proposals), err, len(state), stateErr)
@@ -159,7 +159,7 @@ func canonicalSourceCase(t *testing.T, backend, change string) {
 	changeFixtureSource(t, f, change)
 	// Act: all canonical delivery paths encounter the changed evidence.
 	record, getErr := f.engine.Get(context.Background(), f.actor, f.scope, "timezone", memy.ReadOptions{})
-	snapshot, snapshotErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	snapshot, snapshotErr := fullSnapshot(context.Background(), f.engine, f.actor, f.scope, memy.ReadOptions{})
 	recalled, recallErr := memy.Recall(
 		context.Background(),
 		f.engine,

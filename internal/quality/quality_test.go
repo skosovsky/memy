@@ -4,16 +4,25 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/santhosh-tekuri/jsonschema/v6"
-	"github.com/skosovsky/memy"
 	"os"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/santhosh-tekuri/jsonschema/v6"
+
+	"github.com/skosovsky/memy"
 )
 
 func observed(id string, status Status, mandatory bool) Check {
-	return Check{ID: id, Status: status, Mandatory: mandatory, Expected: "completed", Observed: "completed", Evidence: []Evidence{{Code: "observed", Count: 1}}}
+	return Check{
+		ID:        id,
+		Status:    status,
+		Mandatory: mandatory,
+		Expected:  "completed",
+		Observed:  "completed",
+		Evidence:  []Evidence{{Code: "observed", Count: 1}},
+	}
 }
 func completeScenario() ScenarioReport {
 	s := ScenarioReport{}
@@ -88,7 +97,8 @@ func TestUnknownPrecedenceAndSafeErrors(t *testing.T) {
 	// Act.
 	encoded, marshalErr := json.Marshal(r)
 	// Assert.
-	if marshalErr != nil || strings.Contains(string(encoded), secret) || r.ExitCode() != 2 || r.Diagnostic != "execution_error" {
+	if marshalErr != nil || strings.Contains(string(encoded), secret) || r.ExitCode() != 2 ||
+		r.Diagnostic != "execution_error" {
 		t.Fatal(string(encoded), marshalErr)
 	}
 	for _, status := range []Verdict{VerdictPass, VerdictFail, VerdictUnknown} {
@@ -129,7 +139,8 @@ func TestMalformedManifestFailsBeforeDispatch(t *testing.T) {
 			r, err := Run(context.Background(), c)
 			raw, _ := json.Marshal(r)
 			// Assert.
-			if !errors.Is(err, memy.ErrInvalid) || r.ExitCode() != 2 || len(r.Scenarios) != 0 || strings.Contains(string(raw), "PRIVATE") {
+			if !errors.Is(err, memy.ErrInvalid) || r.ExitCode() != 2 || len(r.Scenarios) != 0 ||
+				strings.Contains(string(raw), "PRIVATE") {
 				t.Fatalf("%s %v", raw, err)
 			}
 		})
@@ -186,11 +197,11 @@ func TestSeedAndRepeatsActuallyDispatch(t *testing.T) {
 		t.Fatal("repeat count not dispatched")
 	}
 	for i := 0; i < len(repeated.Scenarios); i += 2 {
-		if repeated.Scenarios[i].Repeat != 0 || repeated.Scenarios[i+1].Repeat != 1 || repeated.Scenarios[i].Seed == repeated.Scenarios[i+1].Seed {
+		if repeated.Scenarios[i].Repeat != 0 || repeated.Scenarios[i+1].Repeat != 1 ||
+			repeated.Scenarios[i].Seed == repeated.Scenarios[i+1].Seed {
 			t.Fatal("repeat identity or variation seed lost")
 		}
 	}
-
 }
 func validateSchema(t *testing.T, path string, value any) {
 	t.Helper()

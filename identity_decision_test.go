@@ -86,7 +86,15 @@ func TestUnicodeIdentityCompletesLifecycle(t *testing.T) {
 	// Arrange: literal replacement rune and Unicode spelling are exact identities.
 	f := newFixture(t, nil)
 	f.scope = memy.Scope{Tenant: "\ufffd", Namespace: "предпочтения", Subject: "👩"}
-	f.policy.Grant(f.actor.actor, f.scope, "authority/v1", memy.ActionRead, memy.ActionPropose, memy.ActionAccept, memy.ActionCommit)
+	f.policy.Grant(
+		f.actor.actor,
+		f.scope,
+		"authority/v1",
+		memy.ActionRead,
+		memy.ActionPropose,
+		memy.ActionAccept,
+		memy.ActionCommit,
+	)
 	f.source.ID, f.source.Revision = "источник/\ufffd", "версия/👩"
 	if err := f.sources.Put(f.scope, f.source); err != nil {
 		t.Fatal(err)
@@ -97,7 +105,8 @@ func TestUnicodeIdentityCompletesLifecycle(t *testing.T) {
 	f.commit(t, request)
 	record, err := f.engine.Get(t.Context(), f.actor, f.scope, request.RecordID, memy.ReadOptions{})
 	// Assert.
-	if err != nil || record.ID != request.RecordID || record.Scope != f.scope || record.Provenance.Sources[0].ID != f.source.ID {
+	if err != nil || record.ID != request.RecordID || record.Scope != f.scope ||
+		record.Provenance.Sources[0].ID != f.source.ID {
 		t.Fatalf("record=%+v err=%v", record, err)
 	}
 }
@@ -126,13 +135,28 @@ func TestReconciliationDecisionSurvivesReopenAndReplay(t *testing.T) {
 			// Act: reopen without transcript and replay exact request.
 			f = reopenFixture(t, f, path)
 			replayed := f.commit(t, request)
-			record, err := f.engine.Get(t.Context(), f.actor, f.scope, "new", memy.ReadOptions{IncludeConflicts: true})
+			record, err := f.engine.Get(
+				t.Context(),
+				f.actor,
+				f.scope,
+				"new",
+				memy.ReadOptions{IncludeConflicts: true},
+			)
 			changed := request
 			changed.Reconcile.Basis = "different basis"
 			_, conflict := f.engine.Commit(t.Context(), f.actor, f.scope, "assist", changed)
 			// Assert: one initial decision, independent authority and resolver policies.
-			if err != nil || original != replayed || record.Revision != 1 || !reflect.DeepEqual(record.Reconciliation, &request.Reconcile) || record.AuthorityPolicyVersion != "authority/v1" || !errors.Is(conflict, memy.ErrConflict) {
-				t.Fatalf("record=%+v err=%v replay=%+v conflict=%v", record, err, replayed, conflict)
+			if err != nil || original != replayed || record.Revision != 1 ||
+				!reflect.DeepEqual(record.Reconciliation, &request.Reconcile) ||
+				record.AuthorityPolicyVersion != "authority/v1" ||
+				!errors.Is(conflict, memy.ErrConflict) {
+				t.Fatalf(
+					"record=%+v err=%v replay=%+v conflict=%v",
+					record,
+					err,
+					replayed,
+					conflict,
+				)
 			}
 		})
 	}
@@ -148,14 +172,36 @@ func TestHistoricalDecisionDoesNotExposeFutureResolution(t *testing.T) {
 	asof := f.clock.Now()
 	f.clock.Advance(time.Second)
 	p2 := f.propose(t, "p2", "new", memy.Interval{})
-	second := f.acceptedRequest(t, "c2", "fact", 1, p2, memy.Supersede, memy.RevisionRef{RecordID: "fact", Revision: 1})
+	second := f.acceptedRequest(
+		t,
+		"c2",
+		"fact",
+		1,
+		p2,
+		memy.Supersede,
+		memy.RevisionRef{RecordID: "fact", Revision: 1},
+	)
 	second.Reconcile.Basis = "future sensitive basis"
 	f.commit(t, second)
 	// Act.
-	old, err := f.engine.Get(t.Context(), f.actor, f.scope, "fact", memy.ReadOptions{RecordedAsOf: asof})
-	_, denied := f.engine.Get(t.Context(), principal{actor: "other"}, f.scope, "fact", memy.ReadOptions{RecordedAsOf: asof})
+	old, err := f.engine.Get(
+		t.Context(),
+		f.actor,
+		f.scope,
+		"fact",
+		memy.ReadOptions{RecordedAsOf: asof},
+	)
+	_, denied := f.engine.Get(
+		t.Context(),
+		principal{actor: "other"},
+		f.scope,
+		"fact",
+		memy.ReadOptions{RecordedAsOf: asof},
+	)
 	// Assert.
-	if err != nil || old.Revision != 1 || old.State != memy.Active || old.Reconciliation.Basis != first.Reconcile.Basis || !errors.Is(denied, memy.ErrUnauthorized) {
+	if err != nil || old.Revision != 1 || old.State != memy.Active ||
+		old.Reconciliation.Basis != first.Reconcile.Basis ||
+		!errors.Is(denied, memy.ErrUnauthorized) {
 		t.Fatalf("old=%+v err=%v denied=%v", old, err, denied)
 	}
 	encoded, _ := json.Marshal(old)
@@ -167,59 +213,7 @@ func TestHistoricalDecisionDoesNotExposeFutureResolution(t *testing.T) {
 func TestForgetPurgesDecisionAndManagedProjection(t *testing.T) {
 	for _, mode := range []memy.ReconcileMode{memy.Append, memy.Duplicate, memy.Supersede, memy.Conflict} {
 		t.Run(string(mode), func(t *testing.T) {
-			// Arrange: basis is copied into a managed projection, not into permanent receipts.
-			f, _, summary := withSinks(t)
-			var related []memy.RevisionRef
-			if mode != memy.Append {
-				base := f.propose(t, "base-proposal", "base", memy.Interval{})
-				f.commit(t, f.acceptedRequest(t, "base-commit", "base", 0, base, memy.Append))
-				related = []memy.RevisionRef{{RecordID: "base", Revision: 1}}
-			}
-			p := f.propose(t, "p", "value", memy.Interval{})
-			request := f.acceptedRequest(t, "c", "fact", 0, p, mode, related...)
-			request.Reconcile.Basis = "sensitive-decision-basis"
-			receipt := f.commit(t, request)
-			projection, err := memy.Project(t.Context(), f.engine, f.actor, f.scope, "fact", memy.ReadOptions{IncludeConflicts: true}, reference.ProjectorFunc[preference, sourceRef, string]{PolicyVersion: "projection/v1", Apply: func(_ context.Context, r memy.Record[preference, sourceRef]) (string, error) {
-				return r.Reconciliation.Basis, nil
-			}})
-			if err != nil {
-				t.Fatal(err)
-			}
-			raw, err := json.Marshal(projection)
-			if err != nil {
-				t.Fatal(err)
-			}
-			fence, err := f.engine.Fence(t.Context(), f.actor, f.scope, "assist")
-			if err != nil {
-				t.Fatal(err)
-			}
-			lineage := []memy.RevisionRef{{RecordID: receipt.RecordID, Revision: receipt.Revision}}
-			writeErr := f.engine.WithDerivedWrite(t.Context(), f.actor, fence, "assist", lineage, func(ctx context.Context) error { return summary.Put(ctx, "decision", f.scope, lineage, raw) })
-			if mode == memy.Conflict {
-				if !errors.Is(writeErr, memy.ErrStaleInput) {
-					t.Fatalf("conflicted dependency admitted: %v", writeErr)
-				}
-			} else if writeErr != nil {
-				t.Fatal(writeErr)
-			}
-			// Act.
-			purged, err := fullForget(f.engine, t.Context(), f.actor, f.scope, "assist", memy.ForgetRequest{OperationID: "forget", Selector: memy.Selector{Kind: memy.SelectRecord, ID: "fact"}, Reason: "withdraw", PolicyVersion: "deletion/v1"})
-			_, getErr := f.engine.Get(t.Context(), f.actor, f.scope, "fact", memy.ReadOptions{})
-			// Assert: history, tombstones, receipts and managed sink contain no basis.
-			if err != nil || purged.State != memy.PurgeComplete || summary.Contains("decision") || !errors.Is(getErr, memy.ErrNotFound) {
-				t.Fatalf("purge=%+v err=%v get=%v", purged, err, getErr)
-			}
-			if err := f.config.Store.View(t.Context(), f.scope, func(b memy.Bucket) error {
-				entries, err := listEntries(b, "")
-				for _, entry := range entries {
-					if bytes.Contains(entry.Value.Data, []byte(request.Reconcile.Basis)) {
-						t.Fatal("basis survived forget")
-					}
-				}
-				return err
-			}); err != nil {
-				t.Fatal(err)
-			}
+			testForgetDecisionProjection(t, mode)
 		})
 	}
 }
@@ -256,48 +250,7 @@ func TestPersistedIdentityRejectsNormalization(t *testing.T) {
 func TestPurgeReceiptRejectsMalformedRecordIdentity(t *testing.T) {
 	for _, id := range []string{"", "a\x00b", strings.Repeat("x", 1025), strings.Repeat("я", 513), "\u00a0"} {
 		t.Run(string([]rune(id)[:min(8, len([]rune(id)))]), func(t *testing.T) {
-			// Arrange: corrupt a durable receipt after successful revocation.
-			f := newFixture(t, nil)
-			p := f.propose(t, "p", "value", memy.Interval{})
-			f.commit(t, f.acceptedRequest(t, "c", "fact", 0, p, memy.Append))
-			request := memy.ForgetRequest{OperationID: "forget", Selector: memy.Selector{Kind: memy.SelectRecord, ID: "fact"}, Reason: "withdraw", PolicyVersion: "deletion/v1"}
-			if _, err := fullForget(f.engine, t.Context(), f.actor, f.scope, "assist", request); err != nil {
-				t.Fatal(err)
-			}
-			if err := f.config.Store.Update(t.Context(), f.scope, func(b memy.Bucket) error {
-				entries, err := listEntries(b, "purge/")
-				if err != nil {
-					return err
-				}
-				entry := entries[0]
-				var envelope map[string]json.RawMessage
-				if err = json.Unmarshal(entry.Value.Data, &envelope); err != nil {
-					return err
-				}
-				var receipt memy.PurgeReceipt
-				if err = json.Unmarshal(envelope["data"], &receipt); err != nil {
-					return err
-				}
-				receipt.Batch.Records = []string{id}
-				envelope["data"], err = json.Marshal(receipt)
-				if err != nil {
-					return err
-				}
-				raw, err := json.Marshal(envelope)
-				if err != nil {
-					return err
-				}
-				_, err = b.Put(entry.Key, entry.Value.Version, raw)
-				return err
-			}); err != nil {
-				t.Fatal(err)
-			}
-			// Act.
-			_, err := fullForget(f.engine, t.Context(), f.actor, f.scope, "assist", request)
-			// Assert: replay never certifies malformed receipts as complete.
-			if !errors.Is(err, memy.ErrSchema) {
-				t.Fatalf("malformed receipt: %v", err)
-			}
+			testMalformedPurgeIdentity(t, id)
 		})
 	}
 }
@@ -316,5 +269,155 @@ func TestExecutableSchemaIdentityAssertions(t *testing.T) {
 				t.Fatalf("schema accepted invalid identity of %d bytes", len(id))
 			}
 		}
+	}
+}
+
+func testForgetDecisionProjection(t *testing.T, mode memy.ReconcileMode) {
+	t.Helper()
+	// Arrange: basis is copied into a managed projection, not into permanent receipts.
+	f, _, summary := withSinks(t)
+	var related []memy.RevisionRef
+	if mode != memy.Append {
+		base := f.propose(t, "base-proposal", "base", memy.Interval{})
+		f.commit(t, f.acceptedRequest(t, "base-commit", "base", 0, base, memy.Append))
+		related = []memy.RevisionRef{{RecordID: "base", Revision: 1}}
+	}
+	p := f.propose(t, "p", "value", memy.Interval{})
+	request := f.acceptedRequest(t, "c", "fact", 0, p, mode, related...)
+	request.Reconcile.Basis = "sensitive-decision-basis"
+	receipt := f.commit(t, request)
+	assertDecisionProjectionWrite(t, f, summary, receipt, mode)
+	// Act.
+	purged, err := fullForget(
+		t.Context(),
+		f.engine,
+		f.actor,
+		f.scope,
+		"assist",
+		memy.ForgetRequest{
+			OperationID:   "forget",
+			Selector:      memy.Selector{Kind: memy.SelectRecord, ID: "fact"},
+			Reason:        "withdraw",
+			PolicyVersion: "deletion/v1",
+		},
+	)
+	_, getErr := f.engine.Get(t.Context(), f.actor, f.scope, "fact", memy.ReadOptions{})
+	// Assert: history, tombstones, receipts and managed sink contain no basis.
+	if err != nil || purged.State != memy.PurgeComplete || summary.Contains("decision") ||
+		!errors.Is(getErr, memy.ErrNotFound) {
+		t.Fatalf("purge=%+v err=%v get=%v", purged, err, getErr)
+	}
+	if err := f.config.Store.View(t.Context(), f.scope, func(b memy.Bucket) error {
+		entries, err := listEntries(b, "")
+		for _, entry := range entries {
+			if bytes.Contains(entry.Value.Data, []byte(request.Reconcile.Basis)) {
+				t.Fatal("basis survived forget")
+			}
+		}
+		return err
+	}); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testMalformedPurgeIdentity(t *testing.T, id string) {
+	t.Helper()
+	// Arrange: corrupt a durable receipt after successful revocation.
+	f := newFixture(t, nil)
+	p := f.propose(t, "p", "value", memy.Interval{})
+	f.commit(t, f.acceptedRequest(t, "c", "fact", 0, p, memy.Append))
+	request := memy.ForgetRequest{
+		OperationID:   "forget",
+		Selector:      memy.Selector{Kind: memy.SelectRecord, ID: "fact"},
+		Reason:        "withdraw",
+		PolicyVersion: "deletion/v1",
+	}
+	if _, err := fullForget(t.Context(), f.engine, f.actor, f.scope, "assist", request); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.config.Store.Update(t.Context(), f.scope, func(b memy.Bucket) error {
+		entries, err := listEntries(b, "purge/")
+		if err != nil {
+			return err
+		}
+		entry := entries[0]
+		var envelope map[string]json.RawMessage
+		if err = json.Unmarshal(entry.Value.Data, &envelope); err != nil {
+			return err
+		}
+		var receipt memy.PurgeReceipt
+		if err = json.Unmarshal(envelope["data"], &receipt); err != nil {
+			return err
+		}
+		receipt.Batch.Records = []string{id}
+		envelope["data"], err = json.Marshal(receipt)
+		if err != nil {
+			return err
+		}
+		raw, err := json.Marshal(envelope)
+		if err != nil {
+			return err
+		}
+		_, err = b.Put(entry.Key, entry.Value.Version, raw)
+		return err
+	}); err != nil {
+		t.Fatal(err)
+	}
+	// Act.
+	_, err := fullForget(t.Context(), f.engine, f.actor, f.scope, "assist", request)
+	// Assert: replay never certifies malformed receipts as complete.
+	if !errors.Is(err, memy.ErrSchema) {
+		t.Fatalf("malformed receipt: %v", err)
+	}
+}
+
+func assertDecisionProjectionWrite(
+	t *testing.T,
+	f fixture,
+	summary *reference.ProjectionSink,
+	receipt memy.CommitReceipt,
+	mode memy.ReconcileMode,
+) {
+	t.Helper()
+	projection, err := memy.Project(
+		t.Context(),
+		f.engine,
+		f.actor,
+		f.scope,
+		"fact",
+		memy.ReadOptions{IncludeConflicts: true},
+		reference.ProjectorFunc[preference, sourceRef, string]{
+			PolicyVersion: "projection/v1",
+			Apply: func(_ context.Context, r memy.Record[preference, sourceRef]) (string, error) {
+				return r.Reconciliation.Basis, nil
+			},
+		},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, err := json.Marshal(projection)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fence, err := f.engine.Fence(t.Context(), f.actor, f.scope, "assist")
+	if err != nil {
+		t.Fatal(err)
+	}
+	lineage := []memy.RevisionRef{{RecordID: receipt.RecordID, Revision: receipt.Revision}}
+	writeErr := f.engine.WithDerivedWrite(
+		t.Context(),
+		f.actor,
+		fence,
+		"assist",
+		lineage,
+		func(ctx context.Context) error { return summary.Put(ctx, "decision", f.scope, lineage, raw) },
+	)
+	if mode == memy.Conflict {
+		if !errors.Is(writeErr, memy.ErrStaleInput) {
+			t.Fatalf("conflicted dependency admitted: %v", writeErr)
+		}
+	} else if writeErr != nil {
+		t.Fatal(writeErr)
 	}
 }

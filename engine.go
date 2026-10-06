@@ -52,7 +52,8 @@ func New[P, R, A any](config Config[P, R, A]) (*Engine[P, R, A], error) {
 	if !caps.Atomic || !caps.ConditionalWrite || !caps.FencedView {
 		return nil, ErrUnsupported
 	}
-	if caps.SchemaVersion != SchemaVersion || !validIdentifier(config.PayloadCodec.Version()) || !validIdentifier(config.ReferenceCodec.Version()) {
+	if caps.SchemaVersion != SchemaVersion || !validIdentifier(config.PayloadCodec.Version()) ||
+		!validIdentifier(config.ReferenceCodec.Version()) {
 		return nil, ErrSchema
 	}
 	names := make(map[string]bool)
@@ -105,7 +106,8 @@ func (e *Engine[P, R, A]) authorize(
 	if operationErr != nil {
 		return Decision{}, errors.Join(ErrUnavailable, operationErr)
 	}
-	if !decision.Allowed || !validIdentifier(decision.Actor) || !validIdentifier(decision.PolicyVersion) || decision.Scope != scope ||
+	if !decision.Allowed || !validIdentifier(decision.Actor) || !validIdentifier(decision.PolicyVersion) ||
+		decision.Scope != scope ||
 		(!decision.ExpiresAt.IsZero() && !e.config.Clock.Now().Before(decision.ExpiresAt)) {
 		return Decision{}, ErrUnauthorized
 	}

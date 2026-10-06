@@ -5,8 +5,10 @@ package quality
 import (
 	"context"
 	"encoding/binary"
-	"github.com/skosovsky/memy"
 	"hash/fnv"
+	"slices"
+
+	"github.com/skosovsky/memy"
 )
 
 type CaseRun struct {
@@ -32,7 +34,9 @@ func DerivedSeed(seed uint64, id string, repeat int) uint64 {
 	binary.LittleEndian.PutUint64(b[:], seed)
 	_, _ = h.Write(b[:])
 	_, _ = h.Write([]byte(id))
-	binary.LittleEndian.PutUint64(b[:], uint64(repeat))
+	// Encoding signed repeat preserves its eight-byte representation without
+	// a potentially overflowing unsigned conversion. The runner uses nonnegative repeats.
+	_, _ = binary.Encode(b[:], binary.LittleEndian, int64(repeat))
 	_, _ = h.Write(b[:])
 	return h.Sum64()
 }
@@ -40,7 +44,14 @@ func Run(ctx context.Context, c Corpus) (Report, error) {
 	if err := validateCorpus(c); err != nil {
 		return FailureReport(err), err
 	}
-	r := Report{Schema: "memy-quality/v2", Manifest: &c, Versions: c.Versions, Scenarios: []ScenarioReport{}}
+	r := Report{
+		Schema:     reportSchema,
+		Manifest:   &c,
+		Versions:   c.Versions,
+		Scenarios:  []ScenarioReport{},
+		Final:      "",
+		Diagnostic: "",
+	}
 	registry := map[string]CasePlan{}
 	for _, p := range plans() {
 		registry[p.ID] = p
@@ -48,7 +59,7 @@ func Run(ctx context.Context, c Corpus) (Report, error) {
 	var first error
 	for _, spec := range c.Scenarios {
 		p := registry[spec.ID]
-		for repeat := 0; repeat < c.Repeats; repeat++ {
+		for repeat := range c.Repeats {
 			run := CaseRun{repeat, DerivedSeed(c.Seed, p.ID, repeat)}
 			var s ScenarioReport
 			var err error
@@ -63,7 +74,17 @@ func Run(ctx context.Context, c Corpus) (Report, error) {
 					first = err
 				}
 				s.Diagnostic = ErrorClass(err)
-				s.Execution.Checks = append(s.Execution.Checks, Check{ID: "runner_execution", Mandatory: true, Status: Unknown, Expected: "completed", Observed: "unknown", Evidence: []Evidence{{Code: "execution_error", Count: 1}}})
+				s.Execution.Checks = append(
+					s.Execution.Checks,
+					Check{
+						ID:        "runner_execution",
+						Mandatory: true,
+						Status:    Unknown,
+						Expected:  checkpointCompleted,
+						Observed:  string(Unknown),
+						Evidence:  []Evidence{{Code: "execution_error", Count: 1, Aliases: nil}},
+					},
+				)
 			}
 			enforcePlan(&s, p)
 			FinalizeScenario(&s)
@@ -78,7 +99,7 @@ func Run(ctx context.Context, c Corpus) (Report, error) {
 }
 
 func enforcePlan(s *ScenarioReport, p CasePlan) {
-	names := []string{"candidate", "host_review", "effective", "canonical", "rendered", "execution"}
+	names := []string{stageCandidate, stageHostReview, stageEffective, stageCanonical, stageRendered, stageExecution}
 	missing := s.Versions != p.Versions || s.Mode == ""
 	for i, stage := range stages(s) {
 		if stage.Status == NotApplicable && !containsStage(p.OptionalStages, names[i]) {
@@ -86,18 +107,7 @@ func enforcePlan(s *ScenarioReport, p CasePlan) {
 		}
 	}
 	for _, required := range p.Required {
-		found := false
-		for i, stage := range stages(s) {
-			if names[i] != required.Stage {
-				continue
-			}
-			for _, check := range stage.Checks {
-				if check.ID == required.ID && check.Mandatory {
-					found = true
-				}
-			}
-		}
-		if !found {
+		if !hasRequiredCheck(s, names, required) {
 			missing = true
 		}
 	}
@@ -105,13 +115,32 @@ func enforcePlan(s *ScenarioReport, p CasePlan) {
 		missing = true
 	}
 	if missing {
-		s.Execution.Checks = append(s.Execution.Checks, Check{ID: "missing_checkpoint", Mandatory: true, Status: Unknown, Expected: "completed", Observed: "unknown", Evidence: []Evidence{{Code: "missing_checkpoint", Count: 1}}})
+		s.Execution.Checks = append(
+			s.Execution.Checks,
+			Check{
+				ID:        "missing_checkpoint",
+				Mandatory: true,
+				Status:    Unknown,
+				Expected:  checkpointCompleted,
+				Observed:  string(Unknown),
+				Evidence:  []Evidence{{Code: "missing_checkpoint", Count: 1, Aliases: nil}},
+			},
+		)
 	}
 }
 func containsStage(stages []string, stage string) bool {
-	for _, v := range stages {
-		if v == stage {
-			return true
+	return slices.Contains(stages, stage)
+}
+
+func hasRequiredCheck(s *ScenarioReport, names []string, required RequiredCheck) bool {
+	for i, stage := range stages(s) {
+		if names[i] != required.Stage {
+			continue
+		}
+		for _, check := range stage.Checks {
+			if check.ID == required.ID && check.Mandatory {
+				return true
+			}
 		}
 	}
 	return false

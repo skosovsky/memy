@@ -106,26 +106,31 @@ func Recall[P, R, Q, A any](
 	ranker Ranker[P, R],
 	options RecallOptions,
 ) (RecallResult[P, R], error) {
-	if e == nil || nilPort(search) || nilPort(ranker) || options.Limit <= 0 || options.Limit > MaxSearchCandidates || options.Search.MaxCandidates < 1 || options.Search.MaxCandidates > MaxSearchCandidates {
+	if e == nil || nilPort(search) || nilPort(ranker) || options.Limit <= 0 || options.Limit > MaxSearchCandidates ||
+		options.Search.MaxCandidates < 1 ||
+		options.Search.MaxCandidates > MaxSearchCandidates {
 		return RecallResult[P, R]{}, ErrInvalid
 	}
 	decision, operationErr := e.authorize(ctx, authority, scope, ActionRead, options.Read.Purpose)
 	if operationErr != nil {
 		return RecallResult[P, R]{}, operationErr
 	}
-	caps := search.Capabilities()
-	if !caps.Scoped || !caps.BoundedCandidates || (options.Search.Minimum != nil && !caps.Visibility) {
-		return RecallResult[P, R]{}, ErrUnsupported
-	}
-	if options.Search.Minimum != nil && !validRef(RevisionRef{RecordID: options.Search.Minimum.RecordID, Revision: options.Search.Minimum.Revision}) {
-		return RecallResult[P, R]{}, ErrInvalid
-	}
-	if options.Search.Minimum != nil && options.Search.Minimum.Scope != scope {
-		return RecallResult[P, R]{}, ErrScopeViolation
+	if capabilityErr := validateRecallSearch(search, scope, options.Search); capabilityErr != nil {
+		return RecallResult[P, R]{}, capabilityErr
 	}
 	found, operationErr := search.Search(ctx, scope, query, options.Search)
 	if operationErr != nil {
-		return RecallResult[P, R]{Coverage: boundedCoverage(found.Coverage), Records: nil}, operationErr
+		return RecallResult[P, R]{
+			Coverage: boundedCoverage(found.Coverage),
+			Records:  nil,
+			Progress: RecallProgress{
+				ReturnedCandidates:  0,
+				CanonicalChecked:    0,
+				CanonicalFiltered:   0,
+				RankingOmitted:      0,
+				CandidatesTruncated: false,
+			},
+		}, operationErr
 	}
 	if len(found.Candidates) > options.Search.MaxCandidates {
 		return RecallResult[P, R]{}, ErrBudget
@@ -137,7 +142,10 @@ func Recall[P, R, Q, A any](
 	if coverageErr != nil {
 		return result, coverageErr
 	}
-	result.Progress = RecallProgress{ReturnedCandidates: len(found.Candidates), CandidatesTruncated: found.CandidatesTruncated}
+	result.Progress = RecallProgress{
+		ReturnedCandidates: len(found.Candidates), CanonicalChecked: 0, CanonicalFiltered: 0, RankingOmitted: 0,
+		CandidatesTruncated: found.CandidatesTruncated,
+	}
 	var candidates []Ranked[P, R]
 	operationErr = e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
 		var err error
@@ -158,16 +166,8 @@ func Recall[P, R, Q, A any](
 	}
 	result.Progress.RankingOmitted = len(candidates) - len(selected)
 	operationErr = e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
-		for i := range selected {
-			ref := selected[i].Record
-			record, eligible, err := e.recallCandidate(ctx, b, scope, Candidate{RecordID: ref.ID, Revision: ref.Revision}, options.Read)
-			if err != nil {
-				return err
-			}
-			if !eligible {
-				return ErrStaleInput
-			}
-			selected[i].Record = record
+		if refreshErr := e.refreshRecalled(ctx, b, scope, selected, options.Read); refreshErr != nil {
+			return refreshErr
 		}
 		if err := e.validateRankedRetention(ctx, b, scope, selected); err != nil {
 			return err
@@ -264,7 +264,16 @@ func Project[P, R, A, O any](
 	return finishProjection(ctx, e, authority, scope, decision, initial, options, projector)
 }
 
-func finishProjection[P, R, A, O any](ctx context.Context, e *Engine[P, R, A], authority A, scope Scope, decision Decision, initial Record[P, R], options ReadOptions, projector Projector[P, R, O]) (Projection[O, R], error) {
+func finishProjection[P, R, A, O any](
+	ctx context.Context,
+	e *Engine[P, R, A],
+	authority A,
+	scope Scope,
+	decision Decision,
+	initial Record[P, R],
+	options ReadOptions,
+	projector Projector[P, R, O],
+) (Projection[O, R], error) {
 	id := initial.ID
 	projectionInput, operationErr := e.cloneRecord(initial)
 	if operationErr != nil {
@@ -330,3 +339,47 @@ func finishProjection[P, R, A, O any](ctx context.Context, e *Engine[P, R, A], a
 	}
 	return result, nil
 }
+
+func validateRecallSearch[Q any](search Search[Q], scope Scope, options SearchOptions) error {
+	caps := search.Capabilities()
+	if !caps.Scoped || !caps.BoundedCandidates || (options.Minimum != nil && !caps.Visibility) {
+		return ErrUnsupported
+	}
+	if options.Minimum != nil &&
+		!validRef(RevisionRef{RecordID: options.Minimum.RecordID, Revision: options.Minimum.Revision}) {
+		return ErrInvalid
+	}
+	if options.Minimum != nil && options.Minimum.Scope != scope {
+		return ErrScopeViolation
+	}
+	return nil
+}
+
+func (e *Engine[P, R, A]) refreshRecalled(
+	ctx context.Context,
+	b Bucket,
+	scope Scope,
+	selected []Ranked[P, R],
+	read ReadOptions,
+) error {
+	for i := range selected {
+		ref := selected[i].Record
+		record, eligible, err := e.recallCandidate(
+			ctx,
+			b,
+			scope,
+			Candidate{RecordID: ref.ID, Revision: ref.Revision, Score: 0, Signals: nil},
+			read,
+		)
+		if err != nil {
+			return err
+		}
+		if !eligible {
+			return ErrStaleInput
+		}
+		selected[i].Record = record
+	}
+	return nil
+}
+
+const coverageUnavailable = "unavailable"

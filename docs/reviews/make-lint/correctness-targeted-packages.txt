@@ -1,0 +1,6 @@
+ok  	github.com/skosovsky/memy/internal/quality	57.407s
+ok  	github.com/skosovsky/memy/reference	1.474s
+ok  	github.com/skosovsky/memy/store/sqlite	2.793s
+?   	github.com/skosovsky/memy/conformance	[no test files]
+ok  	github.com/skosovsky/memy/examples/quality	12.269s
+?   	github.com/skosovsky/memy/examples/quality-integration	[no test files]

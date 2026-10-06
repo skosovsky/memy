@@ -23,7 +23,14 @@ type ScanPage struct {
 // scanAll is an internal full-traversal operation implemented in bounded pages.
 // Callers that need host continuation use the lifecycle page APIs instead.
 func scanAll(b Bucket, prefix string) ([]Entry, error) {
-	options := ScanOptions{Prefix: prefix, Limit: 256, MaxBytes: int(^uint(0) >> 1)}
+	options := ScanOptions{
+		Prefix:   prefix,
+		Limit:    internalScanPageLimit,
+		MaxBytes: int(^uint(0) >> 1),
+		After:    "",
+		Plan:     "",
+		Cursor:   "",
+	}
 	var result []Entry
 	for {
 		page, err := b.Scan(options)
@@ -40,3 +47,5 @@ func scanAll(b Bucket, prefix string) ([]Entry, error) {
 		options.Cursor = page.Cursor
 	}
 }
+
+const internalScanPageLimit = 256

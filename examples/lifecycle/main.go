@@ -158,10 +158,17 @@ func demonstrateRecallAndForget(
 	if record.Revision != 2 || record.Payload.Value != "UTC+7" {
 		return errors.New("reopened canonical correction mismatch")
 	}
-	if record.Reconciliation == nil || record.Reconciliation.Mode != memy.Supersede || record.AuthorityPolicyVersion == "" {
+	if record.Reconciliation == nil || record.Reconciliation.Mode != memy.Supersede ||
+		record.AuthorityPolicyVersion == "" {
 		return errors.New("reopened reconciliation decision mismatch")
 	}
-	fmt.Printf("Decision: %s, resolver=%s, authority=%s, basis=%s.\n", record.Reconciliation.Mode, record.Reconciliation.PolicyVersion, record.AuthorityPolicyVersion, record.Reconciliation.Basis)
+	fmt.Printf(
+		"Decision: %s, resolver=%s, authority=%s, basis=%s.\n",
+		record.Reconciliation.Mode,
+		record.Reconciliation.PolicyVersion,
+		record.AuthorityPolicyVersion,
+		record.Reconciliation.Basis,
+	)
 	fmt.Printf(
 		"New session, no transcript: %s=%s, revision %d.\n",
 		record.Payload.Key,
@@ -275,8 +282,8 @@ func demonstrateProjectionAndForget(
 		Expected:      lineage,
 		Reason:        "user request",
 		PolicyVersion: "deletion/v1",
-	}
-	purge, operationErr := fullForget(engine, ctx, actor, scope, examplePurpose, forget)
+		Limit:         0, MaxBytes: 0}
+	purge, operationErr := fullForget(ctx, engine, actor, scope, examplePurpose, forget)
 	if operationErr != nil {
 		return operationErr
 	}
@@ -284,7 +291,7 @@ func demonstrateProjectionAndForget(
 		return errors.New("partial deletion incorrectly reported complete")
 	}
 	summary.FailPurge(nil)
-	purge, operationErr = fullForget(engine, ctx, actor, scope, examplePurpose, forget)
+	purge, operationErr = fullForget(ctx, engine, actor, scope, examplePurpose, forget)
 	if operationErr != nil {
 		return operationErr
 	}
@@ -423,7 +430,7 @@ func stageDerivedRecord(
 		if err := index.Stage(
 			ctx,
 			scope,
-			memy.Candidate{RecordID: record.ID, Revision: record.Revision, Score: 1},
+			memy.Candidate{RecordID: record.ID, Revision: record.Revision, Score: 1, Signals: nil},
 		); err != nil {
 			return err
 		}
@@ -434,12 +441,21 @@ func stageDerivedRecord(
 	return lineage, nil
 }
 
-func fullForget[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, purpose string, request memy.ForgetRequest) (memy.PurgeReceipt, error) {
+const defaultForgetMaxBytes = 64 << 20
+
+func fullForget[P, R, A any](
+	ctx context.Context,
+	e *memy.Engine[P, R, A],
+	authority A,
+	scope memy.Scope,
+	purpose string,
+	request memy.ForgetRequest,
+) (memy.PurgeReceipt, error) {
 	if request.Limit == 0 {
 		request.Limit = 256
 	}
 	if request.MaxBytes == 0 {
-		request.MaxBytes = 64 << 20
+		request.MaxBytes = defaultForgetMaxBytes
 	}
 	ids := make(map[string]bool)
 	for {
@@ -456,7 +472,7 @@ func fullForget[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, autho
 				unattempted = true
 			}
 		}
-		if receipt.State != memy.RevocationCommitted && !(receipt.State == memy.PurgePending && unattempted) {
+		if receipt.State != memy.RevocationCommitted && (receipt.State != memy.PurgePending || !unattempted) {
 			receipt.Batch.Records = make([]string, 0, len(ids))
 			for id := range ids {
 				receipt.Batch.Records = append(receipt.Batch.Records, id)

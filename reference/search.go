@@ -16,9 +16,15 @@ import (
 type Eventual[Q any] struct{ Index *Index[Q] }
 
 func (Eventual[Q]) Capabilities() memy.SearchCapabilities {
-	return memy.SearchCapabilities{Scoped: true, BoundedCandidates: true}
+	return memy.SearchCapabilities{Scoped: true, Visibility: false, BoundedCandidates: true}
 }
-func (e Eventual[Q]) Search(ctx context.Context, scope memy.Scope, query Q, options memy.SearchOptions) (memy.SearchResult, error) {
+
+func (e Eventual[Q]) Search(
+	ctx context.Context,
+	scope memy.Scope,
+	query Q,
+	options memy.SearchOptions,
+) (memy.SearchResult, error) {
 	if e.Index == nil {
 		return memy.SearchResult{}, memy.ErrInvalid
 	}
@@ -30,7 +36,7 @@ func (e Eventual[Q]) Search(ctx context.Context, scope memy.Scope, query Q, opti
 		return result, err
 	}
 	for n := range result.Coverage {
-		result.Coverage[n].Status = "eventual"
+		result.Coverage[n].Status = coverageEventual
 		result.Coverage[n].MinimumSatisfied = false
 	}
 	return result, nil
@@ -57,7 +63,8 @@ type Composite[Q any] struct {
 }
 
 func validSearchIdentifier(value string) bool {
-	return len(value) > 0 && len(value) <= 1024 && utf8.ValidString(value) && !strings.ContainsRune(value, 0) && strings.TrimSpace(value) != ""
+	return len(value) > 0 && len(value) <= 1024 && utf8.ValidString(value) && !strings.ContainsRune(value, 0) &&
+		strings.TrimSpace(value) != ""
 }
 func finite(value float64) bool { return !math.IsNaN(value) && !math.IsInf(value, 0) }
 func (c Composite[Q]) validate() error {
@@ -99,6 +106,28 @@ func absentSearch[Q any](backend memy.Search[Q]) bool {
 	switch value.Kind() {
 	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Pointer, reflect.Slice:
 		return value.IsNil()
+	case reflect.Invalid,
+		reflect.Bool,
+		reflect.Int,
+		reflect.Int8,
+		reflect.Int16,
+		reflect.Int32,
+		reflect.Int64,
+		reflect.Uint,
+		reflect.Uint8,
+		reflect.Uint16,
+		reflect.Uint32,
+		reflect.Uint64,
+		reflect.Uintptr,
+		reflect.Float32,
+		reflect.Float64,
+		reflect.Complex64,
+		reflect.Complex128,
+		reflect.Array,
+		reflect.String,
+		reflect.Struct,
+		reflect.UnsafePointer:
+		return false
 	}
 	return false
 }
@@ -122,12 +151,14 @@ func validateBackendResult(result memy.SearchResult, id string, maximum int) err
 		return memy.ErrInvalid
 	}
 	switch result.Coverage[0].Status {
-	case "ready", "eventual", "pending", "degraded", "unavailable":
+	case coverageReady, coverageEventual, coveragePending, "degraded", coverageUnavailable:
 	default:
 		return memy.ErrInvalid
 	}
 	for _, candidate := range result.Candidates {
-		if (memy.RevisionRef{RecordID: candidate.RecordID, Revision: candidate.Revision}).Validate() != nil || !finite(candidate.Score) || len(candidate.Signals) > 1 {
+		if (memy.RevisionRef{RecordID: candidate.RecordID, Revision: candidate.Revision}).Validate() != nil ||
+			!finite(candidate.Score) ||
+			len(candidate.Signals) > 1 {
 			return memy.ErrInvalid
 		}
 		for _, signal := range candidate.Signals {
@@ -159,7 +190,13 @@ func candidateOrder(a, b memy.Candidate) int {
 	}
 	return 0
 }
-func (c Composite[Q]) Search(ctx context.Context, scope memy.Scope, query Q, options memy.SearchOptions) (memy.SearchResult, error) {
+
+func (c Composite[Q]) Search(
+	ctx context.Context,
+	scope memy.Scope,
+	query Q,
+	options memy.SearchOptions,
+) (memy.SearchResult, error) {
 	if err := c.validate(); err != nil {
 		return memy.SearchResult{}, err
 	}
@@ -172,7 +209,10 @@ func (c Composite[Q]) Search(ctx context.Context, scope memy.Scope, query Q, opt
 	}
 	backends := slices.Clone(c.Backends)
 	slices.SortFunc(backends, func(a, b Backend[Q]) int { return strings.Compare(a.ID, b.ID) })
-	combined := memy.SearchResult{Coverage: make([]memy.Coverage, 0, len(backends)), Candidates: make([]memy.Candidate, 0)}
+	combined := memy.SearchResult{
+		Coverage:   make([]memy.Coverage, 0, len(backends)),
+		Candidates: make([]memy.Candidate, 0), CandidatesTruncated: false,
+	}
 	fused := make(map[memy.RevisionRef]memy.Candidate)
 	successes := 0
 	var failures error
@@ -180,71 +220,19 @@ func (c Composite[Q]) Search(ctx context.Context, scope memy.Scope, query Q, opt
 		if err := ctx.Err(); err != nil {
 			return combined, err
 		}
-		result, err := backend.Search.Search(ctx, scope, query, options)
-		// Cancellation may legitimately return no metadata at all. Preserve the
-		// operation error before validating a successful/partial result envelope.
-		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-			if len(result.Coverage) == 1 && result.Coverage[0].Backend == backend.ID {
-				combined.Coverage = append(combined.Coverage, result.Coverage...)
-			}
-			return combined, err
+		result, usable, skippedErr, backendErr := c.searchBackend(ctx, scope, query, options, backend, &combined)
+		if backendErr != nil {
+			return combined, backendErr
 		}
-		if cancellation := ctx.Err(); cancellation != nil {
-			return combined, cancellation
-		}
-		if validation := validateBackendResult(result, backend.ID, options.MaxCandidates); validation != nil {
-			return combined, validation
-		}
-		combined.Coverage = append(combined.Coverage, result.Coverage...)
-		if cancellation := ctx.Err(); cancellation != nil && err == nil {
-			return combined, cancellation
-		}
-		if err != nil {
-			failures = errors.Join(failures, err)
-			if !c.AllowDegraded || options.Minimum != nil || errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-				return combined, err
-			}
+		if !usable {
+			failures = errors.Join(failures, skippedErr)
 			continue
 		}
-		coverage := result.Coverage[0]
-		if coverage.Status == "unavailable" || coverage.Status == "degraded" {
-			failures = errors.Join(failures, memy.ErrUnavailable)
-			if !c.AllowDegraded || options.Minimum != nil {
-				return combined, memy.ErrUnavailable
-			}
-			continue
-		}
-		if options.Minimum != nil && !coverage.MinimumSatisfied {
-			return combined, memy.ErrVisibilityPending
-		}
+
 		successes++
 		combined.CandidatesTruncated = combined.CandidatesTruncated || result.CandidatesTruncated
-		seen := make(map[memy.RevisionRef]bool, len(result.Candidates))
-		rank := 0
-		weight := 1.0
-		if configured, ok := c.RRF.Weights[backend.ID]; ok {
-			weight = configured
-		}
-		for _, candidate := range result.Candidates {
-			ref := memy.RevisionRef{RecordID: candidate.RecordID, Revision: candidate.Revision}
-			if seen[ref] {
-				continue
-			}
-			seen[ref] = true
-			rank++
-			value := fused[ref]
-			value.RecordID = ref.RecordID
-			value.Revision = ref.Revision
-			value.Score += weight / (c.RRF.K + float64(rank))
-			if !finite(value.Score) {
-				return combined, memy.ErrInvalid
-			}
-			rawScore := candidate.Score
-			if len(candidate.Signals) == 1 {
-				rawScore = candidate.Signals[0].Score
-			}
-			value.Signals = append(value.Signals, memy.SearchSignal{Backend: backend.ID, Rank: rank, Score: rawScore})
-			fused[ref] = value
+		if fusionErr := c.fuseBackend(fused, backend.ID, result.Candidates); fusionErr != nil {
+			return combined, fusionErr
 		}
 	}
 	if successes == 0 {
@@ -260,3 +248,92 @@ func (c Composite[Q]) Search(ctx context.Context, scope memy.Scope, query Q, opt
 	}
 	return combined, nil
 }
+
+func (c Composite[Q]) searchBackend(
+	ctx context.Context,
+	scope memy.Scope,
+	query Q,
+	options memy.SearchOptions,
+	backend Backend[Q],
+	combined *memy.SearchResult,
+) (memy.SearchResult, bool, error, error) {
+	result, err := backend.Search.Search(ctx, scope, query, options)
+	// Cancellation may legitimately return no metadata at all. Preserve the
+	// operation error before validating a successful/partial result envelope.
+	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+		if len(result.Coverage) == 1 && result.Coverage[0].Backend == backend.ID {
+			combined.Coverage = append(combined.Coverage, result.Coverage...)
+		}
+		return result, false, nil, err
+	}
+	if cancellation := ctx.Err(); cancellation != nil {
+		return result, false, nil, cancellation
+	}
+	if validation := validateBackendResult(result, backend.ID, options.MaxCandidates); validation != nil {
+		return result, false, nil, validation
+	}
+	combined.Coverage = append(combined.Coverage, result.Coverage...)
+	if cancellation := ctx.Err(); cancellation != nil && err == nil {
+		return result, false, nil, cancellation
+	}
+	if err != nil {
+		if !c.AllowDegraded || options.Minimum != nil || errors.Is(err, context.Canceled) ||
+			errors.Is(err, context.DeadlineExceeded) {
+			return result, false, nil, err
+		}
+		return result, false, err, nil
+	}
+	coverage := result.Coverage[0]
+	if coverage.Status == coverageUnavailable || coverage.Status == "degraded" {
+		if !c.AllowDegraded || options.Minimum != nil {
+			return result, false, nil, memy.ErrUnavailable
+		}
+		return result, false, memy.ErrUnavailable, nil
+	}
+	if options.Minimum != nil && !coverage.MinimumSatisfied {
+		return result, false, nil, memy.ErrVisibilityPending
+	}
+	return result, true, nil, nil
+}
+
+func (c Composite[Q]) fuseBackend(
+	fused map[memy.RevisionRef]memy.Candidate,
+	backendID string,
+	candidates []memy.Candidate,
+) error {
+	seen := make(map[memy.RevisionRef]bool, len(candidates))
+	rank := 0
+	weight := 1.0
+	if configured, ok := c.RRF.Weights[backendID]; ok {
+		weight = configured
+	}
+	for _, candidate := range candidates {
+		ref := memy.RevisionRef{RecordID: candidate.RecordID, Revision: candidate.Revision}
+		if seen[ref] {
+			continue
+		}
+		seen[ref] = true
+		rank++
+		value := fused[ref]
+		value.RecordID = ref.RecordID
+		value.Revision = ref.Revision
+		value.Score += weight / (c.RRF.K + float64(rank))
+		if !finite(value.Score) {
+			return memy.ErrInvalid
+		}
+		rawScore := candidate.Score
+		if len(candidate.Signals) == 1 {
+			rawScore = candidate.Signals[0].Score
+		}
+		value.Signals = append(value.Signals, memy.SearchSignal{Backend: backendID, Rank: rank, Score: rawScore})
+		fused[ref] = value
+	}
+	return nil
+}
+
+const (
+	coverageReady       = "ready"
+	coverageEventual    = "eventual"
+	coveragePending     = "pending"
+	coverageUnavailable = "unavailable"
+)

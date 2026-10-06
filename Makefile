@@ -1,15 +1,16 @@
 GO ?= go
 GOCACHE ?= /tmp/memy-go-build
-GOPATH ?= /tmp/memy-gopath
 GOLANGCI_LINT_CACHE ?= /tmp/memy-golangci-cache
 GOLANGCI_LINT ?= golangci-lint
-VERSION ?= v0.1.0
+RELEASE_TYPE ?= patch
+TEST_TIMEOUT ?= 30m
+TEST_FLAGS ?= -v -race -count=1 -timeout=$(TEST_TIMEOUT)
 FUZZTIME ?= 30s
 FUZZPARALLEL ?= 2
 MODULES := $(shell find . -type d \( -name ".*" -not -name "." -o -name "vendor" \) -prune -o -type f -name "go.mod" -exec dirname {} \;)
-export GOCACHE GOPATH GOLANGCI_LINT_CACHE
+export GOCACHE GOLANGCI_LINT_CACHE
 
-.PHONY: format vet lint fix test race validate examples bench fuzz cover release
+.PHONY: format vet lint fix test race validate examples bench fuzz cover release release-patch release-break
 
 format:
 	@test -z "$$(gofmt -l .)"
@@ -36,7 +37,7 @@ fix:
 test:
 	@for dir in $(MODULES); do \
 		echo "test - $$dir"; \
-		(cd "$$dir" && $(GO) test -v -race ./...) || exit 1; \
+		(cd "$$dir" && $(GO) test $(TEST_FLAGS) ./...) || exit 1; \
 	done
 
 race: test
@@ -46,6 +47,8 @@ validate: format vet lint test examples
 examples:
 	$(GO) run ./examples/lifecycle
 	$(GO) run ./examples/quality
+	$(GO) run ./examples/retrieval
+	$(GO) run ./examples/quality-integration
 
 bench:
 	@for dir in $(MODULES); do \
@@ -77,4 +80,10 @@ cover:
 	done
 
 release: validate
-	./scripts/release.sh "$(VERSION)"
+	./scripts/release.sh "$(RELEASE_TYPE)" "$(MODULES)"
+
+release-patch: validate
+	./scripts/release.sh patch "$(MODULES)"
+
+release-break: validate
+	./scripts/release.sh break "$(MODULES)"

@@ -39,7 +39,16 @@ func rewriteFixtureMemberships(b memy.Bucket, scope memy.Scope, id string, revis
 			return
 		}
 		seen[key] = true
-		bindings = append(bindings, membershipproof.Binding{Scope: scope.Key(), RecordID: id, Revision: uint64(revision), Relation: relation, MatchID: match})
+		bindings = append(
+			bindings,
+			membershipproof.Binding{
+				Scope:    scope.Key(),
+				RecordID: id,
+				Revision: uint64(revision),
+				Relation: relation,
+				MatchID:  match,
+			},
+		)
 	}
 	for _, source := range doc.Data.Proposal.Sources {
 		add("source", source.ID)
@@ -51,7 +60,19 @@ func rewriteFixtureMemberships(b memy.Bucket, scope memy.Scope, id string, revis
 	for i, binding := range bindings {
 		match, _ := json.Marshal(binding.MatchID)
 		mh := sha256.Sum256(match)
-		raw, err := json.Marshal(map[string]any{"schema": memy.SchemaVersion, "kind": "membership", "data": map[string]any{"scope": scope, "ref": memy.RevisionRef{RecordID: id, Revision: revision}, "relation": binding.Relation, "match_id": binding.MatchID, "proof": proofs[i]}})
+		raw, err := json.Marshal(
+			map[string]any{
+				"schema": memy.SchemaVersion,
+				"kind":   "membership",
+				"data": map[string]any{
+					"scope":    scope,
+					"ref":      memy.RevisionRef{RecordID: id, Revision: revision},
+					"relation": binding.Relation,
+					"match_id": binding.MatchID,
+					"proof":    proofs[i],
+				},
+			},
+		)
 		if err != nil {
 			return err
 		}

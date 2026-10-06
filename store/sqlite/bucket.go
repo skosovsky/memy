@@ -4,12 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/skosovsky/memy/internal/workcost"
 	"strings"
+
+	"github.com/skosovsky/memy/internal/workcost"
 
 	"github.com/skosovsky/memy"
 	"github.com/skosovsky/memy/internal/kv"
 )
+
+const maxPrefixByte = 255
 
 // sqlBucket performs addressed SQL inside the owning transaction. It never
 // materializes unrelated scope rows and never outlives its synchronous callback.
@@ -46,7 +49,8 @@ func (b *sqlBucket) Get(key string) (memy.Value, error) {
 		return memy.Value{}, err
 	}
 	var v memy.Value
-	err := b.tx.QueryRowContext(b.ctx, `SELECT version,value FROM memy_values WHERE scope=? AND key=?`, b.scope, key).Scan(&v.Version, &v.Data)
+	err := b.tx.QueryRowContext(b.ctx, `SELECT version,value FROM memy_values WHERE scope=? AND key=?`, b.scope, key).
+		Scan(&v.Version, &v.Data)
 	if errors.Is(err, sql.ErrNoRows) {
 		return memy.Value{}, nil
 	}
@@ -64,7 +68,7 @@ func (b *sqlBucket) Get(key string) (memy.Value, error) {
 func prefixEnd(prefix string) string {
 	end := []byte(prefix)
 	for i := len(end) - 1; i >= 0; i-- {
-		if end[i] != 255 {
+		if end[i] != maxPrefixByte {
 			end[i]++
 			return string(end[:i+1])
 		}
@@ -93,34 +97,11 @@ func (b *sqlBucket) Scan(options memy.ScanOptions) (memy.ScanPage, error) {
 		return memy.ScanPage{}, storageError(err)
 	}
 	defer func() { _ = rows.Close() }()
-	page := memy.ScanPage{Entries: make([]memy.Entry, 0), Complete: true}
-	for rows.Next() {
-		workcost.Metadata()
-		var entry memy.Entry
-		var size int64
-		if err := rows.Scan(&entry.Key, &entry.Value.Version, &size); err != nil {
-			return memy.ScanPage{}, storageError(err)
-		}
-		if entry.Value.Version == 0 || entry.Value.Version > memy.MaxVersion || size <= 0 {
-			return memy.ScanPage{}, memy.ErrSchema
-		}
-		if len(page.Entries) == options.Limit || len(entry.Key) > options.MaxBytes-page.Bytes || size > int64(options.MaxBytes-page.Bytes-len(entry.Key)) {
-			if len(page.Entries) == 0 {
-				return memy.ScanPage{}, memy.ErrBudget
-			}
-			page.Complete = false
-			page.Cursor = b.binding.Next(options, page.Entries[len(page.Entries)-1].Key)
-			break
-		}
-		page.Entries = append(page.Entries, entry)
-		page.Bytes += len(entry.Key) + int(size)
+	page, scanErr := b.scanMetadata(rows, options)
+	if scanErr != nil {
+		return memy.ScanPage{}, scanErr
 	}
-	if err := rows.Err(); err != nil {
-		return memy.ScanPage{}, storageError(err)
-	}
-	if err := rows.Close(); err != nil {
-		return memy.ScanPage{}, storageError(err)
-	}
+
 	for i := range page.Entries {
 		value, err := b.Get(page.Entries[i].Key)
 		if err != nil {
@@ -159,9 +140,24 @@ func (b *sqlBucket) write(key string, expected memy.Version, data []byte) (memy.
 	var result sql.Result
 	var err error
 	if expected == 0 {
-		result, err = b.tx.ExecContext(b.ctx, `INSERT OR IGNORE INTO memy_values(scope,key,version,value) VALUES(?,?,?,?)`, b.scope, key, next, data)
+		result, err = b.tx.ExecContext(
+			b.ctx,
+			`INSERT OR IGNORE INTO memy_values(scope,key,version,value) VALUES(?,?,?,?)`,
+			b.scope,
+			key,
+			next,
+			data,
+		)
 	} else {
-		result, err = b.tx.ExecContext(b.ctx, `UPDATE memy_values SET version=?,value=? WHERE scope=? AND key=? AND version=?`, next, data, b.scope, key, expected)
+		result, err = b.tx.ExecContext(
+			b.ctx,
+			`UPDATE memy_values SET version=?,value=? WHERE scope=? AND key=? AND version=?`,
+			next,
+			data,
+			b.scope,
+			key,
+			expected,
+		)
 	}
 	if err != nil {
 		return 0, storageError(err)
@@ -175,4 +171,37 @@ func (b *sqlBucket) write(key string, expected memy.Version, data []byte) (memy.
 	}
 	b.binding.Generation++
 	return next, nil
+}
+
+func (b *sqlBucket) scanMetadata(rows *sql.Rows, options memy.ScanOptions) (memy.ScanPage, error) {
+	page := memy.ScanPage{Entries: make([]memy.Entry, 0), Complete: true, Cursor: "", Bytes: 0}
+	for rows.Next() {
+		workcost.Metadata()
+		var entry memy.Entry
+		var size int64
+		if err := rows.Scan(&entry.Key, &entry.Value.Version, &size); err != nil {
+			return memy.ScanPage{}, storageError(err)
+		}
+		if entry.Value.Version == 0 || entry.Value.Version > memy.MaxVersion || size <= 0 {
+			return memy.ScanPage{}, memy.ErrSchema
+		}
+		if len(page.Entries) == options.Limit || len(entry.Key) > options.MaxBytes-page.Bytes ||
+			size > int64(options.MaxBytes-page.Bytes-len(entry.Key)) {
+			if len(page.Entries) == 0 {
+				return memy.ScanPage{}, memy.ErrBudget
+			}
+			page.Complete = false
+			page.Cursor = b.binding.Next(options, page.Entries[len(page.Entries)-1].Key)
+			break
+		}
+		page.Entries = append(page.Entries, entry)
+		page.Bytes += len(entry.Key) + int(size)
+	}
+	if err := rows.Err(); err != nil {
+		return memy.ScanPage{}, storageError(err)
+	}
+	if err := rows.Close(); err != nil {
+		return memy.ScanPage{}, storageError(err)
+	}
+	return page, nil
 }

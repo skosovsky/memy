@@ -2,12 +2,26 @@ package quality
 
 import (
 	"context"
-	"github.com/skosovsky/memy"
 	"slices"
+	"time"
+
+	"github.com/skosovsky/memy"
 )
 
-func fullSnapshot[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, read memy.ReadOptions) ([]memy.Record[P, R], error) {
-	options := memy.SnapshotOptions{Read: read, Limit: 256, MaxBytes: int(^uint(0) >> 1)}
+const (
+	snapshotPageLimit   = 256
+	maximumFixtureBytes = 64 << 20
+	fixtureDay          = 24 * time.Hour
+)
+
+func fullSnapshot[P, R, A any](
+	ctx context.Context,
+	e *memy.Engine[P, R, A],
+	authority A,
+	scope memy.Scope,
+	read memy.ReadOptions,
+) ([]memy.Record[P, R], error) {
+	options := memy.SnapshotOptions{Read: read, Limit: snapshotPageLimit, MaxBytes: int(^uint(0) >> 1), Cursor: ""}
 	var records []memy.Record[P, R]
 	for {
 		page, err := e.Snapshot(ctx, authority, scope, options)
@@ -25,12 +39,19 @@ func fullSnapshot[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, aut
 	}
 }
 
-func fullForget[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, purpose string, request memy.ForgetRequest) (memy.PurgeReceipt, error) {
+func fullForget[P, R, A any](
+	ctx context.Context,
+	e *memy.Engine[P, R, A],
+	authority A,
+	scope memy.Scope,
+	purpose string,
+	request memy.ForgetRequest,
+) (memy.PurgeReceipt, error) {
 	if request.Limit == 0 {
 		request.Limit = 256
 	}
 	if request.MaxBytes == 0 {
-		request.MaxBytes = 64 << 20
+		request.MaxBytes = maximumFixtureBytes
 	}
 	ids := make(map[string]bool)
 	for {
@@ -47,7 +68,7 @@ func fullForget[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, autho
 				unattempted = true
 			}
 		}
-		if receipt.State != memy.RevocationCommitted && !(receipt.State == memy.PurgePending && unattempted) {
+		if receipt.State != memy.RevocationCommitted && (receipt.State != memy.PurgePending || !unattempted) {
 			receipt.Batch.Records = make([]string, 0, len(ids))
 			for id := range ids {
 				receipt.Batch.Records = append(receipt.Batch.Records, id)

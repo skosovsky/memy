@@ -15,10 +15,14 @@ type observedProcedureExtractor struct {
 	offline memy.Extractor[quality.ProcedureInput, quality.ProcedureObservation, quality.DocumentRef]
 }
 
-func (p observedProcedureExtractor) Extract(ctx context.Context, in quality.ProcedureInput) ([]memy.Suggestion[quality.ProcedureObservation, quality.DocumentRef], error) {
+func (p observedProcedureExtractor) Extract(
+	ctx context.Context,
+	in quality.ProcedureInput,
+) ([]memy.Suggestion[quality.ProcedureObservation, quality.DocumentRef], error) {
 	// A consumer can replace this script with its own provider SDK. Typed input,
 	// source verification, acceptance and checkpoint expectations stay unchanged.
-	if in.Source.Reference.Document != 17 {
+	const observationDocumentID = 17
+	if in.Source.Reference.Document != observationDocumentID {
 		return nil, memy.ErrInvalid
 	}
 	return p.offline.Extract(ctx, in)
@@ -31,7 +35,13 @@ type boundedProcedureSearch struct {
 func (p boundedProcedureSearch) Capabilities() memy.SearchCapabilities {
 	return p.offline.Capabilities()
 }
-func (p boundedProcedureSearch) Search(ctx context.Context, scope memy.Scope, q quality.ProcedureQuery, o memy.SearchOptions) (memy.SearchResult, error) {
+
+func (p boundedProcedureSearch) Search(
+	ctx context.Context,
+	scope memy.Scope,
+	q quality.ProcedureQuery,
+	o memy.SearchOptions,
+) (memy.SearchResult, error) {
 	return p.offline.Search(ctx, scope, q, o)
 }
 func main() {
@@ -53,8 +63,18 @@ func main() {
 		return len(p) == 1 && p[0].Output.Service == "checkout" && p[0].Trust == "data", nil
 	}
 	corpus := quality.DefaultCorpus()
-	scenario, err := quality.RunProcedureCase(ctx, "procedure-retrieval", corpus, quality.CaseRun{Seed: quality.DerivedSeed(corpus.Seed, "procedure-retrieval", 0)}, ports)
-	report := quality.Report{Schema: "memy-quality/v2", Versions: scenario.Versions, Scenarios: []quality.ScenarioReport{scenario}}
+	scenario, err := quality.RunProcedureCase(
+		ctx,
+		"procedure-retrieval",
+		corpus,
+		quality.CaseRun{Seed: quality.DerivedSeed(corpus.Seed, "procedure-retrieval", 0), Repeat: 0},
+		ports,
+	)
+	report := quality.Report{
+		Schema:    "memy-quality/v2",
+		Versions:  scenario.Versions,
+		Scenarios: []quality.ScenarioReport{scenario},
+		Manifest:  nil, Final: quality.VerdictUnknown, Diagnostic: ""}
 	if err != nil {
 		report.Diagnostic = quality.ErrorClass(err)
 	}
@@ -62,12 +82,16 @@ func main() {
 	encoder := json.NewEncoder(os.Stdout)
 	encoder.SetIndent("", "  ")
 	if encoder.Encode(report) != nil {
-		os.Stderr.WriteString("quality_report_write_failed\n")
+		if _, err := os.Stderr.WriteString("quality_report_write_failed\n"); err != nil {
+			os.Exit(2)
+		}
 		os.Exit(2)
 	}
 	os.Exit(report.ExitCode())
 }
 
 // Compile-time assertions keep this example on the consumer-owned typed seam.
-var _ memy.Extractor[quality.ProcedureInput, quality.ProcedureObservation, quality.DocumentRef] = observedProcedureExtractor{}
-var _ memy.Search[quality.ProcedureQuery] = boundedProcedureSearch{}
+var _ memy.Extractor[quality.ProcedureInput, quality.ProcedureObservation, quality.DocumentRef] = (*observedProcedureExtractor)(
+	nil,
+)
+var _ memy.Search[quality.ProcedureQuery] = (*boundedProcedureSearch)(nil)

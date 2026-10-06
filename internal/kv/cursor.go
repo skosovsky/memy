@@ -11,6 +11,8 @@ import (
 )
 
 // Binding identifies an exact scoped snapshot; its secret is owned by the store.
+const maxCursorBytes = 32768
+
 type Binding struct {
 	Secret     []byte
 	Scope      string
@@ -27,13 +29,17 @@ type cursor struct {
 }
 
 func (b Binding) Resume(options memy.ScanOptions) (string, error) {
-	if options.Limit < 1 || options.Limit > 1024 || options.MaxBytes <= 0 || len(options.Prefix) > 4096 || len(options.After) > 4096 || len(options.Plan) > 1024 || strings.ContainsRune(options.Prefix, '\x00') || strings.ContainsRune(options.After, '\x00') {
+	if options.Limit < 1 || options.Limit > 1024 || options.MaxBytes <= 0 || len(options.Prefix) > 4096 ||
+		len(options.After) > 4096 ||
+		len(options.Plan) > 1024 ||
+		strings.ContainsRune(options.Prefix, '\x00') ||
+		strings.ContainsRune(options.After, '\x00') {
 		return "", memy.ErrInvalid
 	}
 	if options.Cursor == "" {
 		return options.After, nil
 	}
-	if len(options.Cursor) > 32768 {
+	if len(options.Cursor) > maxCursorBytes {
 		return "", memy.ErrInvalid
 	}
 	parts := strings.Split(options.Cursor, ".")
@@ -59,7 +65,10 @@ func (b Binding) Resume(options memy.ScanOptions) (string, error) {
 	if err := decoder.Decode(&c); err != nil {
 		return "", memy.ErrInvalid
 	}
-	if c.Scope != b.Scope || string(c.Prefix) != options.Prefix || string(c.After) != options.After || len(c.Last) == 0 || len(c.Last) > 4096 || !strings.HasPrefix(string(c.Last), options.Prefix) {
+	if c.Scope != b.Scope || string(c.Prefix) != options.Prefix || string(c.After) != options.After ||
+		len(c.Last) == 0 ||
+		len(c.Last) > 4096 ||
+		!strings.HasPrefix(string(c.Last), options.Prefix) {
 		return "", memy.ErrInvalid
 	}
 	if c.Generation != b.Generation || string(c.Plan) != options.Plan {
@@ -69,7 +78,16 @@ func (b Binding) Resume(options memy.ScanOptions) (string, error) {
 }
 
 func (b Binding) Next(options memy.ScanOptions, last string) string {
-	raw, _ := json.Marshal(cursor{Scope: b.Scope, Prefix: []byte(options.Prefix), After: []byte(options.After), Plan: []byte(options.Plan), Generation: b.Generation, Last: []byte(last)})
+	raw, _ := json.Marshal(
+		cursor{
+			Scope:      b.Scope,
+			Prefix:     []byte(options.Prefix),
+			After:      []byte(options.After),
+			Plan:       []byte(options.Plan),
+			Generation: b.Generation,
+			Last:       []byte(last),
+		},
+	)
 	mac := hmac.New(sha256.New, b.Secret)
 	_, _ = mac.Write(raw)
 	return base64.RawURLEncoding.EncodeToString(raw) + "." + base64.RawURLEncoding.EncodeToString(mac.Sum(nil))

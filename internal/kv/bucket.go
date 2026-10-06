@@ -4,8 +4,10 @@ package kv
 import (
 	"bytes"
 	"context"
-	"github.com/skosovsky/memy/internal/workcost"
+	"maps"
 	"strings"
+
+	"github.com/skosovsky/memy/internal/workcost"
 
 	"github.com/skosovsky/memy"
 )
@@ -26,15 +28,22 @@ type Bucket struct {
 // to values through the callback; no complete snapshot or payload copy is made.
 func New(ctx context.Context, values map[string]memy.Value, index *Index, binding Binding, writable bool) *Bucket {
 	owned := *index
-	return &Bucket{Values: values, index: &owned, destination: index, Binding: binding, pending: make(map[string]memy.Value), ctx: ctx, writable: writable, closed: false}
+	return &Bucket{
+		Values:      values,
+		index:       &owned,
+		destination: index,
+		Binding:     binding,
+		pending:     make(map[string]memy.Value),
+		ctx:         ctx,
+		writable:    writable,
+		closed:      false,
+	}
 }
 
 // Commit applies only touched keys after the owner's successful transaction.
 // The caller must hold the same exclusion boundary used for the callback.
 func (b *Bucket) Commit() {
-	for key, value := range b.pending {
-		b.Values[key] = value
-	}
+	maps.Copy(b.Values, b.pending)
 	*b.destination = *b.index
 }
 
@@ -82,13 +91,19 @@ func (b *Bucket) Scan(options memy.ScanOptions) (memy.ScanPage, error) {
 		return memy.ScanPage{}, err
 	}
 	keys := b.index.Keys(options.Prefix, after, options.Limit+1)
-	page := memy.ScanPage{Entries: make([]memy.Entry, 0, min(len(keys), options.Limit)), Complete: true}
+	page := memy.ScanPage{
+		Entries:  make([]memy.Entry, 0, min(len(keys), options.Limit)),
+		Complete: true,
+		Cursor:   "",
+		Bytes:    0,
+	}
 	for _, key := range keys {
 		if err := b.ctx.Err(); err != nil {
 			return memy.ScanPage{}, err
 		}
 		value := b.value(key)
-		if len(page.Entries) == options.Limit || len(key) > options.MaxBytes-page.Bytes || len(value.Data) > options.MaxBytes-page.Bytes-len(key) {
+		if len(page.Entries) == options.Limit || len(key) > options.MaxBytes-page.Bytes ||
+			len(value.Data) > options.MaxBytes-page.Bytes-len(key) {
 			if len(page.Entries) == 0 {
 				return memy.ScanPage{}, memy.ErrBudget
 			}

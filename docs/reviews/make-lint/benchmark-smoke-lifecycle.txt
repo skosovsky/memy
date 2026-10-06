@@ -1,0 +1,7 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/skosovsky/memy
+cpu: Apple M1 Max
+BenchmarkLifecycleCost/memory/1000/Get-10         	       1	   1289834 ns/op	         0 censored/op	      2862 decoded-bytes/op	         2.000 decoded-docs/op	         8.000 get-requests/op	        18.00 index-nodes/op	         1.000 listed-entries/op	      2862 memory-copy-bytes/op	   1390250 p50-ns	   1390250 p95-ns	      2862 returned-bytes/op	         0 sql-metadata-rows/op	         0 sql-value-bytes/op	         0 sql-value-rows/op	  407360 B/op	    4647 allocs/op
+PASS
+ok  	github.com/skosovsky/memy	0.573s

@@ -27,6 +27,10 @@ import (
 // Stage identifies a fault-injection boundary. Hooks execute synchronously.
 type Stage string
 
+const readPoolConnections = 16
+const idleReadConnections = 4
+const cursorSecretBytes = 32
+
 const lockWaitLimit = 5 * time.Second
 const lockRetryDelay = 2 * time.Millisecond
 
@@ -75,7 +79,16 @@ func Open(ctx context.Context, path string, options Options) (*Store, error) {
 	}
 	db.SetMaxOpenConns(1)
 	db.SetMaxIdleConns(1)
-	store := &Store{db: db, fault: options.Fault, once: sync.Once{}, closeErr: nil}
+	store := &Store{
+		db:       db,
+		fault:    options.Fault,
+		once:     sync.Once{},
+		closeErr: nil,
+		reads:    nil,
+		fenceDir: "",
+		secret:   nil,
+		closed:   atomic.Bool{},
+	}
 	if err := store.initialize(ctx); err != nil {
 		_ = db.Close()
 		return nil, err
@@ -103,8 +116,8 @@ func Open(ctx context.Context, path string, options Options) (*Store, error) {
 		_ = db.Close()
 		return nil, storageError(operationErr)
 	}
-	store.reads.SetMaxOpenConns(16)
-	store.reads.SetMaxIdleConns(4)
+	store.reads.SetMaxOpenConns(readPoolConnections)
+	store.reads.SetMaxIdleConns(idleReadConnections)
 	return store, nil
 }
 
@@ -114,7 +127,10 @@ func (s *Store) initialize(ctx context.Context) error {
 		return storageError(operationErr)
 	}
 	defer func() { _ = tx.Rollback() }()
-	if _, err := tx.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS memy_schema (singleton INTEGER PRIMARY KEY CHECK(singleton=1), version INTEGER NOT NULL, cursor_secret BLOB)`); err != nil {
+	if _, err := tx.ExecContext(
+		ctx,
+		`CREATE TABLE IF NOT EXISTS memy_schema (singleton INTEGER PRIMARY KEY CHECK(singleton=1), version INTEGER NOT NULL, cursor_secret BLOB)`,
+	); err != nil {
 		return storageError(err)
 	}
 	inserted, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO memy_schema(singleton,version) VALUES(1,3)`)
@@ -122,8 +138,9 @@ func (s *Store) initialize(ctx context.Context) error {
 		return storageError(err)
 	}
 	var version int
-	if err := tx.QueryRowContext(ctx, `SELECT version FROM memy_schema WHERE singleton=1`).Scan(&version); err != nil {
-		return storageError(err)
+	if queryErr := tx.QueryRowContext(ctx, `SELECT version FROM memy_schema WHERE singleton=1`).
+		Scan(&version); queryErr != nil {
+		return storageError(queryErr)
 	}
 	if version != int(memy.SchemaVersion) {
 		return memy.ErrSchema
@@ -132,21 +149,8 @@ func (s *Store) initialize(ctx context.Context) error {
 	if err != nil {
 		return storageError(err)
 	}
-	if created == 1 {
-		s.secret = make([]byte, 32)
-		if _, err := rand.Read(s.secret); err != nil {
-			return storageError(err)
-		}
-		if _, err := tx.ExecContext(ctx, `UPDATE memy_schema SET cursor_secret=? WHERE singleton=1`, s.secret); err != nil {
-			return storageError(err)
-		}
-	} else {
-		if err := tx.QueryRowContext(ctx, `SELECT cursor_secret FROM memy_schema WHERE singleton=1`).Scan(&s.secret); err != nil {
-			return errors.Join(memy.ErrSchema, err)
-		}
-		if len(s.secret) != 32 {
-			return memy.ErrSchema
-		}
+	if secretErr := s.initializeSecret(ctx, tx, created == 1); secretErr != nil {
+		return secretErr
 	}
 	if _, err := tx.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS memy_values (
 		scope TEXT NOT NULL, key TEXT NOT NULL, version INTEGER NOT NULL CHECK(version>0),
@@ -169,7 +173,13 @@ func (s *Store) initialize(ctx context.Context) error {
 
 // Capabilities describes the persistent transactional contract.
 func (*Store) Capabilities() memy.StoreCapabilities {
-	return memy.StoreCapabilities{Atomic: true, ConditionalWrite: true, FencedView: platformFencing, Durable: true, SchemaVersion: memy.SchemaVersion}
+	return memy.StoreCapabilities{
+		Atomic:           true,
+		ConditionalWrite: true,
+		FencedView:       platformFencing,
+		Durable:          true,
+		SchemaVersion:    memy.SchemaVersion,
+	}
 }
 
 // View reads addressed values in a consistent transaction, rejecting writes.
@@ -222,21 +232,24 @@ func (s *Store) run(ctx context.Context, scope memy.Scope, writable bool, fn fun
 	if writable {
 		tx, operationErr = s.begin(ctx)
 	} else {
-		tx, operationErr = s.reads.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
+		tx, operationErr = s.reads.BeginTx(ctx, &sql.TxOptions{ReadOnly: true, Isolation: sql.LevelDefault})
 	}
 	if operationErr != nil {
 		return storageError(operationErr)
 	}
 	defer func() { _ = tx.Rollback() }()
-	var generation memy.Version
-	err := tx.QueryRowContext(ctx, `SELECT generation FROM memy_generations WHERE scope=?`, scope.Key()).Scan(&generation)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return storageError(err)
+	generation, generationErr := readGeneration(ctx, tx, scope.Key())
+	if generationErr != nil {
+		return generationErr
 	}
-	if generation > memy.MaxVersion || (err == nil && generation == 0) {
-		return memy.ErrSchema
+	bucket := &sqlBucket{
+		ctx:      ctx,
+		tx:       tx,
+		scope:    scope.Key(),
+		writable: writable,
+		closed:   false,
+		binding:  kv.Binding{Secret: s.secret, Scope: scope.Key(), Generation: generation},
 	}
-	bucket := &sqlBucket{ctx: ctx, tx: tx, scope: scope.Key(), writable: writable, binding: kv.Binding{Secret: s.secret, Scope: scope.Key(), Generation: generation}}
 	defer bucket.Seal()
 	if err := fn(bucket); err != nil {
 		return err
@@ -247,29 +260,7 @@ func (s *Store) run(ctx context.Context, scope memy.Scope, writable bool, fn fun
 	if !writable {
 		return nil
 	} // Deferred rollback releases the read transaction.
-	if bucket.binding.Generation != generation {
-		if _, err := tx.ExecContext(ctx, `INSERT INTO memy_generations(scope,generation) VALUES(?,?) ON CONFLICT(scope) DO UPDATE SET generation=excluded.generation`, scope.Key(), bucket.binding.Generation); err != nil {
-			return storageError(err)
-		}
-	}
-	if s.fault != nil {
-		if err := s.fault(ctx, BeforeCommit); err != nil {
-			return err
-		}
-	}
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	if err := tx.Commit(); err != nil {
-		// Commit errors may not certify absence of external durable effects.
-		return errors.Join(memy.ErrUnknownOutcome, storageError(err))
-	}
-	if s.fault != nil {
-		if err := s.fault(ctx, AfterCommit); err != nil {
-			return errors.Join(memy.ErrUnknownOutcome, err)
-		}
-	}
-	return nil
+	return s.commit(ctx, tx, scope.Key(), generation, bucket.binding.Generation)
 }
 
 func storageError(err error) error {
@@ -308,4 +299,75 @@ func (s *Store) begin(ctx context.Context) (*sql.Tx, error) {
 func (s *Store) Close() error {
 	s.once.Do(func() { s.closed.Store(true); s.closeErr = errors.Join(s.reads.Close(), s.db.Close()) })
 	return s.closeErr
+}
+
+func (s *Store) initializeSecret(ctx context.Context, tx *sql.Tx, created bool) error {
+	if !created {
+		if err := tx.QueryRowContext(ctx, `SELECT cursor_secret FROM memy_schema WHERE singleton=1`).
+			Scan(&s.secret); err != nil {
+			return errors.Join(memy.ErrSchema, err)
+		}
+		if len(s.secret) != cursorSecretBytes {
+			return memy.ErrSchema
+		}
+		return nil
+	}
+	s.secret = make([]byte, cursorSecretBytes)
+	if _, err := rand.Read(s.secret); err != nil {
+		return storageError(err)
+	}
+	_, err := tx.ExecContext(ctx, `UPDATE memy_schema SET cursor_secret=? WHERE singleton=1`, s.secret)
+	if err != nil {
+		return storageError(err)
+	}
+	return nil
+}
+
+func readGeneration(ctx context.Context, tx *sql.Tx, scopeKey string) (memy.Version, error) {
+	var generation memy.Version
+	err := tx.QueryRowContext(ctx, `SELECT generation FROM memy_generations WHERE scope=?`, scopeKey).
+		Scan(&generation)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return 0, storageError(err)
+	}
+	if generation > memy.MaxVersion || (err == nil && generation == 0) {
+		return 0, memy.ErrSchema
+	}
+	return generation, nil
+}
+
+func (s *Store) commit(
+	ctx context.Context,
+	tx *sql.Tx,
+	scopeKey string,
+	generation, nextGeneration memy.Version,
+) error {
+	if nextGeneration != generation {
+		if _, err := tx.ExecContext(
+			ctx,
+			`INSERT INTO memy_generations(scope,generation) VALUES(?,?) ON CONFLICT(scope) DO UPDATE SET generation=excluded.generation`,
+			scopeKey,
+			nextGeneration,
+		); err != nil {
+			return storageError(err)
+		}
+	}
+	if s.fault != nil {
+		if err := s.fault(ctx, BeforeCommit); err != nil {
+			return err
+		}
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		// Commit errors may not certify absence of external durable effects.
+		return errors.Join(memy.ErrUnknownOutcome, storageError(err))
+	}
+	if s.fault != nil {
+		if err := s.fault(ctx, AfterCommit); err != nil {
+			return errors.Join(memy.ErrUnknownOutcome, err)
+		}
+	}
+	return nil
 }

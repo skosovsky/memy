@@ -171,7 +171,7 @@ func TestDeadlineCrossedDuringCanonicalDelivery(t *testing.T) {
 					}
 					return
 				}
-				records, err := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
+				records, err := fullSnapshot(context.Background(), f.engine, f.actor, f.scope, memy.ReadOptions{})
 				// Assert.
 				if !errors.Is(err, memy.ErrStaleInput) || len(records) != 0 {
 					t.Fatalf("records=%+v err=%v", records, err)
@@ -294,7 +294,7 @@ func TestSnapshotRechecksEarlierRecordAfterLaterSourceIO(t *testing.T) {
 			assertFirstHistoryID(t, f, "a")
 			sources.armed = true
 			// Act: only the later record's source call advances the clock.
-			records, err := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
+			records, err := fullSnapshot(context.Background(), f.engine, f.actor, f.scope, memy.ReadOptions{})
 			// Assert: a final batch gate withholds the earlier, now expired record.
 			if !errors.Is(err, memy.ErrStaleInput) || len(records) != 0 {
 				t.Fatalf("snapshot=%+v err=%v", records, err)

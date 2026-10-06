@@ -3,10 +3,12 @@ package quality
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/skosovsky/memy"
+	"errors"
 	"io"
 	"os"
 	"slices"
+
+	"github.com/skosovsky/memy"
 )
 
 const CorpusVersion = "memy-quality-corpus/v2"
@@ -45,13 +47,48 @@ type Corpus struct {
 	Scenarios []ScenarioSpec `json:"scenarios"`
 }
 
-var RequiredGroups = []string{"sessions", "temporal", "retrieval", "abstention", "poisoning", "forget", "consolidation", "evaluator"}
+func requiredGroups() []string {
+	return []string{
+		"sessions",
+		"temporal",
+		groupRetrieval,
+		groupAbstention,
+		groupPoisoning,
+		groupForget,
+		"consolidation",
+		evaluatorDomain,
+	}
+}
 
 func DefaultVersions() PortVersions {
-	return PortVersions{Provider: "scripted-provider/v2", Model: "scripted", HostReview: "fixture-host-review/v2", Retention: "fixture-retention/v2", Resolver: "fixture-resolver/v2", Consolidation: "fixture-consolidation/v2", Search: "reference-rrf/v2", Projector: "fixture-projector/v2", Packing: "json-packing/v1", Grader: "none"}
+	return PortVersions{
+		Provider:      "scripted-provider/v2",
+		Model:         fixtureModeScripted,
+		HostReview:    "fixture-host-review/v2",
+		Retention:     "fixture-retention/v2",
+		Resolver:      "fixture-resolver/v2",
+		Consolidation: "fixture-consolidation/v2",
+		Search:        "reference-rrf/v2",
+		Projector:     "fixture-projector/v2",
+		Packing:       jsonPackingVersion,
+		Grader:        portNone,
+	}
 }
 func DefaultCorpus() Corpus {
-	c := Corpus{Version: CorpusVersion, Seed: 20260601, Repeats: 2, Versions: DefaultVersions(), Budgets: Budgets{MaxCandidates: 100, RecallLimit: 100, ContextBytes: 20000, InputBytes: 10000, OutputBytes: 10000, CostUnits: 5}}
+	c := Corpus{
+		Version:  CorpusVersion,
+		Seed:     defaultCorpusSeed,
+		Repeats:  2,
+		Versions: DefaultVersions(),
+		Budgets: Budgets{
+			MaxCandidates: defaultCandidateLimit,
+			RecallLimit:   defaultCandidateLimit,
+			ContextBytes:  defaultContextBytes,
+			InputBytes:    defaultProviderBytes,
+			OutputBytes:   defaultProviderBytes,
+			CostUnits:     defaultProviderCost,
+		},
+		Scenarios: nil}
 	for _, p := range plans() {
 		c.Scenarios = append(c.Scenarios, ScenarioSpec{ID: p.ID, Version: p.Version, Versions: p.Versions})
 	}
@@ -69,7 +106,7 @@ func Load(path string) (Corpus, error) {
 		return Corpus{}, memy.ErrInvalid
 	}
 	var trailing any
-	if err = d.Decode(&trailing); err != io.EOF {
+	if err = d.Decode(&trailing); !errors.Is(err, io.EOF) {
 		return Corpus{}, memy.ErrInvalid
 	}
 	if err = validateCorpus(c); err != nil {
@@ -78,13 +115,17 @@ func Load(path string) (Corpus, error) {
 	return c, nil
 }
 func validateCorpus(c Corpus) error {
-	b := c.Budgets
-	if c.Version != CorpusVersion || c.Seed == 0 || c.Repeats < 1 || c.Repeats > 20 || c.Versions != DefaultVersions() || b.MaxCandidates < 1 || b.MaxCandidates > memy.MaxSearchCandidates || b.RecallLimit < 1 || b.RecallLimit > memy.MaxSearchCandidates || b.ContextBytes < 1 || b.ContextBytes > 64<<20 || b.InputBytes < 1 || b.InputBytes > 64<<20 || b.OutputBytes < 1 || b.OutputBytes > 64<<20 || b.CostUnits < 1 || b.CostUnits > 1000000 || len(c.Scenarios) == 0 || len(c.Scenarios) > 100 {
+	if c.Version != CorpusVersion || c.Seed == 0 || c.Repeats < 1 || c.Repeats > 20 ||
+		c.Versions != DefaultVersions() || len(c.Scenarios) == 0 || len(c.Scenarios) > 100 {
 		return memy.ErrInvalid
+	}
+	if err := validateBudgets(c.Budgets); err != nil {
+		return err
 	}
 	registered := map[string]CasePlan{}
 	for _, p := range plans() {
-		if p.ID == "" || p.Version == "" || p.Run == nil || len(p.Required) == 0 || !validVersions(p.Versions) || registered[p.ID].ID != "" {
+		if p.ID == "" || p.Version == "" || p.Run == nil || len(p.Required) == 0 || !validVersions(p.Versions) ||
+			registered[p.ID].ID != "" {
 			return memy.ErrInvalid
 		}
 		registered[p.ID] = p
@@ -98,13 +139,13 @@ func validateCorpus(c Corpus) error {
 		}
 		seen[s.ID] = true
 		for _, g := range p.Groups {
-			if !slices.Contains(RequiredGroups, g) {
+			if !slices.Contains(requiredGroups(), g) {
 				return memy.ErrInvalid
 			}
 			groups[g] = true
 		}
 	}
-	for _, g := range RequiredGroups {
+	for _, g := range requiredGroups() {
 		if !groups[g] {
 			return memy.ErrInvalid
 		}
@@ -113,10 +154,37 @@ func validateCorpus(c Corpus) error {
 }
 
 func validVersions(v PortVersions) bool {
-	for _, s := range []string{v.Provider, v.Model, v.HostReview, v.Retention, v.Resolver, v.Consolidation, v.Search, v.Projector, v.Packing, v.Grader} {
-		if s == "" {
-			return false
-		}
+	return !slices.Contains(
+		[]string{
+			v.Provider,
+			v.Model,
+			v.HostReview,
+			v.Retention,
+			v.Resolver,
+			v.Consolidation,
+			v.Search,
+			v.Projector,
+			v.Packing,
+			v.Grader,
+		},
+		"",
+	)
+}
+
+func validateBudgets(b Budgets) error {
+	if b.MaxCandidates < 1 ||
+		b.MaxCandidates > memy.MaxSearchCandidates ||
+		b.RecallLimit < 1 ||
+		b.RecallLimit > memy.MaxSearchCandidates ||
+		b.ContextBytes < 1 ||
+		b.ContextBytes > 64<<20 ||
+		b.InputBytes < 1 ||
+		b.InputBytes > 64<<20 ||
+		b.OutputBytes < 1 ||
+		b.OutputBytes > 64<<20 ||
+		b.CostUnits < 1 ||
+		b.CostUnits > 1000000 {
+		return memy.ErrInvalid
 	}
-	return true
+	return nil
 }

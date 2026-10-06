@@ -79,12 +79,18 @@ func TestPersistedLifecycleMatchesWireSchemas(t *testing.T) {
 	}
 	inspectWireDocuments(t, f, schemas, seen)
 	request.Limit = 256
-	_, operationErr = fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", request)
+	_, operationErr = fullForget(context.Background(), f.engine, f.actor, f.scope, "assist", request)
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}
 	inspectWireDocuments(t, f, schemas, seen)
-	_, operationErr = f.engine.Sweep(context.Background(), f.actor, f.scope, "assist", memy.SweepRequest{OperationID: "schema-sweep", Limit: 1, MaxBytes: 10000})
+	_, operationErr = f.engine.Sweep(
+		context.Background(),
+		f.actor,
+		f.scope,
+		"assist",
+		memy.SweepRequest{OperationID: "schema-sweep", Limit: 1, MaxBytes: 10000},
+	)
 	if operationErr != nil {
 		t.Fatal(operationErr)
 	}

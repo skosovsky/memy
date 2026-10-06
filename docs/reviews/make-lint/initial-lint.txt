@@ -1,0 +1,1128 @@
+golangci-lint - .
+examples/retrieval/main.go:3:1: the average complexity for the package main is 10.750000, max is 10.000000 (cyclop)
+package main
+^
+storage_cost_test.go:24:2: there must be an empty line separating embedded fields from regular fields (embeddedstructfieldcheck)
+	memy.Store
+	^
+storage_cost_test.go:29:2: there must be an empty line separating embedded fields from regular fields (embeddedstructfieldcheck)
+	memy.Bucket
+	^
+internal/quality/procedure.go:156:10: Error return value is not checked (errcheck)
+		closeFn()
+		       ^
+internal/quality/procedure.go:161:10: Error return value is not checked (errcheck)
+		closeFn()
+		       ^
+internal/quality/corpus.go:72:32: comparing with != will fail on wrapped errors. Use errors.Is to check for a specific error (errorlint)
+	if err = d.Decode(&trailing); err != io.EOF {
+	                              ^
+identity.go:19:2: missing cases in switch of type reflect.Kind: reflect.Invalid, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128, reflect.Chan, reflect.Func, reflect.Map, reflect.UnsafePointer (exhaustive)
+	switch value.Kind() {
+	^
+internal/quality/report.go:194:2: missing cases in switch of type quality.Verdict: quality.VerdictUnknown (exhaustive)
+	switch r.Final {
+	^
+reference/search.go:99:2: missing cases in switch of type reflect.Kind: reflect.Invalid, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128, reflect.Array, reflect.String, reflect.Struct, reflect.UnsafePointer (exhaustive)
+	switch value.Kind() {
+	^
+conformance/search.go:32:16: memy.Candidate is missing field Signals (exhaustruct_v5)
+		candidate := memy.Candidate{RecordID: "record", Revision: 1, Score: 1}
+		             ^
+conformance/search.go:34:34: memy.Candidate is missing field Signals (exhaustruct_v5)
+		must(t, f.Seed(t.Context(), b, memy.Candidate{RecordID: "private", Revision: 1, Score: 1}))
+		                               ^
+conformance/search.go:61:16: memy.Candidate is missing field Signals (exhaustruct_v5)
+		candidate := memy.Candidate{RecordID: "record", Revision: 1, Score: 1}
+		             ^
+conformance/search.go:96:35: memy.Candidate is missing field Signals (exhaustruct_v5)
+			must(t, f.Seed(t.Context(), a, memy.Candidate{RecordID: id, Revision: 1, Score: 1}))
+			                               ^
+conformance/search.go:100:60: memy.SearchOptions is missing field Minimum (exhaustruct_v5)
+		result, err := f.Adapter.Search(t.Context(), a, f.Query, memy.SearchOptions{MaxCandidates: 1})
+		                                                         ^
+conformance/store.go:75:13: memy.ScanOptions is missing fields After, Plan, Cursor (exhaustruct_v5)
+	options := memy.ScanOptions{Prefix: "prefix/", Limit: 37, MaxBytes: 200}
+	           ^
+conformance/store.go:120:46: memy.ScanOptions is missing fields Prefix, After, Plan, Cursor (exhaustruct_v5)
+		for _, options := range []memy.ScanOptions{{Limit: 0, MaxBytes: 1}, {Limit: 1025, MaxBytes: 1}, {Limit: 1, MaxBytes: 0}} {
+		                                           ^
+conformance/store.go:125:23: memy.ScanOptions is missing fields After, Plan, Cursor (exhaustruct_v5)
+		if _, err := b.Scan(memy.ScanOptions{Prefix: "prefix/", Limit: 1, MaxBytes: 1}); !errors.Is(err, memy.ErrBudget) {
+		                    ^
+conformance/store.go:142:13: memy.ScanOptions is missing fields After, Plan, Cursor (exhaustruct_v5)
+	options := memy.ScanOptions{Prefix: "a/", Limit: 1, MaxBytes: 100}
+	           ^
+conformance/store.go:510:13: memy.ScanOptions is missing fields After, Plan, Cursor (exhaustruct_v5)
+	options := memy.ScanOptions{Prefix: prefix, Limit: 256, MaxBytes: int(^uint(0) >> 1)}
+	           ^
+consolidation.go:81:12: memy.SnapshotPage is missing fields Cursor, Complete, Scanned, ScannedBytes (exhaustruct_v5)
+	result := SnapshotPage[P, R]{Records: make([]Record[P, R], 0)}
+	          ^
+consolidation.go:83:23: memy.ScanOptions is missing field After (exhaustruct_v5)
+		page, err := b.Scan(ScanOptions{Prefix: "record/", Plan: plan, Cursor: options.Cursor, Limit: options.Limit, MaxBytes: options.MaxBytes})
+		                    ^
+consolidation.go:220:5: memy.Candidate is missing fields Score, Signals (exhaustruct_v5)
+				Candidate{RecordID: ref.RecordID, Revision: ref.Revision},
+				^
+consolidation.go:221:5: memy.ReadOptions is missing fields ValidAsOf, RecordedAsOf, IncludeUnknown, IncludeConflicts (exhaustruct_v5)
+				ReadOptions{Purpose: request.Purpose})
+				^
+examples/quality-integration/main.go:56:80: quality.CaseRun is missing field Repeat (exhaustruct_v5)
+	scenario, err := quality.RunProcedureCase(ctx, "procedure-retrieval", corpus, quality.CaseRun{Seed: quality.DerivedSeed(corpus.Seed, "procedure-retrieval", 0)}, ports)
+	                                                                              ^
+examples/quality-integration/main.go:57:12: quality.Report is missing fields Manifest, Final, Diagnostic (exhaustruct_v5)
+	report := quality.Report{Schema: "memy-quality/v2", Versions: scenario.Versions, Scenarios: []quality.ScenarioReport{scenario}}
+	          ^
+examples/quality-integration/main.go:72:99: main.observedProcedureExtractor is missing field offline (exhaustruct_v5)
+var _ memy.Extractor[quality.ProcedureInput, quality.ProcedureObservation, quality.DocumentRef] = observedProcedureExtractor{}
+                                                                                                  ^
+examples/quality-integration/main.go:73:45: main.boundedProcedureSearch is missing field offline (exhaustruct_v5)
+var _ memy.Search[quality.ProcedureQuery] = boundedProcedureSearch{}
+                                            ^
+examples/retrieval/main.go:46:9: memy.SearchCapabilities is missing field Visibility (exhaustruct_v5)
+	return memy.SearchCapabilities{Scoped: true, BoundedCandidates: true}
+	       ^
+examples/retrieval/main.go:61:12: memy.SearchResult is missing fields Candidates, CandidatesTruncated (exhaustruct_v5)
+	result := memy.SearchResult{Coverage: []memy.Coverage{{Backend: s.ID, Status: "eventual"}}}
+	          ^
+membership.go:36:29: memy.membershipDisk is missing field Proof (exhaustruct_v5)
+		members = append(members, membershipDisk{Scope: r.Scope, Ref: RevisionRef{RecordID: r.ID, Revision: r.Revision}, Relation: relation, MatchID: id})
+		                          ^
+projected_recall.go:93:10: memy.ProjectedRecallResult is missing field Budget (exhaustruct_v5)
+	body := ProjectedRecallResult[O, R]{
+	        ^
+projected_recall.go:184:28: memy.Ranked is missing fields Score, Explanation, Signals (exhaustruct_v5)
+			ranked = append(ranked, Ranked[P, R]{Record: record})
+			                        ^
+purge_job.go:136:13: memy.PurgeReceipt is missing field CanonicalComplete (exhaustruct_v5)
+	receipt := PurgeReceipt{Batch: PurgeBatch{OperationID: request.OperationID, Scope: scope, Epoch: epoch.Value, Selector: request.Selector, Records: []string{}}, State: RevocationCommitted, RevokedAt: epoch.RecordedAt, Sinks: []SinkResult{}}
+	           ^
+purge_job.go:138:41: memy.SinkResult is missing fields Acknowledged, ErrorCode (exhaustruct_v5)
+		receipt.Sinks = append(receipt.Sinks, SinkResult{Name: sink.Name()})
+		                                      ^
+purge_job.go:143:95: memy.operationDisk is missing fields Proposals, Receipt, Epoch (exhaustruct_v5)
+	return writeDocument(b, objectKey("operation", request.OperationID), "operation", opVersion, operationDisk{Action: "forget", Digest: requestDigest})
+	                                                                                             ^
+purge_job.go:185:22: memy.ScanOptions is missing fields Plan, Cursor (exhaustruct_v5)
+	page, err := b.Scan(ScanOptions{Prefix: prefix, After: job.After, Limit: *remaining, MaxBytes: maxBytes})
+	                    ^
+purge_job.go:215:22: memy.SinkResult is missing fields Acknowledged, ErrorCode (exhaustruct_v5)
+		receipt.Sinks[i] = SinkResult{Name: receipt.Sinks[i].Name}
+		                   ^
+purge_job.go:430:20: memy.recordDisk is missing fields Proposal, AuthorityPolicyVersion, Reconciliation, Lineage, Transitions (exhaustruct_v5)
+						tombstone := recordDisk{ID: item.ID, Revision: head.Revision + 1, Scope: scope, State: Revoked, InitialState: Revoked, RecordedAt: receipt.RevokedAt}
+						             ^
+purge_job.go:474:26: memy.ScanOptions is missing fields After, Plan, Cursor (exhaustruct_v5)
+					page, err := b.Scan(ScanOptions{Prefix: jobPrefix(job.OperationID) + "origins/", Limit: 1, MaxBytes: request.MaxBytes})
+					                    ^
+recall.go:128:10: memy.RecallResult is missing field Progress (exhaustruct_v5)
+		return RecallResult[P, R]{Coverage: boundedCoverage(found.Coverage), Records: nil}, operationErr
+		       ^
+recall.go:140:20: memy.RecallProgress is missing fields CanonicalChecked, CanonicalFiltered, RankingOmitted (exhaustruct_v5)
+	result.Progress = RecallProgress{ReturnedCandidates: len(found.Candidates), CandidatesTruncated: found.CandidatesTruncated}
+	                  ^
+recall.go:163:62: memy.Candidate is missing fields Score, Signals (exhaustruct_v5)
+			record, eligible, err := e.recallCandidate(ctx, b, scope, Candidate{RecordID: ref.ID, Revision: ref.Revision}, options.Read)
+			                                                          ^
+recall_state.go:11:12: memy.RecallResult is missing field Progress (exhaustruct_v5)
+	result := RecallResult[P, R]{
+	          ^
+recall_state.go:35:11: memy.RecallResult is missing field Progress (exhaustruct_v5)
+			return RecallResult[P, R]{Coverage: result.Coverage, Records: nil}, ErrVisibilityPending
+			       ^
+reference/index.go:131:11: memy.SearchResult is missing field CandidatesTruncated (exhaustruct_v5)
+			return memy.SearchResult{
+			       ^
+reference/index.go:187:12: memy.SearchResult is missing field CandidatesTruncated (exhaustruct_v5)
+	result := memy.SearchResult{
+	          ^
+reference/index.go:214:12: memy.SearchResult is missing field CandidatesTruncated (exhaustruct_v5)
+	result := memy.SearchResult{
+	          ^
+reference/search.go:19:9: memy.SearchCapabilities is missing field Visibility (exhaustruct_v5)
+	return memy.SearchCapabilities{Scoped: true, BoundedCandidates: true}
+	       ^
+reference/search.go:175:14: memy.SearchResult is missing field CandidatesTruncated (exhaustruct_v5)
+	combined := memy.SearchResult{Coverage: make([]memy.Coverage, 0, len(backends)), Candidates: make([]memy.Candidate, 0)}
+	            ^
+scan.go:26:13: memy.ScanOptions is missing fields After, Plan, Cursor (exhaustruct_v5)
+	options := ScanOptions{Prefix: prefix, Limit: 256, MaxBytes: int(^uint(0) >> 1)}
+	           ^
+store/memory/memory.go:34:8: memory.Store is missing fields mu, once, closed, secret (exhaustruct_v5)
+	s := &Store{scopes: make(map[string]*scopeState)}
+	      ^
+store/memory/memory.go:55:12: memory.scopeState is missing fields index, generation (exhaustruct_v5)
+		state = &scopeState{gate: make(chan struct{}, 1), values: make(map[string]memy.Value)}
+		         ^
+store/sqlite/bucket.go:96:10: memy.ScanPage is missing fields Cursor, Bytes (exhaustruct_v5)
+	page := memy.ScanPage{Entries: make([]memy.Entry, 0), Complete: true}
+	        ^
+store/sqlite/sqlite.go:78:12: sqlite.Store is missing fields reads, fenceDir, secret, closed (exhaustruct_v5)
+	store := &Store{db: db, fault: options.Fault, once: sync.Once{}, closeErr: nil}
+	          ^
+store/sqlite/sqlite.go:225:44: sql.TxOptions is missing field Isolation (exhaustruct_v5)
+		tx, operationErr = s.reads.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
+		                                         ^
+store/sqlite/sqlite.go:239:13: sqlite.sqlBucket is missing field closed (exhaustruct_v5)
+	bucket := &sqlBucket{ctx: ctx, tx: tx, scope: scope.Key(), writable: writable, binding: kv.Binding{Secret: s.secret, Scope: scope.Key(), Generation: generation}}
+	           ^
+sweep.go:176:25: memy.ScanOptions is missing fields Plan, Cursor (exhaustruct_v5)
+				page, err := b.Scan(ScanOptions{Prefix: prefix, After: job.After, Limit: 1, MaxBytes: request.MaxBytes})
+				                    ^
+sweep.go:198:15: memy.ForgetRequest is missing fields Limit, MaxBytes (exhaustruct_v5)
+							req := ForgetRequest{OperationID: op, Selector: Selector{Kind: SelectRecord, ID: target.Ref.RecordID}, Expected: []RevisionRef{target.Ref}, Reason: "retention expiry", PolicyVersion: target.PolicyVersion}
+							       ^
+sweep.go:293:73: memy.ForgetRequest is missing fields Selector, Expected, Reason, PolicyVersion (exhaustruct_v5)
+			receipt, used, err := e.advancePurge(ctx, authority, scope, purpose, ForgetRequest{OperationID: pending, Limit: request.Limit - result.Work, MaxBytes: request.MaxBytes})
+			                                                                     ^
+internal/quality/preference.go:520:6: Function 'preferenceFailures' has too many statements (53 > 50) (funlen)
+func preferenceFailures(ctx context.Context, seed uint64, limit, maxCandidates int, bytes uint64) (preferenceRunResult, error) {
+     ^
+internal/quality/procedure.go:454:28: Function 'poisoning' has too many statements (55 > 50) (funlen)
+func (f *procedureFixture) poisoning(ctx context.Context, r *ScenarioReport, guarded bool) error {
+                           ^
+internal/workcost/cost.go:17:5: active is a global variable (gochecknoglobals)
+var active atomic.Pointer[Counters]
+    ^
+callback_delivery_test.go:40:1: cognitive complexity 47 of func `TestCallbacksAllowMutationAndRejectRevokedFinalDelivery` is high (> 20) (gocognit)
+func TestCallbacksAllowMutationAndRejectRevokedFinalDelivery(t *testing.T) {
+^
+conformance/search.go:24:1: cognitive complexity 34 of func `SearchSuite` is high (> 20) (gocognit)
+func SearchSuite[Q any](t *testing.T, factory func(*testing.T) SearchFixture[Q]) {
+^
+conformance/search.go:128:1: cognitive complexity 22 of func `checkCoverage` is high (> 20) (gocognit)
+func checkCoverage(t *testing.T, result memy.SearchResult, minimum bool) {
+^
+conformance/store.go:58:1: cognitive complexity 39 of func `boundedScan` is high (> 20) (gocognit)
+func boundedScan(t *testing.T, store memy.Store) {
+^
+consolidation.go:151:1: cognitive complexity 36 of func `Consolidate` is high (> 20) (gocognit)
+func Consolidate[P, R, A any](
+^
+cross_handle_lifecycle_test.go:15:1: cognitive complexity 37 of func `TestIndependentSQLiteEnginesShareLifecycleIdempotency` is high (> 20) (gocognit)
+func TestIndependentSQLiteEnginesShareLifecycleIdempotency(t *testing.T) {
+^
+engine_test.go:547:1: cognitive complexity 35 of func `fullSweep` is high (> 20) (gocognit)
+func fullSweep[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, purpose, op string) (memy.SweepResult, error) {
+^
+examples/retrieval/main.go:86:1: cognitive complexity 25 of func `run` is high (> 20) (gocognit)
+func run() error {
+^
+identity.go:15:1: cognitive complexity 25 of func `metadataValueValid` is high (> 20) (gocognit)
+func metadataValueValid(value reflect.Value, field string) bool {
+^
+identity.go:58:1: cognitive complexity 29 of func `strictWireText` is high (> 20) (gocognit)
+func strictWireText(raw []byte) bool {
+^
+identity_decision_test.go:167:1: cognitive complexity 37 of func `TestForgetPurgesDecisionAndManagedProjection` is high (> 20) (gocognit)
+func TestForgetPurgesDecisionAndManagedProjection(t *testing.T) {
+^
+identity_decision_test.go:256:1: cognitive complexity 30 of func `TestPurgeReceiptRejectsMalformedRecordIdentity` is high (> 20) (gocognit)
+func TestPurgeReceiptRejectsMalformedRecordIdentity(t *testing.T) {
+^
+internal/membershipproof/proof_test.go:8:1: cognitive complexity 23 of func `TestProofBindsEveryRelationAndTreeShape` is high (> 20) (gocognit)
+func TestProofBindsEveryRelationAndTreeShape(t *testing.T) {
+^
+internal/quality/evaluator.go:211:1: cognitive complexity 33 of func `runEvaluatorWithMarker` is high (> 20) (gocognit)
+func runEvaluatorWithMarker(ctx context.Context, c Corpus, run CaseRun, marker string) (ScenarioReport, error) {
+^
+internal/quality/evaluator_test.go:11:1: cognitive complexity 58 of func `TestEvaluatorInsufficientBaselineDoesNotRunMutations` is high (> 20) (gocognit)
+func TestEvaluatorInsufficientBaselineDoesNotRunMutations(t *testing.T) {
+^
+internal/quality/evaluator_test.go:76:1: cognitive complexity 55 of func `TestEvaluatorMutationsRejectWrongObservations` is high (> 20) (gocognit)
+func TestEvaluatorMutationsRejectWrongObservations(t *testing.T) {
+^
+internal/quality/preference.go:217:1: cognitive complexity 22 of func `preferenceSessions` is high (> 20) (gocognit)
+func preferenceSessions(ctx context.Context, seed uint64, limit, maxCandidates int, bytes uint64) (preferenceRunResult, error) {
+^
+internal/quality/preference.go:296:1: cognitive complexity 22 of func `preferenceTemporal` is high (> 20) (gocognit)
+func preferenceTemporal(ctx context.Context, seed uint64, limit, maxCandidates int, bytes uint64) (preferenceRunResult, error) {
+^
+internal/quality/preference.go:382:1: cognitive complexity 63 of func `preferenceConsolidation` is high (> 20) (gocognit)
+func preferenceConsolidation(ctx context.Context, seed uint64, limit, maxCandidates int, bytes uint64, mode memy.ConsolidationMode, budget memy.Budget) (preferenceRunResult, error) {
+^
+internal/quality/procedure.go:344:1: cognitive complexity 30 of func `(*procedureFixture).retrieval` is high (> 20) (gocognit)
+func (f *procedureFixture) retrieval(ctx context.Context, c Corpus, r *ScenarioReport, search memy.Search[ProcedureQuery]) error {
+^
+internal/quality/procedure.go:524:1: cognitive complexity 21 of func `(*procedureFixture).forget` is high (> 20) (gocognit)
+func (f *procedureFixture) forget(ctx context.Context, r *ScenarioReport) error {
+^
+internal/quality/procedure_test.go:232:1: cognitive complexity 21 of func `TestProcedureCanonicalChecksAfterGraderCallback` is high (> 20) (gocognit)
+func TestProcedureCanonicalChecksAfterGraderCallback(t *testing.T) {
+^
+internal/quality/quality.go:80:1: cognitive complexity 23 of func `enforcePlan` is high (> 20) (gocognit)
+func enforcePlan(s *ScenarioReport, p CasePlan) {
+^
+internal/quality/report.go:99:1: cognitive complexity 44 of func `FinalizeScenario` is high (> 20) (gocognit)
+func FinalizeScenario(s *ScenarioReport) {
+^
+projected_recall.go:62:1: cognitive complexity 56 of func `RecallProjected` is high (> 20) (gocognit)
+func RecallProjected[P, R, Q, A, O any](
+^
+projected_recall_test.go:196:1: cognitive complexity 89 of func `TestRecallProjectedRevalidatesAfterPolicyCallbacks` is high (> 20) (gocognit)
+func TestRecallProjectedRevalidatesAfterPolicyCallbacks(t *testing.T) {
+^
+projected_recall_test.go:306:1: cognitive complexity 43 of func `TestRecallProjectedPolicyAllowsConcurrentForget` is high (> 20) (gocognit)
+func TestRecallProjectedPolicyAllowsConcurrentForget(t *testing.T) {
+^
+projected_recall_test.go:373:1: cognitive complexity 39 of func `TestRecallProjectedRejectsChangedEligibleState` is high (> 20) (gocognit)
+func TestRecallProjectedRejectsChangedEligibleState(t *testing.T) {
+^
+purge_batch_test.go:16:1: cognitive complexity 102 of func `TestBoundedPurgeStaysFencedAndResumesAcrossReopen` is high (> 20) (gocognit)
+func TestBoundedPurgeStaysFencedAndResumesAcrossReopen(t *testing.T) {
+^
+purge_batch_test.go:122:1: cognitive complexity 71 of func `TestPurgeContinuationRejectsCorruptFenceAndProgress` is high (> 20) (gocognit)
+func TestPurgeContinuationRejectsCorruptFenceAndProgress(t *testing.T) {
+^
+purge_fanin_cost_test.go:10:1: cognitive complexity 22 of func `TestPurgeFanInDoesNotRedecodeChildPerParent` is high (> 20) (gocognit)
+func TestPurgeFanInDoesNotRedecodeChildPerParent(t *testing.T) {
+^
+purge_graph_test.go:12:1: cognitive complexity 130 of func `TestNativePurgeTraversesLongHistoricalGraph` is high (> 20) (gocognit)
+func TestNativePurgeTraversesLongHistoricalGraph(t *testing.T) {
+^
+purge_job.go:222:1: cognitive complexity 423 of func `(*Engine).advancePurge` is high (> 20) (gocognit)
+func (e *Engine[P, R, A]) advancePurge(ctx context.Context, authority A, scope Scope, purpose string, request ForgetRequest) (PurgeReceipt, int, error) {
+^
+recall.go:99:1: cognitive complexity 29 of func `Recall` is high (> 20) (gocognit)
+func Recall[P, R, Q, A any](
+^
+reference/packing.go:43:1: cognitive complexity 31 of func `(JSONPacking).Select` is high (> 20) (gocognit)
+func (p JSONPacking[O, R]) Select(ctx context.Context, input memy.ProjectedRecallResult[O, R], max uint64) (memy.OutputSelection, error) {
+^
+reference/search.go:162:1: cognitive complexity 55 of func `(Composite).Search` is high (> 20) (gocognit)
+func (c Composite[Q]) Search(ctx context.Context, scope memy.Scope, query Q, options memy.SearchOptions) (memy.SearchResult, error) {
+^
+snapshot_page_test.go:15:1: cognitive complexity 54 of func `TestSnapshotPagesBoundScannedWorkAndBindReadPolicy` is high (> 20) (gocognit)
+func TestSnapshotPagesBoundScannedWorkAndBindReadPolicy(t *testing.T) {
+^
+storage_cost_test.go:91:1: cognitive complexity 22 of func `seedCostCorpus` is high (> 20) (gocognit)
+func seedCostCorpus(b testing.TB, f fixture, n int) {
+^
+storage_cost_test.go:143:1: cognitive complexity 57 of func `BenchmarkLifecycleCost` is high (> 20) (gocognit)
+func BenchmarkLifecycleCost(b *testing.B) {
+^
+storage_extended_cost_test.go:35:1: cognitive complexity 28 of func `seedCostLineage` is high (> 20) (gocognit)
+func seedCostLineage(b testing.TB, f fixture, n int) {
+^
+storage_extended_cost_test.go:81:1: cognitive complexity 43 of func `BenchmarkGrowingLineage` is high (> 20) (gocognit)
+func BenchmarkGrowingLineage(b *testing.B) {
+^
+storage_extended_cost_test.go:140:1: cognitive complexity 24 of func `BenchmarkSQLiteReopenGet` is high (> 20) (gocognit)
+func BenchmarkSQLiteReopenGet(b *testing.B) {
+^
+storage_private_cost_test.go:13:1: cognitive complexity 46 of func `TestAddressedOperationsDoNotDecodeOrCopyUnrelatedHistory` is high (> 20) (gocognit)
+func TestAddressedOperationsDoNotDecodeOrCopyUnrelatedHistory(t *testing.T) {
+^
+store/sqlite/bucket.go:75:1: cognitive complexity 24 of func `(*sqlBucket).Scan` is high (> 20) (gocognit)
+func (b *sqlBucket) Scan(options memy.ScanOptions) (memy.ScanPage, error) {
+^
+store/sqlite/fence_test.go:39:1: cognitive complexity 51 of func `TestScopeFencingAcrossProcesses` is high (> 20) (gocognit)
+func TestScopeFencingAcrossProcesses(t *testing.T) {
+^
+store/sqlite/fence_test.go:125:1: cognitive complexity 23 of func `TestCursorSurvivesHandleReopenButNotMutationOrDatabaseCopy` is high (> 20) (gocognit)
+func TestCursorSurvivesHandleReopenButNotMutationOrDatabaseCopy(t *testing.T) {
+^
+store/sqlite/sqlite.go:207:1: cognitive complexity 26 of func `(*Store).run` is high (> 20) (gocognit)
+func (s *Store) run(ctx context.Context, scope memy.Scope, writable bool, fn func(memy.Bucket) error) error {
+^
+sweep.go:62:1: cognitive complexity 269 of func `(*Engine).Sweep` is high (> 20) (gocognit)
+func (e *Engine[P, R, A]) Sweep(ctx context.Context, authority A, scope Scope, purpose string, request SweepRequest) (SweepResult, error) {
+^
+sweep_batch_test.go:18:1: cognitive complexity 80 of func `TestSweepBoundedPassResumesAfterReopen` is high (> 20) (gocognit)
+func TestSweepBoundedPassResumesAfterReopen(t *testing.T) {
+^
+validation.go:226:1: cognitive complexity 25 of func `validPurgeJob` is high (> 20) (gocognit)
+func validPurgeJob(job *purgeJobDisk) bool {
+^
+conformance/store.go:264:92: string `original` has 3 occurrences, make it a constant (goconst)
+	if value := get(t, store, scope(), "record"); value.Version != 1 || string(value.Data) != "original" {
+	                                                                                          ^
+examples/retrieval/main.go:66:22: string `payments` has 4 occurrences, make it a constant (goconst)
+	if query.Service != "payments" || query.Severity < 2 {
+	                    ^
+internal/quality/corpus.go:48:68: string `abstention` has 4 occurrences, make it a constant (goconst)
+var RequiredGroups = []string{"sessions", "temporal", "retrieval", "abstention", "poisoning", "forget", "consolidation", "evaluator"}
+                                                                   ^
+internal/quality/evaluator.go:16:127: string `adapter_error` has 3 occurrences, make it a constant (goconst)
+var evaluatorProbeIDs = []string{"wrong_payload", "wrong_revision", "missing_lineage", "false_empty_outage", "checker_error", "adapter_error", "late_privacy"}
+                                                                                                                              ^
+internal/quality/evaluator.go:25:31: string `candidate` has 17 occurrences, make it a constant (goconst)
+	required := []RequiredCheck{{"candidate", "candidate_input"}, {"host_review", "accepted_receipt"}, {"effective", "effective_exact"}, {"canonical", "canonical_exact"}, {"rendered", "rendered_exact"}, {"execution", "completed"}}
+	                             ^
+internal/quality/preference.go:102:30: string `drink` has 5 occurrences, make it a constant (goconst)
+	fact := PreferenceFact{Key: "drink", Value: value, Negated: negated}
+	                            ^
+internal/quality/preference.go:240:31: string `conflict` has 6 occurrences, make it a constant (goconst)
+	items := []string{"unknown", "conflict"}
+	                             ^
+internal/quality/preference.go:474:85: string `derived` has 3 occurrences, make it a constant (goconst)
+			out.check("host_review", "explicit_apply_checked_receipt", good && applied.ID == "derived" && applied.Revision == 1, 1)
+			                                                                                 ^
+internal/quality/preference.go:527:20: string `baseline` has 4 occurrences, make it a constant (goconst)
+	order := []string{"baseline", "irrelevant"}
+	                  ^
+internal/quality/preference.go:605:190: string `completed` has 8 occurrences, make it a constant (goconst)
+	base := []RequiredCheck{{Stage: "effective", ID: "exact_revisions_payload_validity_sources_lineage"}, {Stage: "rendered", ID: "exact_projection_body_and_budget"}, {Stage: "execution", ID: "completed"}}
+	                                                                                                                                                                                            ^
+internal/quality/preference.go:608:431: string `candidate` has 17 occurrences, make it a constant (goconst)
+		{ID: "preference-sessions", Domain: "preference", Version: "preference-sessions/v2", Groups: []string{"sessions"}, Required: add(RequiredCheck{"effective", "unknown_read_options"}, RequiredCheck{"effective", "conflict_read_options"}, RequiredCheck{"effective", "conflict_get_abstains"}, RequiredCheck{"canonical", "historical_original_exact_revision"}, RequiredCheck{"canonical", "scope_and_sources"}), OptionalStages: []string{"candidate", "host_review"}},
+		                                                                                                                                                                                                                                                                                                                                                                                                                                            ^
+internal/quality/preference.go:610:115: string `abstention` has 4 occurrences, make it a constant (goconst)
+		{ID: "preference-port-failures", Domain: "preference", Version: "preference-port-failures/v2", Groups: []string{"abstention"}, Required: add(RequiredCheck{"execution", "expected_provider_unavailable"}, RequiredCheck{"execution", "provider_recovery_unaccepted_proposal"}, RequiredCheck{"execution", "expected_policy_unavailable_fail_closed"}, RequiredCheck{"canonical", "port_failures_do_not_apply_or_erase"}), OptionalStages: []string{"candidate", "host_review"}},
+		                                                                                                                ^
+internal/quality/procedure.go:94:18: string `checkout` has 12 occurrences, make it a constant (goconst)
+	if q.Service != "checkout" || q.MinimumSeverity < 2 {
+	                ^
+internal/quality/procedure.go:99:20: string `distractor` has 5 occurrences, make it a constant (goconst)
+		if c.RecordID == "distractor" {
+		                 ^
+internal/quality/procedure.go:172:170: string `assist` has 16 occurrences, make it a constant (goconst)
+	proposals, err := memy.Extract(ctx, f.engine, "operator", f.scope, memy.ExtractionJob{OperationID: "extract-" + id, ProviderVersion: f.ports.ExtractorVersion, Purpose: "assist"}, ProcedureInput{Observation: p, Source: f.source, At: f.clock.Now()}, memy.JSONCodec[ProcedureInput]{}, f.ports.Extractor)
+	                                                                                                                                                                        ^
+internal/quality/procedure.go:245:156: string `abstention` has 4 occurrences, make it a constant (goconst)
+	for _, entry := range []struct{ id, group string }{{"procedure-retrieval", "retrieval"}, {"procedure-cross-scope", "retrieval"}, {"procedure-abstention", "abstention"}, {"procedure-poisoning-guarded", "poisoning"}, {"procedure-poisoning-permissive", "poisoning"}, {"procedure-forget-memory", "forget"}, {"procedure-forget-sqlite", "forget"}, {"procedure-controlled-failures", "abstention"}} {
+	                                                                                                                                                          ^
+internal/quality/procedure.go:444:147: string `conflict` has 6 occurrences, make it a constant (goconst)
+	conflictSearch := procedureSearch{"procedure-conflict/v1", f.scope, []memy.Candidate{{RecordID: "relevant-a", Revision: 1, Score: 1}, {RecordID: "conflict", Revision: 1, Score: 0.5}}, false}
+	                                                                                                                                                 ^
+internal/quality/procedure.go:643:19: string `candidate` has 17 occurrences, make it a constant (goconst)
+		return []string{"candidate"}
+		                ^
+internal/quality/procedure.go:664:81: string `canonical` has 20 occurrences, make it a constant (goconst)
+	checks := []RequiredCheck{{Stage: "effective", ID: "effective-exact"}, {Stage: "canonical", ID: "canonical-state"}, {Stage: "rendered", ID: "rendered-context"}, {Stage: "execution", ID: "procedure-completed"}, {Stage: "execution", ID: "configured-boundaries"}}
+	                                                                               ^
+internal/quality/quality.go:66:127: string `completed` has 8 occurrences, make it a constant (goconst)
+				s.Execution.Checks = append(s.Execution.Checks, Check{ID: "runner_execution", Mandatory: true, Status: Unknown, Expected: "completed", Observed: "unknown", Evidence: []Evidence{{Code: "execution_error", Count: 1}}})
+				                                                                                                                          ^
+internal/quality/quality.go:81:20: string `candidate` has 17 occurrences, make it a constant (goconst)
+	names := []string{"candidate", "host_review", "effective", "canonical", "rendered", "execution"}
+	                  ^
+purge_job.go:132:110: string `history` has 4 occurrences, make it a constant (goconst)
+	job := purgeJobDisk{Scope: scope, OperationID: request.OperationID, Phase: "seed", Next: 1, Clean: 1, Part: "history"}
+	                                                                                                            ^
+purge_job.go:170:111: string `record` has 3 occurrences, but such constant `SelectRecord` already exists (goconst)
+	item := purgeItemDisk{Scope: job.Scope, OperationID: job.OperationID, ID: id, Revision: head.Revision, Kind: "record"}
+	                                                                                                             ^
+purge_job.go:204:136: string `proposal` has 5 occurrences, make it a constant (goconst)
+	return writeDocument(b, key, "purge-item", value.Version, purgeItemDisk{Scope: job.Scope, OperationID: job.OperationID, ID: id, Kind: "proposal"})
+	                                                                                                                                      ^
+purge_job.go:218:14: string `ack` has 9 occurrences, make it a constant (goconst)
+	job.Phase = "ack"
+	            ^
+purge_job.go:268:59: string `done` has 12 occurrences, make it a constant (goconst)
+		for remaining > 0 && job.Phase != "ack" && job.Phase != "done" {
+		                                                        ^
+purge_job.go:279:18: string `expand` has 4 occurrences, make it a constant (goconst)
+					job.Phase = "expand"
+					            ^
+purge_job.go:322:18: string `records` has 7 occurrences, make it a constant (goconst)
+					job.Phase = "records"
+					            ^
+purge_job.go:352:18: string `proposals` has 10 occurrences, make it a constant (goconst)
+					job.Phase = "proposals"
+					            ^
+purge_job.go:382:18: string `members` has 3 occurrences, make it a constant (goconst)
+						job.Part = "members"
+						           ^
+purge_job.go:413:18: string `finish` has 3 occurrences, make it a constant (goconst)
+						job.Part = "finish"
+						           ^
+purge_job.go:469:18: string `origins` has 5 occurrences, make it a constant (goconst)
+					job.Phase = "origins"
+					            ^
+purge_job.go:480:19: string `emit` has 8 occurrences, make it a constant (goconst)
+						job.Phase = "emit"
+						            ^
+purge_state.go:49:22: string `unavailable` has 5 occurrences, make it a constant (goconst)
+		result.ErrorCode = "unavailable"
+		                   ^
+recall_state.go:17:25: string `unavailable` has 5 occurrences, make it a constant (goconst)
+		if coverage.Status != "unavailable" {
+		                      ^
+reference/index.go:133:32: string `unavailable` has 3 occurrences, make it a constant (goconst)
+					{Backend: i.name, Status: "unavailable", MinimumSatisfied: false},
+					                          ^
+reference/index.go:147:62: string `ready` has 3 occurrences, make it a constant (goconst)
+			if options.Minimum == nil && result.Coverage[0].Status == "ready" {
+			                                                          ^
+reference/index.go:148:33: string `eventual` has 3 occurrences, make it a constant (goconst)
+				result.Coverage[0].Status = "eventual"
+				                            ^
+reference/index.go:193:32: string `pending` has 3 occurrences, make it a constant (goconst)
+			result.Coverage[0].Status = "pending"
+			                            ^
+reference/search.go:33:31: string `eventual` has 3 occurrences, make it a constant (goconst)
+		result.Coverage[n].Status = "eventual"
+		                            ^
+reference/search.go:125:28: string `pending` has 3 occurrences, make it a constant (goconst)
+	case "ready", "eventual", "pending", "degraded", "unavailable":
+	                          ^
+sweep.go:107:93: string `records` has 7 occurrences, make it a constant (goconst)
+				job = sweepJobDisk{Scope: scope, OperationID: request.OperationID, Digest: plan, Phase: "records"}
+				                                                                                        ^
+sweep.go:117:20: string `done` has 12 occurrences, make it a constant (goconst)
+			if job.Phase == "done" {
+			                ^
+sweep.go:170:21: string `proposals` has 10 occurrences, make it a constant (goconst)
+				if job.Phase == "proposals" {
+				                ^
+sweep.go:173:21: string `origin` has 5 occurrences, make it a constant (goconst)
+				if job.Phase == "origin" {
+				                ^
+sweep.go:259:37: string `proposal` has 5 occurrences, make it a constant (goconst)
+						for _, kind := range []string{"proposal", "acceptance"} {
+						                              ^
+validation.go:202:204: string `done` has 12 occurrences, make it a constant (goconst)
+		return data.Scope.Validate() == nil && validIdentifier(data.OperationID) && validDigest(data.Digest) && (data.Phase == "records" || data.Phase == "proposals" || data.Phase == "origin" || data.Phase == "done") && len(data.After) <= 4096 && (data.Origin == "" || validIdentifier(data.Origin)) && (data.PurgeOperation == "" || validIdentifier(data.PurgeOperation))
+		                                                                                                                                                                                                         ^
+validation.go:208:201: string `proposal` has 5 occurrences, make it a constant (goconst)
+		return data.Scope.Validate() == nil && validIdentifier(data.OperationID) && validIdentifier(data.ID) && data.Revision <= MaxVersion && ((data.Kind == "record" && data.Revision > 0) || (data.Kind == "proposal" && data.Revision == 0))
+		                                                                                                                                                                                                      ^
+validation.go:220:60: string `ack` has 9 occurrences, make it a constant (goconst)
+	case "seed", "expand", "records", "proposals", "origins", "ack", "done", "emit":
+	                                                          ^
+validation.go:230:67: string `finish` has 3 occurrences, make it a constant (goconst)
+	if job.Part != "history" && job.Part != "members" && job.Part != "finish" {
+	                                                                 ^
+examples/quality/main.go:24:2: exitAfterDefer: os.Exit will exit, and `defer cancel()` will not run (gocritic)
+	os.Exit(execute(ctx, os.Args[1:], os.Stdout, os.Stderr))
+	^
+examples/quality/main.go:40:3: ifElseChain: rewrite if-else to switch statement (gocritic)
+		if err != nil {
+		^
+internal/kv/index.go:69:2: ifElseChain: rewrite if-else to switch statement (gocritic)
+	if key < n.key {
+	^
+internal/kv/index.go:84:2: ifElseChain: rewrite if-else to switch statement (gocritic)
+	if key < n.key {
+	^
+internal/quality/corpus.go:80:1: cyclomatic complexity 36 of func `validateCorpus` is high (> 30) (gocyclo)
+func validateCorpus(c Corpus) error {
+^
+validation.go:178:1: cyclomatic complexity 54 of func `validDocument` is high (> 30) (gocyclo)
+func validDocument(value any) bool {
+^
+reference/packing.go:10:1: text "encoding/json.Marshal" should be replaced with "[encoding/json.Marshal]" to link to stdlib function (godoclint)
+// JSONPacking greedily preserves the supplied ranked order using exact bytes of
+^
+internal/kv/bucket.go:7:1: File is not properly formatted (goimports)
+	"github.com/skosovsky/memy/internal/workcost"
+^
+internal/quality/corpus.go:6:1: File is not properly formatted (goimports)
+	"github.com/skosovsky/memy"
+^
+internal/quality/helpers.go:5:1: File is not properly formatted (goimports)
+	"github.com/skosovsky/memy"
+^
+internal/quality/preference_test.go:6:1: File is not properly formatted (goimports)
+	"github.com/skosovsky/memy"
+^
+internal/quality/quality.go:8:1: File is not properly formatted (goimports)
+	"github.com/skosovsky/memy"
+^
+internal/quality/quality_test.go:7:1: File is not properly formatted (goimports)
+	"github.com/santhosh-tekuri/jsonschema/v6"
+^
+internal/quality/report.go:5:1: File is not properly formatted (goimports)
+	"errors"
+^
+membership.go:5:1: File is not properly formatted (goimports)
+	"fmt"
+^
+purge_callback_corruption_test.go:7:1: File is not properly formatted (goimports)
+	"github.com/skosovsky/memy"
+^
+store/sqlite/bucket.go:7:1: File is not properly formatted (goimports)
+	"github.com/skosovsky/memy/internal/workcost"
+^
+validation.go:6:1: File is not properly formatted (goimports)
+	"github.com/skosovsky/memy/internal/membershipproof"
+^
+wire.go:8:1: File is not properly formatted (goimports)
+	"github.com/skosovsky/memy/internal/workcost"
+^
+callback_delivery_test.go:17:1: File is not properly formatted (golines)
+func (h heldRanker) Rank(ctx context.Context, records []memy.Ranked[preference, sourceRef]) ([]memy.Ranked[preference, sourceRef], error) {
+^
+conformance/search.go:40:1: File is not properly formatted (golines)
+		staged, err := f.Adapter.Search(t.Context(), a, f.Query, memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates, Minimum: nil})
+^
+conformance/sink.go:40:1: File is not properly formatted (golines)
+			if ack.Sink != f.Adapter.Name() || ack.OperationID != batch.OperationID || ack.Epoch != batch.Epoch || ack.Chunk != batch.Chunk {
+^
+conformance/store.go:143:1: File is not properly formatted (golines)
+	must(t, store.View(context.Background(), scope(), func(b memy.Bucket) error { page, err := b.Scan(options); options.Cursor = page.Cursor; return err }))
+^
+consolidation.go:69:1: File is not properly formatted (golines)
+func (e *Engine[P, R, A]) Snapshot(ctx context.Context, authority A, scope Scope, options SnapshotOptions) (SnapshotPage[P, R], error) {
+^
+consolidation_addressed_test.go:20:1: File is not properly formatted (golines)
+				store, err = sqlite.Open(context.Background(), filepath.Join(t.TempDir(), "addressed.db"), sqlite.Options{})
+^
+cross_handle_lifecycle_test.go:61:1: File is not properly formatted (golines)
+	deletion := memy.ForgetRequest{OperationID: "delete", Selector: memy.Selector{Kind: memy.SelectRecord, ID: "record"}, Reason: "delete", PolicyVersion: "delete/v1", Limit: 1, MaxBytes: 1 << 20}
+^
+engine.go:55:1: File is not properly formatted (golines)
+	if caps.SchemaVersion != SchemaVersion || !validIdentifier(config.PayloadCodec.Version()) || !validIdentifier(config.ReferenceCodec.Version()) {
+^
+engine_test.go:550:1: File is not properly formatted (golines)
+		page, err := e.Sweep(ctx, authority, scope, purpose, memy.SweepRequest{OperationID: op, Limit: 256, MaxBytes: 64 << 20})
+^
+examples/quality-integration/main.go:18:1: File is not properly formatted (golines)
+func (p observedProcedureExtractor) Extract(ctx context.Context, in quality.ProcedureInput) ([]memy.Suggestion[quality.ProcedureObservation, quality.DocumentRef], error) {
+^
+examples/retrieval/main.go:48:1: File is not properly formatted (golines)
+func (s scriptedSearch) Search(ctx context.Context, scope memy.Scope, query Query, options memy.SearchOptions) (memy.SearchResult, error) {
+^
+forget.go:305:1: File is not properly formatted (golines)
+		updated, updateErr := e.persistSinkResult(ctx, authority, scope, purpose, operationID, receipt.Batch.Chunk, status)
+^
+identity.go:31:1: File is not properly formatted (golines)
+		case "ID", "RecordID", "ProposalID", "OperationID", "Actor", "PolicyVersion", "AuthorityPolicyVersion", "ProviderVersion", "PayloadCodec", "ReferenceCodec", "Codec", "Extractor", "Sink", "Name", "Backend", "Purpose", "Tenant", "Namespace", "Subject":
+^
+identity_decision_test.go:89:1: File is not properly formatted (golines)
+	f.policy.Grant(f.actor.actor, f.scope, "authority/v1", memy.ActionRead, memy.ActionPropose, memy.ActionAccept, memy.ActionCommit)
+^
+lineage_consistency_regression_test.go:68:1: File is not properly formatted (golines)
+	recalled, recallErr := memy.Recall(context.Background(), f.engine, f.actor, f.scope, "all", index,
+^
+membership.go:21:1: File is not properly formatted (golines)
+	return fmt.Sprintf("%s%s/%020d", membershipPrefix(m.Relation, m.MatchID), membershipIdentity(m.Ref.RecordID), m.Ref.Revision)
+^
+membership_fixture_test.go:42:1: File is not properly formatted (golines)
+		bindings = append(bindings, membershipproof.Binding{Scope: scope.Key(), RecordID: id, Revision: uint64(revision), Relation: relation, MatchID: match})
+^
+mixed_search_test.go:21:1: File is not properly formatted (golines)
+		Backends:      []reference.Backend[string]{{ID: "index/v1", Search: index}, {ID: "eventual", Search: reference.Eventual[string]{Index: eventual}}},
+^
+projected_recall.go:194:1: File is not properly formatted (golines)
+func applyOutputSelection[O, R any](body ProjectedRecallResult[O, R], selection OutputSelection) (ProjectedRecallResult[O, R], error) {
+^
+projected_recall_test.go:21:1: File is not properly formatted (golines)
+func (s projectedSearch) Search(ctx context.Context, _ memy.Scope, _ string, opts memy.SearchOptions) (memy.SearchResult, error) {
+^
+proposal.go:113:1: File is not properly formatted (golines)
+	if e == nil || nilPort(codec) || nilPort(provider) || !validIdentifier(job.ProviderVersion) || !validIdentifier(job.OperationID) {
+^
+purge_batch_test.go:38:1: File is not properly formatted (golines)
+				p, err := f.engine.Remember(context.Background(), f.actor, f.scope, "remember-"+id, "assist", suggestion)
+^
+purge_callback_corruption_test.go:50:1: File is not properly formatted (golines)
+	q := memy.ForgetRequest{OperationID: "round3", Selector: memy.Selector{Kind: memy.SelectScope}, Reason: "review", PolicyVersion: "v1", Limit: 1, MaxBytes: 1 << 20}
+^
+purge_fanin_cost_test.go:22:1: File is not properly formatted (golines)
+				receipt, err := fullForget(f.engine, t.Context(), f.actor, f.scope, "assist", memy.ForgetRequest{OperationID: "fanin", Selector: memy.Selector{Kind: memy.SelectScope}, Reason: "delete", PolicyVersion: "delete/v1", Limit: 1, MaxBytes: 1 << 20})
+^
+purge_graph_test.go:23:1: File is not properly formatted (golines)
+				graph[fmt.Sprintf("cost-%d", i)] = []memy.RevisionRef{{RecordID: fmt.Sprintf("cost-%d", i-1), Revision: 1}}
+^
+purge_job.go:90:1: File is not properly formatted (golines)
+func (e *Engine[P, R, A]) beginPurge(ctx context.Context, b Bucket, authority A, scope Scope, purpose string, decision Decision, request ForgetRequest, requestDigest string) error {
+^
+recall.go:109:1: File is not properly formatted (golines)
+	if e == nil || nilPort(search) || nilPort(ranker) || options.Limit <= 0 || options.Limit > MaxSearchCandidates || options.Search.MaxCandidates < 1 || options.Search.MaxCandidates > MaxSearchCandidates {
+^
+recall_forget_test.go:115:1: File is not properly formatted (golines)
+	if visibleErr != nil || len(visible.Coverage) != 1 || visible.Coverage[0].Status != "ready" || !visible.Coverage[0].MinimumSatisfied || len(visible.Records) != 1 ||
+^
+recall_state.go:55:1: File is not properly formatted (golines)
+			records = append(records, Ranked[P, R]{Record: record, Score: candidate.Score, Explanation: "", Signals: slices.Clone(candidate.Signals)})
+^
+reference/index.go:61:1: File is not properly formatted (golines)
+	if i == nil || (memy.RevisionRef{RecordID: candidate.RecordID, Revision: candidate.Revision}).Validate() != nil || !finite(candidate.Score) {
+^
+reference/search.go:21:1: File is not properly formatted (golines)
+func (e Eventual[Q]) Search(ctx context.Context, scope memy.Scope, query Q, options memy.SearchOptions) (memy.SearchResult, error) {
+^
+retention_policy_test.go:133:1: File is not properly formatted (golines)
+		memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Read: memy.ReadOptions{}, Limit: 1},
+^
+store.go:39:1: File is not properly formatted (golines)
+	return utf8.ValidString(value) && strings.TrimSpace(value) != "" && len(value) <= 1024 && !strings.ContainsRune(value, '\x00')
+^
+store/memory/memory.go:41:1: File is not properly formatted (golines)
+	return memy.StoreCapabilities{Atomic: true, ConditionalWrite: true, FencedView: true, SchemaVersion: memy.SchemaVersion, Durable: false}
+^
+store/sqlite/bucket.go:49:1: File is not properly formatted (golines)
+	err := b.tx.QueryRowContext(b.ctx, `SELECT version,value FROM memy_values WHERE scope=? AND key=?`, b.scope, key).Scan(&v.Version, &v.Data)
+^
+store/sqlite/sqlite.go:117:1: File is not properly formatted (golines)
+	if _, err := tx.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS memy_schema (singleton INTEGER PRIMARY KEY CHECK(singleton=1), version INTEGER NOT NULL, cursor_secret BLOB)`); err != nil {
+^
+sweep.go:104:1: File is not properly formatted (golines)
+				if err = writeDocument(b, "active_sweep", "sweep-active", active.Version, activePurgeDisk{scope, request.OperationID}); err != nil {
+^
+validation.go:56:1: File is not properly formatted (golines)
+	if !validIdentifier(r.ID) || r.Revision == 0 || r.Revision > MaxVersion || r.Scope.Validate() != nil || r.RecordedAt.IsZero() ||
+^
+examples/quality-integration/main.go:65:3: G104: Errors unhandled (gosec)
+		os.Stderr.WriteString("quality_report_write_failed\n")
+		^
+internal/quality/preference.go:241:9: G404: Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (gosec)
+	rng := rand.New(rand.NewPCG(seed, seed^0x6a09e667))
+	       ^
+internal/quality/preference.go:306:9: G404: Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (gosec)
+	rng := rand.New(rand.NewPCG(seed, seed^0xbb67ae85))
+	       ^
+internal/quality/preference.go:391:9: G404: Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (gosec)
+	rng := rand.New(rand.NewPCG(seed, seed^0x3c6ef372))
+	       ^
+internal/quality/preference.go:528:9: G404: Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (gosec)
+	rng := rand.New(rand.NewPCG(seed, seed^0xa54ff53a))
+	       ^
+internal/quality/procedure.go:146:4: G104: Errors unhandled (gosec)
+			os.RemoveAll(dir)
+			^
+internal/quality/procedure.go:188:53: G115: integer overflow conversion uint64 -> int64 (gosec)
+		f.recordedAt[id] = f.clock.Now().Add(time.Duration(f.committed-1) * time.Nanosecond)
+		                                                  ^
+internal/quality/procedure.go:198:7: G404: Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (gosec)
+	r := rand.New(rand.NewPCG(seed, seed^0x9e3779b97f4a7c15))
+	     ^
+internal/quality/procedure.go:488:59: G115: integer overflow conversion uint64 -> int64 (gosec)
+		f.recordedAt["poison"] = f.clock.Now().Add(time.Duration(f.committed-1) * time.Nanosecond)
+		                                                        ^
+internal/quality/quality.go:35:44: G115: integer overflow conversion int -> uint64 (gosec)
+	binary.LittleEndian.PutUint64(b[:], uint64(repeat))
+	                                          ^
+cross_handle_lifecycle_test.go:45:7: shadow: declaration of "err" shadows declaration at line 18 (govet)
+			r, err := engine.Commit(ctx, f.actor, f.scope, "assist", request)
+			   ^
+cross_handle_lifecycle_test.go:67:7: shadow: declaration of "err" shadows declaration at line 18 (govet)
+			r, err := fullForget(engine, ctx, f.actor, f.scope, "assist", deletion)
+			   ^
+cross_handle_lifecycle_test.go:89:10: shadow: declaration of "err" shadows declaration at line 18 (govet)
+		heads, err := listEntries(b, "head/")
+		       ^
+internal/quality/preference.go:400:6: shadow: declaration of "err" shadows declaration at line 384 (govet)
+		r, err := f.commit(ctx, id, p, valid, 0, memy.Append, nil)
+		   ^
+internal/quality/preference.go:430:14: shadow: declaration of "err" shadows declaration at line 384 (govet)
+		proposals, err := memy.Consolidate(ctx, f.engine, "host", f.scope, memy.ConsolidationRequest{OperationID: "consolidate", Purpose: "quality", PolicyVersion: "consolidation/v2", Mode: mode, Inputs: inputs, Budget: budget, MinimumUtility: 0}, provider)
+		           ^
+internal/quality/procedure.go:478:13: shadow: declaration of "err" shadows declaration at line 462 (govet)
+		accepted, err := f.engine.Accept(ctx, "operator", f.scope, p.ID, p.Digest, p.Revision, "assist")
+		          ^
+projected_recall.go:101:6: shadow: declaration of "err" shadows declaration at line 85 (govet)
+		if err := ctx.Err(); err != nil {
+		   ^
+projected_recall.go:106:3: shadow: declaration of "err" shadows declaration at line 85 (govet)
+		err := e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
+		^
+projected_recall.go:107:15: shadow: declaration of "err" shadows declaration at line 85 (govet)
+			_, record, err := e.projectionRecord(ctx, b, scope, ref.RecordID, ref.Revision, options.Read)
+			           ^
+projected_recall.go:134:10: shadow: declaration of "err" shadows declaration at line 85 (govet)
+		input, err := cloneProjectedBody(e, body, packing.Codec)
+		       ^
+projected_recall.go:142:6: shadow: declaration of "err" shadows declaration at line 134 (govet)
+		if err := ctx.Err(); err != nil {
+		   ^
+projected_recall.go:172:18: shadow: declaration of "err" shadows declaration at line 85 (govet)
+			disk, record, err := e.projectionRecord(ctx, b, scope, ref.RecordID, ref.Revision, options.Read)
+			              ^
+purge_batch_test.go:57:14: shadow: declaration of "err" shadows declaration at line 45 (govet)
+				receipt, err := f.engine.Forget(context.Background(), f.actor, f.scope, "assist", request)
+				         ^
+purge_batch_test.go:195:12: shadow: declaration of "err" shadows declaration at line 134 (govet)
+				after, err := listEntries(b, "record/")
+				       ^
+purge_graph_test.go:101:12: shadow: declaration of "err" shadows declaration at line 29 (govet)
+				heads, err := listEntries(bucket, "head/")
+				       ^
+purge_job.go:98:5: shadow: declaration of "err" shadows declaration at line 91 (govet)
+	if err := activePurgeGate(b, scope); err != nil {
+	   ^
+purge_job.go:101:5: shadow: declaration of "err" shadows declaration at line 91 (govet)
+	if err := expectedForgetRevisions(b, scope, request.Expected); err != nil {
+	   ^
+purge_job.go:116:5: shadow: declaration of "err" shadows declaration at line 91 (govet)
+	if err := e.reauthorize(ctx, authority, scope, ActionForget, purpose, decision); err != nil {
+	   ^
+purge_job.go:119:5: shadow: declaration of "err" shadows declaration at line 91 (govet)
+	if err := writeDocument(b, "epoch", "epoch", epochVersion, epoch); err != nil {
+	   ^
+purge_job.go:122:5: shadow: declaration of "err" shadows declaration at line 91 (govet)
+	if err := persistRevocation(b, request, epoch.Value); err != nil {
+	   ^
+purge_job.go:230:19: shadow: declaration of "err" shadows declaration at line 223 (govet)
+		receiptVersion, err := readDocument(b, objectKey("purge", request.OperationID), "purge", &receipt)
+		                ^
+purge_job.go:234:6: shadow: declaration of "err" shadows declaration at line 230 (govet)
+		if err := validatePurgeBinding(receipt, scope, request.OperationID); err != nil {
+		   ^
+storage_cost_test.go:110:5: shadow: declaration of "err" shadows declaration at line 96 (govet)
+	if err := json.Unmarshal(template["data"], &record); err != nil {
+	   ^
+storage_cost_test.go:119:9: shadow: declaration of "err" shadows declaration at line 96 (govet)
+			raw, err := json.Marshal(template)
+			     ^
+store/sqlite/fence_test.go:31:6: shadow: declaration of "err" shadows declaration at line 24 (govet)
+		_, err := io.Copy(io.Discard, os.Stdin)
+		   ^
+store/sqlite/fence_test.go:62:7: shadow: declaration of "err" shadows declaration at line 45 (govet)
+			if err := cmd.Start(); err != nil {
+			   ^
+store/sqlite/fence_unix.go:62:7: shadow: declaration of "err" shadows declaration at line 47 (govet)
+			if err := ctx.Err(); err != nil {
+			   ^
+store/sqlite/sqlite.go:125:5: shadow: declaration of "err" shadows declaration at line 120 (govet)
+	if err := tx.QueryRowContext(ctx, `SELECT version FROM memy_schema WHERE singleton=1`).Scan(&version); err != nil {
+	   ^
+sweep.go:82:8: shadow: declaration of "err" shadows declaration at line 66 (govet)
+				if err := activeSweepGate(b, scope); err != nil {
+				   ^
+sweep.go:85:16: shadow: declaration of "err" shadows declaration at line 66 (govet)
+				epoch, ev, err := currentEpoch(b)
+				           ^
+sweep.go:129:19: shadow: declaration of "err" shadows declaration at line 66 (govet)
+			activeVersion, err := boundActiveSweep(b, job)
+			               ^
+sweep.go:145:8: shadow: declaration of "err" shadows declaration at line 129 (govet)
+				_, err := readDocument(b, objectKey("purge", job.PurgeOperation), "purge", &receipt)
+				   ^
+sweep.go:185:24: shadow: declaration of "err" shadows declaration at line 176 (govet)
+						target, expired, err := e.expiredRecord(ctx, b, scope, e.config.Clock.Now(), entry)
+						                 ^
+sweep.go:218:16: shadow: declaration of "err" shadows declaration at line 176 (govet)
+						current, err := e.currentRetention(ctx, scope, proposal)
+						         ^
+sweep.go:260:8: shadow: declaration of "key" shadows declaration at line 78 (govet)
+							key := objectKey(kind, job.Origin)
+							^
+sweep_batch_test.go:53:11: shadow: declaration of "err" shadows declaration at line 34 (govet)
+				page, err := f.engine.Sweep(t.Context(), f.actor, f.scope, "assist", req)
+				      ^
+sweep_batch_test.go:198:12: shadow: declaration of "err" shadows declaration at line 191 (govet)
+		entries, err := listEntries(b, "record/")
+		         ^
+sweep_batch_test.go:216:12: shadow: declaration of "err" shadows declaration at line 191 (govet)
+		entries, err := listEntries(b, "record/")
+		         ^
+conformance/store.go:61:3: for loop can be changed to use an integer range (Go 1.22+) (intrange)
+		for i := 0; i < 700; i++ {
+		^
+conformance/store.go:67:3: for loop can be changed to use an integer range (Go 1.22+) (intrange)
+		for i := 0; i < 1000; i++ {
+		^
+identity.go:37:3: for loop can be changed to use an integer range (Go 1.22+)
+Because the key is returned by a function or method, take care to consider side effects. (intrange)
+		for i := 0; i < value.NumField(); i++ {
+		^
+identity.go:47:3: for loop can be changed to use an integer range (Go 1.22+)
+Because the key is returned by a function or method, take care to consider side effects. (intrange)
+		for i := 0; i < value.Len(); i++ {
+		^
+internal/kv/index_test.go:33:2: for loop can be changed to use an integer range (Go 1.22+) (intrange)
+	for operation := 0; operation < 10000; operation++ {
+	^
+internal/kv/index_test.go:69:2: for loop can be changed to use an integer range (Go 1.22+) (intrange)
+	for i := 0; i < 1000; i++ {
+	^
+internal/kv/index_test.go:76:2: for loop can be changed to use an integer range (Go 1.22+) (intrange)
+	for i := 0; i < 1000; i++ {
+	^
+internal/quality/quality.go:51:3: for loop can be changed to use an integer range (Go 1.22+) (intrange)
+		for repeat := 0; repeat < c.Repeats; repeat++ {
+		^
+purge_batch_test.go:32:4: for loop can be changed to use an integer range (Go 1.22+) (intrange)
+			for i := 0; i < 30; i++ {
+			^
+purge_batch_test.go:55:4: for loop can be changed to use an integer range (Go 1.22+) (intrange)
+			for call := 0; call < 1000; call++ {
+			^
+purge_callback_corruption_test.go:52:2: for loop can be changed to use an integer range (Go 1.22+) (intrange)
+	for i := 0; i < 100; i++ {
+	^
+storage_cost_test.go:152:6: for loop can be changed to use an integer range (Go 1.22+) (intrange)
+					for iteration := 0; iteration < b.N; iteration++ {
+					^
+sweep_batch_test.go:51:4: for loop can be changed to use an integer range (Go 1.22+) (intrange)
+			for call := 0; call < 500; call++ {
+			^
+conformance/sink.go:79:16: Magic number: 7, in <assign> detected (mnd)
+		Chunk:       7,
+		             ^
+conformance/store.go:104:18: Magic number: 700, in <condition> detected (mnd)
+	if len(keys) != 700 {
+	                ^
+examples/lifecycle/main.go:442:22: Magic number: 64, in <operation> detected (mnd)
+		request.MaxBytes = 64 << 20
+		                   ^
+examples/quality-integration/main.go:21:37: Magic number: 17, in <condition> detected (mnd)
+	if in.Source.Reference.Document != 17 {
+	                                   ^
+examples/quality/main.go:22:42: Magic number: 5, in <argument> detected (mnd)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
+	                                        ^
+examples/retrieval/main.go:102:157: Magic number: 1000, in <argument> detected (mnd)
+	for _, entry := range []struct{ ID, Text string }{{"a", "Check queue lag."}, {"b", "Check retry pressure."}, {"c", strings.Repeat("Detailed diagnostic. ", 1000)}} {
+	                                                                                                                                                           ^
+examples/retrieval/main.go:119:48: Magic number: 3, in <assign> detected (mnd)
+	query := Query{Service: "payments", Severity: 3}
+	                                              ^
+internal/kv/cursor.go:36:27: Magic number: 32768, in <condition> detected (mnd)
+	if len(options.Cursor) > 32768 {
+	                         ^
+internal/kv/index.go:111:16: Magic number: 255, in <condition> detected (mnd)
+		if end[j] != 255 {
+		             ^
+internal/membershipproof/proof.go:56:16: Magic number: 64, in <condition> detected (mnd)
+		if len(s) != 64 {
+		             ^
+internal/quality/evaluator.go:213:55: Magic number: 24, in <argument> detected (mnd)
+	f, err := newPreferenceFixture(ctx, false, clock.Add(24*time.Hour))
+	                                                     ^
+internal/quality/evaluator.go:223:81: Magic number: 12, in <argument> detected (mnd)
+	valid := memy.Interval{Known: true, From: clock.Add(-time.Hour), To: clock.Add(12 * time.Hour)}
+	                                                                               ^
+internal/quality/helpers.go:33:22: Magic number: 64, in <operation> detected (mnd)
+		request.MaxBytes = 64 << 20
+		                   ^
+internal/quality/preference.go:224:102: Magic number: 24, in <argument> detected (mnd)
+	known := memy.Interval{Known: true, From: f.clock.Now().Add(-24 * time.Hour), To: f.clock.Now().Add(24 * time.Hour)}
+	                                                                                                    ^
+internal/quality/preference.go:330:18: Magic number: 5, in <argument> detected (mnd)
+	f.clock.Advance(5 * time.Hour)
+	                ^
+internal/quality/preference.go:389:97: Magic number: 24, in <argument> detected (mnd)
+	valid := memy.Interval{Known: true, From: f.clock.Now().Add(-time.Hour), To: f.clock.Now().Add(24 * time.Hour)}
+	                                                                                               ^
+internal/quality/preference.go:394:58: Magic number: 3, in <argument> detected (mnd)
+	originals := make([]memy.Record[Preference, string], 0, 3)
+	                                                        ^
+internal/quality/procedure.go:154:113: Magic number: 17, in <assign> detected (mnd)
+	f.source = memy.Source[DocumentRef]{ID: "synthetic-document", Revision: "r1", Reference: DocumentRef{Document: 17, Section: "observations"}}
+	                                                                                                               ^
+internal/quality/procedure.go:226:119: Magic number: 3, in <assign> detected (mnd)
+	return memy.RecallProjected(ctx, f.engine, "operator", f.scope, ProcedureQuery{Service: "checkout", MinimumSeverity: 3}, search, memy.ScoreRanker[ProcedureObservation, DocumentRef]{}, f.options(), procedureProjector(), budget)
+	                                                                                                                     ^
+internal/quality/procedure.go:284:25: Magic number: 4, in <argument> detected (mnd)
+	f.candidateLimit = min(4, c.Budgets.MaxCandidates)
+	                       ^
+internal/quality/procedure.go:285:22: Magic number: 4, in <argument> detected (mnd)
+	f.recallLimit = min(4, c.Budgets.RecallLimit)
+	                    ^
+internal/quality/procedure.go:345:92: Magic number: 3, in <assign> detected (mnd)
+	recall, err := f.recall(ctx, search, ProcedureQuery{Service: "checkout", MinimumSeverity: 3})
+	                                                                                          ^
+internal/quality/procedure.go:417:32: Magic number: 3, in <argument> detected (mnd)
+	if err := f.canonical(ctx, r, 3); err != nil {
+	                              ^
+internal/quality/procedure.go:420:18: Magic number: 25, in <argument> detected (mnd)
+	f.clock.Advance(25 * time.Hour)
+	                ^
+internal/quality/procedure.go:426:91: Magic number: 3, in <assign> detected (mnd)
+	empty, err := f.recall(ctx, search, ProcedureQuery{Service: "no-match", MinimumSeverity: 3})
+	                                                                                         ^
+internal/quality/procedure.go:438:229: Magic number: 3, in <argument> detected (mnd)
+	r.Effective.Checks = append(r.Effective.Checks, procedureCheck("effective-exact", len(empty.Records) == 0 && outageOK && conflictErr == nil && conflicted.State == memy.Conflicted, "healthy-empty-conflict-unavailable-distinct", 3))
+	                                                                                                                                                                                                                                   ^
+internal/quality/procedure.go:451:152: Magic number: 3, in <argument> detected (mnd)
+	r.Rendered.Checks = append(r.Rendered.Checks, procedureCheck("rendered-context", renderedOK, "projected-healthy-empty-conflict-unavailable-distinct", 3), procedureCheck("projected-healthy-empty", len(emptyBody.Projections) == 0 && emptyBodyErr == nil, "healthy-empty-body", 0), procedureCheck("projected-conflict", len(conflictBody.Projections) == 0 && conflictBody.Progress.CanonicalFiltered == 2, "conflict-suppressed-body", 0), procedureCheck("projected-unavailable", errors.Is(unavailableBodyErr, memy.ErrUnavailable) && len(unavailableBody.Projections) == 0, "unavailable-fail-closed", 0))
+	                                                                                                                                                      ^
+internal/quality/procedure.go:452:29: Magic number: 4, in <argument> detected (mnd)
+	return f.canonical(ctx, r, 4)
+	                           ^
+internal/quality/procedure.go:494:92: Magic number: 3, in <assign> detected (mnd)
+	recall, err := f.recall(ctx, search, ProcedureQuery{Service: "checkout", MinimumSeverity: 3})
+	                                                                                          ^
+internal/quality/procedure.go:562:94: Magic number: 3, in <assign> detected (mnd)
+	indexed, err := f.recall(ctx, f.index, ProcedureQuery{Service: "checkout", MinimumSeverity: 3})
+	                                                                                            ^
+internal/quality/procedure.go:623:142: Magic number: 4, in <argument> detected (mnd)
+	r.Execution.Checks = append(r.Execution.Checks, procedureCheck("known-controlled-port-errors", known, "four-controlled-unavailable-errors", 4))
+	                                                                                                                                            ^
+internal/quality/procedure.go:625:92: Magic number: 3, in <assign> detected (mnd)
+	recall, err := f.recall(ctx, search, ProcedureQuery{Service: "checkout", MinimumSeverity: 3})
+	                                                                                          ^
+internal/quality/procedure.go:632:29: Magic number: 3, in <argument> detected (mnd)
+	return f.canonical(ctx, r, 3)
+	                           ^
+internal/quality/procedure.go:720:119: Magic number: 29, in <assign> detected (mnd)
+	f.foreignSource = memy.Source[DocumentRef]{ID: f.source.ID, Revision: "foreign-r1", Reference: DocumentRef{Document: 29, Section: "foreign-private"}}
+	                                                                                                                     ^
+internal/quality/procedure.go:751:272: Magic number: 3, in <argument> detected (mnd)
+	r.Canonical.Checks = append(r.Canonical.Checks, procedureCheck("cross-scope-read-denied", errors.Is(foreignGetErr, memy.ErrUnauthorized) && errors.Is(foreignSnapshotErr, memy.ErrUnauthorized) && errors.Is(missingInAErr, memy.ErrNotFound), "foreign-get-snapshot-denied", 3))
+	                                                                                                                                                                                                                                                                              ^
+internal/quality/procedure.go:758:92: Magic number: 3, in <assign> detected (mnd)
+	actual, err := f.recall(ctx, search, ProcedureQuery{Service: "checkout", MinimumSeverity: 3})
+	                                                                                          ^
+internal/quality/procedure.go:772:29: Magic number: 3, in <argument> detected (mnd)
+	return f.canonical(ctx, r, 3)
+	                           ^
+store/sqlite/bucket.go:67:16: Magic number: 255, in <condition> detected (mnd)
+		if end[i] != 255 {
+		             ^
+store/sqlite/sqlite.go:106:30: Magic number: 16, in <argument> detected (mnd)
+	store.reads.SetMaxOpenConns(16)
+	                            ^
+store/sqlite/sqlite.go:107:30: Magic number: 4, in <argument> detected (mnd)
+	store.reads.SetMaxIdleConns(4)
+	                            ^
+store/sqlite/sqlite.go:136:27: Magic number: 32, in <argument> detected (mnd)
+		s.secret = make([]byte, 32)
+		                        ^
+store/sqlite/sqlite.go:147:23: Magic number: 32, in <condition> detected (mnd)
+		if len(s.secret) != 32 {
+		                    ^
+validation.go:255:27: Magic number: 4096, in <return> detected (mnd)
+	return len(job.After) <= 4096
+	                         ^
+internal/kv/bucket.go:36:3: mapsloop: Replace m[k]=v loop with maps.Copy (modernize)
+		b.Values[key] = value
+		^
+internal/quality/corpus.go:116:2: slicescontains: Loop can be simplified using slices.Contains (modernize)
+	for _, s := range []string{v.Provider, v.Model, v.HostReview, v.Retention, v.Resolver, v.Consolidation, v.Search, v.Projector, v.Packing, v.Grader} {
+	^
+internal/quality/quality.go:112:2: slicescontains: Loop can be simplified using slices.Contains (modernize)
+	for _, v := range stages {
+	^
+internal/membershipproof/proof.go:24:25: the given struct should be annotated with the `json` tag (musttag)
+	raw, _ := json.Marshal(b)
+	                       ^
+internal/quality/preference.go:412:1: `if mode != ""` has complex nested blocks (complexity: 22) (nestif)
+	if mode != "" {
+^
+projected_recall.go:128:1: `if budget != nil` has complex nested blocks (complexity: 10) (nestif)
+	if budget != nil {
+^
+purge_batch_test.go:72:1: `if call == 9` has complex nested blocks (complexity: 10) (nestif)
+				if call == 9 {
+^
+purge_job.go:293:1: `if receipt.Batch.Selector.Kind == SelectSource` has complex nested blocks (complexity: 5) (nestif)
+					if receipt.Batch.Selector.Kind == SelectSource {
+^
+purge_job.go:512:1: `if page.Complete` has complex nested blocks (complexity: 6) (nestif)
+				if page.Complete {
+^
+store/sqlite/sqlite.go:135:1: `if created == 1` has complex nested blocks (complexity: 5) (nestif)
+	if created == 1 {
+^
+sweep.go:81:1: `if errors.Is(readErr, ErrNotFound)` has complex nested blocks (complexity: 8) (nestif)
+			if errors.Is(readErr, ErrNotFound) {
+^
+sweep.go:143:1: `if job.PurgeOperation != ""` has complex nested blocks (complexity: 8) (nestif)
+			if job.PurgeOperation != "" {
+^
+sweep.go:168:1: `if pending == ""` has complex nested blocks (complexity: 42) (nestif)
+			if pending == "" {
+^
+sweep.go:289:1: `if pending != ""` has complex nested blocks (complexity: 6) (nestif)
+		if pending != "" {
+^
+sweep_batch_test.go:67:1: `if call == 2` has complex nested blocks (complexity: 8) (nestif)
+				if call == 2 {
+^
+internal/membershipproof/proof_test.go:10:9: integer-format: fmt.Sprint can be replaced with faster strconv.Itoa (perfsprint)
+		t.Run(fmt.Sprint(count), func(t *testing.T) {
+		      ^
+internal/quality/evaluator_test.go:13:9: integer-format: fmt.Sprint can be replaced with faster strconv.FormatUint (perfsprint)
+		t.Run(fmt.Sprint(budget), func(t *testing.T) {
+		      ^
+storage_extended_cost_test.go:142:9: integer-format: fmt.Sprint can be replaced with faster strconv.Itoa (perfsprint)
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+		      ^
+engine_test.go:495:57: context-as-argument: context.Context should be the first parameter of a function (revive)
+func fullSnapshot[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, read memy.ReadOptions) ([]memy.Record[P, R], error) {
+                                                        ^
+engine_test.go:514:55: context-as-argument: context.Context should be the first parameter of a function (revive)
+func fullForget[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, purpose string, request memy.ForgetRequest) (memy.PurgeReceipt, error) {
+                                                      ^
+examples/lifecycle/main.go:437:55: context-as-argument: context.Context should be the first parameter of a function (revive)
+func fullForget[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, purpose string, request memy.ForgetRequest) (memy.PurgeReceipt, error) {
+                                                      ^
+internal/kv/index.go:23:2: redefines-builtin-id: redefinition of the built-in function copy (revive)
+	copy := *n
+	^
+internal/kv/index.go:34:2: redefines-builtin-id: redefinition of the built-in function copy (revive)
+	copy := *n
+	^
+internal/kv/index.go:67:2: redefines-builtin-id: redefinition of the built-in function copy (revive)
+	copy := *n
+	^
+internal/kv/index.go:82:2: redefines-builtin-id: redefinition of the built-in function copy (revive)
+	copy := *n
+	^
+internal/quality/helpers.go:9:57: context-as-argument: context.Context should be the first parameter of a function (revive)
+func fullSnapshot[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, read memy.ReadOptions) ([]memy.Record[P, R], error) {
+                                                        ^
+internal/quality/helpers.go:28:55: context-as-argument: context.Context should be the first parameter of a function (revive)
+func fullForget[P, R, A any](e *memy.Engine[P, R, A], ctx context.Context, authority A, scope memy.Scope, purpose string, request memy.ForgetRequest) (memy.PurgeReceipt, error) {
+                                                      ^
+internal/quality/preference.go:419:79: unused-parameter: parameter 'records' seems to be unused, consider removing or renaming it as _ (revive)
+			provider = reference.MergeFunc[Preference, string](func(_ context.Context, records []memy.Record[Preference, string], _ memy.Budget) (memy.MergeResult[Preference, string], error) {
+			                                                                           ^
+internal/quality/preference.go:662:34: unused-parameter: parameter 'run' seems to be unused, consider removing or renaming it as _ (revive)
+func preferenceReport(id string, run CaseRun, observed preferenceRunResult, err error) ScenarioReport {
+                                 ^
+membership.go:74:21: unused-parameter: parameter 'b' seems to be unused, consider removing or renaming it as _ (revive)
+func readMembership(b Bucket, scope Scope, entry Entry, relation, id string) (membershipDisk, error) {
+                    ^
+projected_recall_test.go:72:120: redefines-builtin-id: redefinition of the built-in function max (revive)
+func projectedCall(ctx context.Context, f fixture, refs []memy.RevisionRef, read memy.ReadOptions, p *projectedPolicy, max uint64) (memy.ProjectedRecallResult[projectedOutput, sourceRef], error) {
+                                                                                                                       ^
+projected_recall_test.go:243:62: unused-parameter: parameter 'b' seems to be unused, consider removing or renaming it as _ (revive)
+					p := &projectedPolicy{selectFn: func(_ context.Context, b memy.ProjectedRecallResult[projectedOutput, sourceRef]) (memy.OutputSelection, error) {
+					                                                        ^
+store/sqlite/fence_test.go:169:2: redefines-builtin-id: redefinition of the built-in function copy (revive)
+	copy := open(t, copyPath, sqlite.Options{})
+	^
+engine_test.go:536:51: QF1001: could apply De Morgan's law (staticcheck)
+		if receipt.State != memy.RevocationCommitted && !(receipt.State == memy.PurgePending && unattempted) {
+		                                                ^
+examples/lifecycle/main.go:459:51: QF1001: could apply De Morgan's law (staticcheck)
+		if receipt.State != memy.RevocationCommitted && !(receipt.State == memy.PurgePending && unattempted) {
+		                                                ^
+examples/quality/main.go:69:2: QF1003: could use tagged switch on code (staticcheck)
+	if code == 1 {
+	^
+internal/quality/helpers.go:50:51: QF1001: could apply De Morgan's law (staticcheck)
+		if receipt.State != memy.RevocationCommitted && !(receipt.State == memy.PurgePending && unattempted) {
+		                                                ^
+reference/search_test.go:299:17: unnecessary conversion (unconvert)
+			want := error(context.Canceled)
+			             ^
+purge_job.go:292:6: assigned to id, but reassigned without using the value (wastedassign)
+					id := ""
+					^
+internal/quality/quality_test.go:194:1: unnecessary trailing newline (whitespace)
+}
+^
+purge_callback_corruption_test.go:71:1: unnecessary trailing newline (whitespace)
+}
+^
+recall_state.go:29:2: unnecessary trailing newline (whitespace)
+	}
+	^
+365 issues:
+* cyclop: 1
+* embeddedstructfieldcheck: 2
+* errcheck: 2
+* errorlint: 1
+* exhaustive: 3
+* exhaustruct_v5: 50
+* funlen: 2
+* gochecknoglobals: 1
+* gocognit: 50
+* goconst: 50
+* gocritic: 4
+* gocyclo: 2
+* godoclint: 1
+* goimports: 12
+* golines: 38
+* gosec: 10
+* govet: 38
+* intrange: 13
+* mnd: 43
+* modernize: 3
+* musttag: 1
+* nestif: 11
+* perfsprint: 3
+* revive: 15
+* staticcheck: 4
+* unconvert: 1
+* wastedassign: 1
+* whitespace: 3
+make: *** [lint] Error 1

@@ -10,6 +10,8 @@ import (
 
 const selectedRecord = "selected"
 
+const sinkChunk = 7
+
 // SinkFixture provisions artifacts with one-record lineage and probes metadata.
 type SinkFixture struct {
 	Adapter  memy.Sink
@@ -37,7 +39,8 @@ func SinkSuite(t *testing.T, factory func(*testing.T) SinkFixture) {
 		for range 2 {
 			ack, err := f.Adapter.Purge(t.Context(), batch)
 			must(t, err)
-			if ack.Sink != f.Adapter.Name() || ack.OperationID != batch.OperationID || ack.Epoch != batch.Epoch || ack.Chunk != batch.Chunk {
+			if ack.Sink != f.Adapter.Name() || ack.OperationID != batch.OperationID || ack.Epoch != batch.Epoch ||
+				ack.Chunk != batch.Chunk {
 				t.Fatalf("unbound acknowledgement: %+v", ack)
 			}
 		}
@@ -76,7 +79,7 @@ func sinkBatch(sc memy.Scope) memy.PurgeBatch {
 		OperationID: "purge",
 		Scope:       sc,
 		Epoch:       1,
-		Chunk:       7,
+		Chunk:       sinkChunk,
 		Selector:    memy.Selector{Kind: memy.SelectRecord, ID: selectedRecord},
 		Records:     []string{selectedRecord},
 	}

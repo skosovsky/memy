@@ -1,0 +1,47 @@
+for dir in .; do \
+		echo "fuzz - $dir"; \
+		(cd "$dir" && \
+			packages=$(go list -tags=fuzz ./...) && \
+			for pkg in $packages; do \
+				targets=$(go test -tags=fuzz -list '^Fuzz' "$pkg") || exit 1; \
+				for target in $targets; do \
+					case "$target" in Fuzz*) \
+						go test -tags=fuzz -run='^$' -fuzz="^$target$" \
+							-fuzztime=30s -parallel=2 "$pkg" || exit 1 ;; \
+					esac; \
+				done; \
+			done \
+		) || exit 1; \
+	done
+if [ -f "go.work" ]; then go work sync; fi
+for dir in .; do \
+		echo "fix & tidy - $dir"; \
+		(cd "$dir" && go fix ./... && go mod tidy) || exit 1; \
+		(cd "$dir" && golangci-lint run --fix --allow-serial-runners ./...) || exit 1; \
+	done
+for dir in .; do \
+		echo "cover - $dir"; \
+		(cd "$dir" && go test -coverprofile=coverage.out ./... && go tool cover -func=coverage.out) || exit 1; \
+	done
+for dir in .; do \
+		echo "bench - $dir"; \
+		(cd "$dir" && go test -bench=. -run='^$' -benchmem ./...) || exit 1; \
+	done
+test -z "$(gofmt -l .)"
+for dir in .; do \
+		(cd "$dir" && go vet ./...) || exit 1; \
+	done
+for dir in .; do \
+		echo "golangci-lint - $dir"; \
+		(cd "$dir" && golangci-lint run --allow-serial-runners ./...) || exit 1; \
+	done
+for dir in .; do \
+		echo "test - $dir"; \
+		(cd "$dir" && go test -v -race -count=1 -timeout=30m ./...) || exit 1; \
+	done
+go run ./examples/lifecycle
+go run ./examples/quality
+go run ./examples/retrieval
+go run ./examples/quality-integration
+./scripts/release.sh patch "."
+./scripts/release.sh break "."

@@ -13,6 +13,14 @@ import (
 	"github.com/skosovsky/memy"
 )
 
+const originalPayload = "original"
+const scanFixtureKeys = 700
+const boundedScanLimit = 37
+const boundedScanMaxBytes = 200
+const conformanceScanPageLimit = 256
+const cursorScanMaxBytes = 100
+const oversizedScanLimit = 1025
+
 const lockWaitDeadline = 30 * time.Millisecond
 const versionAfterRecreation memy.Version = 3
 
@@ -57,22 +65,15 @@ func StoreSuite(t *testing.T, factory Factory) {
 
 func boundedScan(t *testing.T, store memy.Store) {
 	// Arrange: ordered live keys, a different prefix, and many retained tombstones.
-	must(t, store.Update(context.Background(), scope(), func(b memy.Bucket) error {
-		for i := 0; i < 700; i++ {
-			key := "prefix/" + fmt.Sprintf("%04d", i)
-			if _, err := b.Put(key, 0, []byte("payload")); err != nil {
-				return err
-			}
-		}
-		for i := 0; i < 1000; i++ {
-			if _, err := b.Delete("deleted/"+strconv.Itoa(i), 0); err != nil {
-				return err
-			}
-		}
-		_, err := b.Put("other/key", 0, []byte("excluded"))
-		return err
-	}))
-	options := memy.ScanOptions{Prefix: "prefix/", Limit: 37, MaxBytes: 200}
+	seedBoundedScan(t, store)
+	options := memy.ScanOptions{
+		Prefix:   "prefix/",
+		Limit:    boundedScanLimit,
+		MaxBytes: boundedScanMaxBytes,
+		After:    "",
+		Plan:     "",
+		Cursor:   "",
+	}
 	var keys []string
 	// Act: continue across independent consistent transactions without mutation.
 	for {
@@ -101,7 +102,7 @@ func boundedScan(t *testing.T, store memy.Store) {
 		}
 		options.Cursor = page.Cursor
 	}
-	if len(keys) != 700 {
+	if len(keys) != scanFixtureKeys {
 		t.Fatalf("keys=%d", len(keys))
 	}
 	for i, key := range keys {
@@ -109,24 +110,7 @@ func boundedScan(t *testing.T, store memy.Store) {
 			t.Fatalf("unordered key %d: %s", i, key)
 		}
 	}
-	must(t, store.View(context.Background(), scope(), func(b memy.Bucket) error {
-		v, err := b.Get(keys[0])
-		if err != nil {
-			return err
-		}
-		if string(v.Data) != "payload" {
-			t.Fatal("scan aliases stored bytes")
-		}
-		for _, options := range []memy.ScanOptions{{Limit: 0, MaxBytes: 1}, {Limit: 1025, MaxBytes: 1}, {Limit: 1, MaxBytes: 0}} {
-			if _, err := b.Scan(options); !errors.Is(err, memy.ErrInvalid) {
-				t.Fatalf("invalid scan: %v", err)
-			}
-		}
-		if _, err := b.Scan(memy.ScanOptions{Prefix: "prefix/", Limit: 1, MaxBytes: 1}); !errors.Is(err, memy.ErrBudget) {
-			t.Fatalf("oversized entry: %v", err)
-		}
-		return nil
-	}))
+	checkBoundedScanOwnershipAndBudgets(t, store, keys)
 }
 
 func scanCursorBinding(t *testing.T, store memy.Store) {
@@ -139,8 +123,15 @@ func scanCursorBinding(t *testing.T, store memy.Store) {
 		}
 		return nil
 	}))
-	options := memy.ScanOptions{Prefix: "a/", Limit: 1, MaxBytes: 100}
-	must(t, store.View(context.Background(), scope(), func(b memy.Bucket) error { page, err := b.Scan(options); options.Cursor = page.Cursor; return err }))
+	options := memy.ScanOptions{Prefix: "a/", Limit: 1, MaxBytes: cursorScanMaxBytes, After: "", Plan: "", Cursor: ""}
+	must(
+		t,
+		store.View(
+			context.Background(),
+			scope(),
+			func(b memy.Bucket) error { page, err := b.Scan(options); options.Cursor = page.Cursor; return err },
+		),
+	)
 	if options.Cursor == "" {
 		t.Fatal("missing continuation")
 	}
@@ -170,7 +161,10 @@ func scanCursorBinding(t *testing.T, store memy.Store) {
 	}); !errors.Is(err, rollbackErr) {
 		t.Fatal(err)
 	}
-	must(t, store.View(context.Background(), scope(), func(b memy.Bucket) error { _, err := b.Scan(options); return err }))
+	must(
+		t,
+		store.View(context.Background(), scope(), func(b memy.Bucket) error { _, err := b.Scan(options); return err }),
+	)
 	must(t, store.Update(context.Background(), scope(), func(b memy.Bucket) error {
 		if _, err := b.Put("unrelated", 0, []byte("v")); err != nil {
 			return err
@@ -245,7 +239,7 @@ func scopeIsolation(t *testing.T, store memy.Store) {
 
 func rollback(t *testing.T, store memy.Store) {
 	// Arrange.
-	writeRecord(t, store, scope(), 0, "original")
+	writeRecord(t, store, scope(), 0, originalPayload)
 	failure := errors.New("injected failure")
 	// Act: the record and its receipt are one transaction.
 	operationErr := store.Update(context.Background(), scope(), func(b memy.Bucket) error {
@@ -261,7 +255,7 @@ func rollback(t *testing.T, store memy.Store) {
 	if !errors.Is(operationErr, failure) {
 		t.Fatalf("want failure: %v", operationErr)
 	}
-	if value := get(t, store, scope(), "record"); value.Version != 1 || string(value.Data) != "original" {
+	if value := get(t, store, scope(), "record"); value.Version != 1 || string(value.Data) != originalPayload {
 		t.Fatalf("rollback record: %+v", value)
 	}
 	if value := get(t, store, scope(), "receipt"); value.Version != 0 {
@@ -315,7 +309,7 @@ func cancelRollback(t *testing.T, store memy.Store) {
 
 func detachedBytes(t *testing.T, store memy.Store) {
 	// Arrange.
-	input := []byte("original")
+	input := []byte(originalPayload)
 	must(t, store.Update(context.Background(), scope(), func(b memy.Bucket) error {
 		if _, err := b.Put("record", 0, input); err != nil {
 			return err
@@ -335,7 +329,7 @@ func detachedBytes(t *testing.T, store memy.Store) {
 		return nil
 	}))
 	// Assert.
-	if value := get(t, store, scope(), "record"); string(value.Data) != "original" {
+	if value := get(t, store, scope(), "record"); string(value.Data) != originalPayload {
 		t.Fatalf("alias changed store: %s", value.Data)
 	}
 }
@@ -359,7 +353,7 @@ func readOnly(t *testing.T, store memy.Store) {
 
 func deleteABA(t *testing.T, store memy.Store) {
 	// Arrange.
-	writeRecord(t, store, scope(), 0, "original")
+	writeRecord(t, store, scope(), 0, originalPayload)
 	// Act.
 	must(t, store.Update(context.Background(), scope(), func(b memy.Bucket) error {
 		_, transactionErr := b.Delete("record", 1)
@@ -382,7 +376,7 @@ func deleteABA(t *testing.T, store memy.Store) {
 
 func concurrentCAS(t *testing.T, store memy.Store) {
 	// Arrange.
-	writeRecord(t, store, scope(), 0, "original")
+	writeRecord(t, store, scope(), 0, originalPayload)
 	start := make(chan struct{})
 	errorsOut := make(chan error, 2)
 	var writers sync.WaitGroup
@@ -477,7 +471,7 @@ func closed(t *testing.T, store memy.Store) {
 func malformedScopeIdentity(t *testing.T, store memy.Store) {
 	// Arrange: a valid replacement rune must remain distinct from malformed bytes.
 	good := memy.Scope{Tenant: "\ufffd", Namespace: "имя", Subject: "👩"}
-	writeRecord(t, store, good, 0, "original")
+	writeRecord(t, store, good, 0, originalPayload)
 	for _, component := range []string{"tenant", "namespace", "subject"} {
 		for _, malformed := range []string{string([]byte{0xff}), string([]byte{0xfe}), "x\x00y"} {
 			bad := good
@@ -500,14 +494,21 @@ func malformedScopeIdentity(t *testing.T, store memy.Store) {
 			}
 		}
 	}
-	if value := get(t, store, good, "record"); string(value.Data) != "original" || value.Version != 1 {
+	if value := get(t, store, good, "record"); string(value.Data) != originalPayload || value.Version != 1 {
 		t.Fatal("invalid scope mutated valid state")
 	}
 }
 
 func entries(b memy.Bucket, prefix string) ([]memy.Entry, error) {
 	var result []memy.Entry
-	options := memy.ScanOptions{Prefix: prefix, Limit: 256, MaxBytes: int(^uint(0) >> 1)}
+	options := memy.ScanOptions{
+		Prefix:   prefix,
+		Limit:    conformanceScanPageLimit,
+		MaxBytes: int(^uint(0) >> 1),
+		After:    "",
+		Plan:     "",
+		Cursor:   "",
+	}
 	for {
 		page, err := b.Scan(options)
 		if err != nil {
@@ -522,4 +523,50 @@ func entries(b memy.Bucket, prefix string) ([]memy.Entry, error) {
 		}
 		options.Cursor = page.Cursor
 	}
+}
+
+func seedBoundedScan(t *testing.T, store memy.Store) {
+	t.Helper()
+	must(t, store.Update(context.Background(), scope(), func(b memy.Bucket) error {
+		for i := range scanFixtureKeys {
+			key := "prefix/" + fmt.Sprintf("%04d", i)
+			if _, err := b.Put(key, 0, []byte("payload")); err != nil {
+				return err
+			}
+		}
+		for i := range 1000 {
+			if _, err := b.Delete("deleted/"+strconv.Itoa(i), 0); err != nil {
+				return err
+			}
+		}
+		_, err := b.Put("other/key", 0, []byte("excluded"))
+		return err
+	}))
+}
+
+func checkBoundedScanOwnershipAndBudgets(t *testing.T, store memy.Store, keys []string) {
+	t.Helper()
+	must(t, store.View(context.Background(), scope(), func(b memy.Bucket) error {
+		v, err := b.Get(keys[0])
+		if err != nil {
+			return err
+		}
+		if string(v.Data) != "payload" {
+			t.Fatal("scan aliases stored bytes")
+		}
+		for _, options := range []memy.ScanOptions{{Limit: 0, MaxBytes: 1, Prefix: "", After: "", Plan: "", Cursor: ""}, {Limit: oversizedScanLimit, MaxBytes: 1, Prefix: "", After: "", Plan: "", Cursor: ""}, {Limit: 1, MaxBytes: 0, Prefix: "", After: "", Plan: "", Cursor: ""}} {
+			if _, err := b.Scan(options); !errors.Is(err, memy.ErrInvalid) {
+				t.Fatalf("invalid scan: %v", err)
+			}
+		}
+		if _, err := b.Scan(
+			memy.ScanOptions{Prefix: "prefix/", Limit: 1, MaxBytes: 1, After: "", Plan: "", Cursor: ""},
+		); !errors.Is(
+			err,
+			memy.ErrBudget,
+		) {
+			t.Fatalf("oversized entry: %v", err)
+		}
+		return nil
+	}))
 }

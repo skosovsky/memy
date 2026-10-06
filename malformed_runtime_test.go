@@ -96,7 +96,7 @@ func corruptCanonicalData(raw []byte, field string) ([]byte, error) {
 func TestNullRevocationEpochCannotResetFence(t *testing.T) {
 	// Arrange: a real forget has advanced the scope epoch.
 	f := newFixture(t, nil)
-	_, operationErr := fullForget(f.engine, context.Background(), f.actor, f.scope, "assist", memy.ForgetRequest{
+	_, operationErr := fullForget(context.Background(), f.engine, f.actor, f.scope, "assist", memy.ForgetRequest{
 		OperationID:   "forget-scope",
 		Selector:      memy.Selector{Kind: memy.SelectScope},
 		Reason:        "withdraw",
@@ -220,7 +220,7 @@ func TestMalformedLineageDoesNotBecomeEmptyRecall(t *testing.T) {
 		memy.ScoreRanker[preference, sourceRef]{},
 		memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 1},
 	)
-	snapshot, snapshotErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
+	snapshot, snapshotErr := fullSnapshot(context.Background(), f.engine, f.actor, f.scope, memy.ReadOptions{})
 	// Assert: canonical corruption remains an explicit schema error.
 	if !errors.Is(recallErr, memy.ErrSchema) || !errors.Is(snapshotErr, memy.ErrSchema) || len(recalled.Records) != 0 ||
 		len(snapshot) != 0 {

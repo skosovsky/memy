@@ -36,7 +36,8 @@ const SchemaVersion uint32 = 3
 
 // validIdentifier compares exact text; it never normalizes identity.
 func validIdentifier(value string) bool {
-	return utf8.ValidString(value) && strings.TrimSpace(value) != "" && len(value) <= 1024 && !strings.ContainsRune(value, '\x00')
+	return utf8.ValidString(value) && strings.TrimSpace(value) != "" && len(value) <= 1024 &&
+		!strings.ContainsRune(value, '\x00')
 }
 
 func validPurpose(value string) bool { return value == "" || validIdentifier(value) }

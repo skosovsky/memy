@@ -31,14 +31,26 @@ type Store struct {
 
 // New returns an empty store. No goroutines are created.
 func New() *Store {
-	s := &Store{scopes: make(map[string]*scopeState)}
+	s := &Store{
+		scopes: make(map[string]*scopeState),
+		mu:     sync.Mutex{},
+		once:   sync.Once{},
+		closed: atomic.Bool{},
+		secret: [32]byte{},
+	}
 	_, _ = rand.Read(s.secret[:])
 	return s
 }
 
 // Capabilities describes the in-process guarantees; Durable is false.
 func (*Store) Capabilities() memy.StoreCapabilities {
-	return memy.StoreCapabilities{Atomic: true, ConditionalWrite: true, FencedView: true, SchemaVersion: memy.SchemaVersion, Durable: false}
+	return memy.StoreCapabilities{
+		Atomic:           true,
+		ConditionalWrite: true,
+		FencedView:       true,
+		SchemaVersion:    memy.SchemaVersion,
+		Durable:          false,
+	}
 }
 
 func (s *Store) acquire(ctx context.Context, scope memy.Scope) (*scopeState, error) {
@@ -52,7 +64,12 @@ func (s *Store) acquire(ctx context.Context, scope memy.Scope) (*scopeState, err
 	}
 	state := s.scopes[scope.Key()]
 	if state == nil {
-		state = &scopeState{gate: make(chan struct{}, 1), values: make(map[string]memy.Value)}
+		state = &scopeState{
+			gate:       make(chan struct{}, 1),
+			values:     make(map[string]memy.Value),
+			index:      kv.Index{},
+			generation: 0,
+		}
 		s.scopes[scope.Key()] = state
 	}
 	s.mu.Unlock()
@@ -95,7 +112,13 @@ func (s *Store) run(ctx context.Context, scope memy.Scope, writable bool, fn fun
 		return err
 	}
 	defer func() { <-state.gate }()
-	bucket := kv.New(ctx, state.values, &state.index, kv.Binding{Secret: s.secret[:], Scope: scope.Key(), Generation: state.generation}, writable)
+	bucket := kv.New(
+		ctx,
+		state.values,
+		&state.index,
+		kv.Binding{Secret: s.secret[:], Scope: scope.Key(), Generation: state.generation},
+		writable,
+	)
 	defer bucket.Seal()
 	if err := fn(bucket); err != nil {
 		return err

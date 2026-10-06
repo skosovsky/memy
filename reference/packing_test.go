@@ -14,14 +14,35 @@ import (
 )
 
 func packingBody(values ...string) memy.ProjectedRecallResult[string, string] {
-	body := memy.ProjectedRecallResult[string, string]{Projections: []memy.Projection[string, string]{}, Coverage: []memy.Coverage{{Backend: "offline", Status: "ready"}}, Omissions: []memy.BudgetOmission{}}
+	body := memy.ProjectedRecallResult[string, string]{
+		Projections: []memy.Projection[string, string]{},
+		Coverage:    []memy.Coverage{{Backend: "offline", Status: "ready"}},
+		Omissions:   []memy.BudgetOmission{},
+	}
 	for i, value := range values {
-		body.Projections = append(body.Projections, memy.Projection[string, string]{RecordID: string(rune('a' + i)), Revision: 1, Output: value, Trust: "data", Provenance: memy.Provenance[string]{Evidence: "source evidence", Sources: []memy.Source[string]{{ID: "source", Revision: "v1", Reference: "host://source"}}, Losses: []string{"compressed"}, Uncertainties: []string{"unverified"}}})
+		body.Projections = append(
+			body.Projections,
+			memy.Projection[string, string]{
+				RecordID: string(rune('a' + i)),
+				Revision: 1,
+				Output:   value,
+				Trust:    "data",
+				Provenance: memy.Provenance[string]{
+					Evidence:      "source evidence",
+					Sources:       []memy.Source[string]{{ID: "source", Revision: "v1", Reference: "host://source"}},
+					Losses:        []string{"compressed"},
+					Uncertainties: []string{"unverified"},
+				},
+			},
+		)
 	}
 	return body
 }
 
-func applyPacking(body memy.ProjectedRecallResult[string, string], selection memy.OutputSelection) memy.ProjectedRecallResult[string, string] {
+func applyPacking(
+	body memy.ProjectedRecallResult[string, string],
+	selection memy.OutputSelection,
+) memy.ProjectedRecallResult[string, string] {
 	original := body.Projections
 	body.Projections = []memy.Projection[string, string]{}
 	body.Omissions = selection.Omissions
@@ -40,7 +61,16 @@ func TestJSONPackingWholeBody(t *testing.T) {
 	ctx := context.Background()
 	policy := reference.JSONPacking[string, string]{}
 	body := packingBody("tiny", "tiny", strings.Repeat("x", 20000))
-	expected := applyPacking(body, memy.OutputSelection{Refs: []memy.RevisionRef{{RecordID: "a", Revision: 1}}, Omissions: []memy.BudgetOmission{{Ref: memy.RevisionRef{RecordID: "b", Revision: 1}, Reason: memy.OmittedBudget}, {Ref: memy.RevisionRef{RecordID: "c", Revision: 1}, Reason: memy.OmittedOversized}}})
+	expected := applyPacking(
+		body,
+		memy.OutputSelection{
+			Refs: []memy.RevisionRef{{RecordID: "a", Revision: 1}},
+			Omissions: []memy.BudgetOmission{
+				{Ref: memy.RevisionRef{RecordID: "b", Revision: 1}, Reason: memy.OmittedBudget},
+				{Ref: memy.RevisionRef{RecordID: "c", Revision: 1}, Reason: memy.OmittedOversized},
+			},
+		},
+	)
 	limit, err := policy.Measure(ctx, expected)
 	if err != nil {
 		t.Fatal(err)
@@ -135,7 +165,8 @@ func TestJSONPackingAllOmittedAndEmpty(t *testing.T) {
 		if err != nil || measureErr != nil || len(selection.Refs) != 0 || cost > 1000 {
 			t.Fatalf("selection=%+v cost=%d error=%v/%v", selection, cost, err, measureErr)
 		}
-		if len(body.Projections) > 0 && (len(selection.Omissions) != 1 || selection.Omissions[0].Reason != memy.OmittedOversized) {
+		if len(body.Projections) > 0 &&
+			(len(selection.Omissions) != 1 || selection.Omissions[0].Reason != memy.OmittedOversized) {
 			t.Fatalf("oversized omission lost: %+v", selection)
 		}
 	}
@@ -147,7 +178,15 @@ func TestJSONPackingPreservesRankedOrder(t *testing.T) {
 	policy := reference.JSONPacking[string, string]{}
 	body := packingBody("tie", "tie")
 	body.Projections[0], body.Projections[1] = body.Projections[1], body.Projections[0]
-	expected := applyPacking(body, memy.OutputSelection{Refs: []memy.RevisionRef{{RecordID: "b", Revision: 1}}, Omissions: []memy.BudgetOmission{{Ref: memy.RevisionRef{RecordID: "a", Revision: 1}, Reason: memy.OmittedBudget}}})
+	expected := applyPacking(
+		body,
+		memy.OutputSelection{
+			Refs: []memy.RevisionRef{{RecordID: "b", Revision: 1}},
+			Omissions: []memy.BudgetOmission{
+				{Ref: memy.RevisionRef{RecordID: "a", Revision: 1}, Reason: memy.OmittedBudget},
+			},
+		},
+	)
 	limit, err := policy.Measure(ctx, expected)
 	if err != nil {
 		t.Fatal(err)
@@ -167,7 +206,11 @@ func (v cancelPackingJSON) MarshalJSON() ([]byte, error) { v.Cancel(); return []
 func TestJSONPackingMarshalFailureAndCancellation(t *testing.T) {
 	// Arrange: consumer-defined marshalers remain subject to cancellation checks.
 	ctx, cancel := context.WithCancel(context.Background())
-	body := memy.ProjectedRecallResult[cancelPackingJSON, string]{Projections: []memy.Projection[cancelPackingJSON, string]{{RecordID: "a", Revision: 1, Output: cancelPackingJSON{Cancel: cancel}}}}
+	body := memy.ProjectedRecallResult[cancelPackingJSON, string]{
+		Projections: []memy.Projection[cancelPackingJSON, string]{
+			{RecordID: "a", Revision: 1, Output: cancelPackingJSON{Cancel: cancel}},
+		},
+	}
 	policy := reference.JSONPacking[cancelPackingJSON, string]{}
 	// Act.
 	_, err := policy.Select(ctx, body, math.MaxUint64)
@@ -176,7 +219,9 @@ func TestJSONPackingMarshalFailureAndCancellation(t *testing.T) {
 		t.Fatalf("cancellation during marshal ignored: %v", err)
 	}
 	// Arrange: invalid consumer JSON must not be represented as a successful cost.
-	invalid := memy.ProjectedRecallResult[func(), string]{Projections: []memy.Projection[func(), string]{{RecordID: "a", Revision: 1, Output: func() {}}}}
+	invalid := memy.ProjectedRecallResult[func(), string]{
+		Projections: []memy.Projection[func(), string]{{RecordID: "a", Revision: 1, Output: func() {}}},
+	}
 	// Act.
 	_, measureErr := (reference.JSONPacking[func(), string]{}).Measure(context.Background(), invalid)
 	_, selectErr := (reference.JSONPacking[func(), string]{}).Select(context.Background(), invalid, math.MaxUint64)

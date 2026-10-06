@@ -110,7 +110,8 @@ func Extract[I, P, R, A any](
 	codec Codec[I],
 	provider Extractor[I, P, R],
 ) ([]Proposal[P, R], error) {
-	if e == nil || nilPort(codec) || nilPort(provider) || !validIdentifier(job.ProviderVersion) || !validIdentifier(job.OperationID) {
+	if e == nil || nilPort(codec) || nilPort(provider) || !validIdentifier(job.ProviderVersion) ||
+		!validIdentifier(job.OperationID) {
 		return nil, ErrInvalid
 	}
 	decision, authErr := e.authorize(ctx, authority, scope, ActionPropose, job.Purpose)

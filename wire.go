@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/skosovsky/memy/internal/workcost"
 	"reflect"
 	"time"
+
+	"github.com/skosovsky/memy/internal/workcost"
 )
 
 type document struct {

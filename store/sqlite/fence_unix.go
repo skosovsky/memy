@@ -59,9 +59,9 @@ func (s *Store) scopeFence(ctx context.Context, scope memy.Scope, exclusive bool
 		}
 		err = syscall.Flock(int(file.Fd()), operation)
 		if err == nil {
-			if err := ctx.Err(); err != nil {
+			if contextErr := ctx.Err(); contextErr != nil {
 				_ = file.Close()
-				return nil, err
+				return nil, contextErr
 			}
 			return func() { _ = file.Close() }, nil
 		}

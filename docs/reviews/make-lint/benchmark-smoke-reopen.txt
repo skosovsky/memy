@@ -1,0 +1,7 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/skosovsky/memy
+cpu: Apple M1 Max
+BenchmarkSQLiteReopenGet/1000-10         	       1	   1498959 ns/op	  440288 B/op	    5073 allocs/op
+PASS
+ok  	github.com/skosovsky/memy	1.044s

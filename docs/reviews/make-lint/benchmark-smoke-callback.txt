@@ -1,0 +1,7 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/skosovsky/memy
+cpu: Apple M1 Max
+BenchmarkCallbackContention/memory-10         	       1	     94833 ns/op	  50000000 held-callback-ns	     13291 write-p50-ns	     13291 write-p95-ns	    3920 B/op	      51 allocs/op
+PASS
+ok  	github.com/skosovsky/memy	0.568s

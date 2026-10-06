@@ -2,6 +2,8 @@ package kv
 
 import "github.com/skosovsky/memy/internal/workcost"
 
+const maxPrefixByte = 255
+
 // Index is a scope-owned AVL index of live keys. Tombstones retain CAS versions
 // in the value map but do not make prefix reads scan deleted or unrelated keys.
 type Index struct{ root *node }
@@ -20,8 +22,8 @@ func height(n *node) int {
 }
 func refresh(n *node) { n.height = 1 + max(height(n.left), height(n.right)) }
 func left(n *node) *node {
-	copy := *n
-	n = &copy
+	owned := *n
+	n = &owned
 	pivot := *n.right
 	p := &pivot
 	n.right = p.left
@@ -31,8 +33,8 @@ func left(n *node) *node {
 	return p
 }
 func right(n *node) *node {
-	copy := *n
-	n = &copy
+	owned := *n
+	n = &owned
 	pivot := *n.left
 	p := &pivot
 	n.left = p.right
@@ -62,15 +64,16 @@ func balance(n *node) *node {
 }
 func insert(n *node, key string) *node {
 	if n == nil {
-		return &node{key: key, height: 1}
+		return &node{key: key, height: 1, left: nil, right: nil}
 	}
-	copy := *n
-	n = &copy
-	if key < n.key {
+	owned := *n
+	n = &owned
+	switch {
+	case key < n.key:
 		n.left = insert(n.left, key)
-	} else if key > n.key {
+	case key > n.key:
 		n.right = insert(n.right, key)
-	} else {
+	default:
 		return n
 	}
 	return balance(n)
@@ -79,13 +82,14 @@ func remove(n *node, key string) *node {
 	if n == nil {
 		return nil
 	}
-	copy := *n
-	n = &copy
-	if key < n.key {
+	owned := *n
+	n = &owned
+	switch {
+	case key < n.key:
 		n.left = remove(n.left, key)
-	} else if key > n.key {
+	case key > n.key:
 		n.right = remove(n.right, key)
-	} else {
+	default:
 		if n.left == nil {
 			return n.right
 		}
@@ -108,7 +112,7 @@ func (i *Index) Remove(key string) { i.root = remove(i.root, key) }
 func upperPrefix(prefix string) string {
 	end := []byte(prefix)
 	for j := len(end) - 1; j >= 0; j-- {
-		if end[j] != 255 {
+		if end[j] != maxPrefixByte {
 			end[j]++
 			return string(end[:j+1])
 		}

@@ -1,0 +1,35 @@
+{
+  "command": [
+    "make",
+    "validate"
+  ],
+  "environment": {
+    "GOCACHE": "/private/tmp/memy-task03-go-cache"
+  },
+  "exit": 0,
+  "lint_issues": 0,
+  "test_flags": "-v -race -count=1 -timeout=30m",
+  "packages": [
+    "ok  \tgithub.com/skosovsky/memy\t769.788s",
+    "?   \tgithub.com/skosovsky/memy/conformance\t[no test files]",
+    "ok  \tgithub.com/skosovsky/memy/examples/lifecycle\t1.596s",
+    "ok  \tgithub.com/skosovsky/memy/examples/quality\t11.979s",
+    "?   \tgithub.com/skosovsky/memy/examples/quality-integration\t[no test files]",
+    "?   \tgithub.com/skosovsky/memy/examples/retrieval\t[no test files]",
+    "ok  \tgithub.com/skosovsky/memy/internal/kv\t1.862s",
+    "ok  \tgithub.com/skosovsky/memy/internal/membershipproof\t1.412s",
+    "ok  \tgithub.com/skosovsky/memy/internal/quality\t55.148s",
+    "?   \tgithub.com/skosovsky/memy/internal/workcost\t[no test files]",
+    "ok  \tgithub.com/skosovsky/memy/reference\t1.241s",
+    "ok  \tgithub.com/skosovsky/memy/store/memory\t1.440s",
+    "ok  \tgithub.com/skosovsky/memy/store/sqlite\t2.584s"
+  ],
+  "examples": [
+    "go run ./examples/lifecycle",
+    "go run ./examples/quality",
+    "go run ./examples/retrieval",
+    "go run ./examples/quality-integration"
+  ],
+  "source_hashes_verified": 127,
+  "source_drift": []
+}
