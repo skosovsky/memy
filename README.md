@@ -183,7 +183,7 @@ authority для безопасного использования через en
 go get github.com/skosovsky/memy@v0.1.0
 ```
 
-Для публикации из чистой ветки `main` с настроенным GitHub remote:
+Для публикации committed HEAD с настроенным `origin` (tracked-изменения должны быть закоммичены):
 
 ```sh
 make release # patch по умолчанию; также доступен make release-patch
@@ -191,11 +191,13 @@ make release # patch по умолчанию; также доступен make r
 make release RELEASE_TYPE=break # также доступен make release-break
 ```
 
-Targets сначала выполняют `make validate`, затем передают тип релиза и список
-modules в `scripts/release.sh`. Скрипт рассчитывает следующую версию, запрашивает
-подтверждение и публикует теги из detached HEAD. Для major 0 breaking change
-увеличивает minor; для major ≥1 — major. Рабочая ветка не публикуется, GitHub
-Release автоматически не создаётся.
+Targets сначала выполняют `make validate`, включая local-only release fixtures.
+Single-module script рассчитывает версию по опубликованным tags, запрашивает
+подтверждение и публикует один exact tag из disposable clone. Untracked-файлы
+и посторонние tags не публикуются; исходный checkout сохраняется, включая
+detached HEAD. Для major 0 break увеличивает minor; major-переходы требуют
+отдельного semantic import-version изменения и отклоняются. Неизвестный исход
+push сохраняет recovery clone. См. [release contract](docs/release.md).
 
 `Snapshot` возвращает одну `SnapshotPage`: host задаёт `SnapshotOptions.Read`,
 `Limit` и `MaxBytes`, затем явно продолжает `Cursor` до `Complete`. Бюджет

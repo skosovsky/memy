@@ -1,120 +1,77 @@
 #!/bin/bash
-set -e # Stop script on any error
+set -euo pipefail
 
-RELEASE_TYPE=$1
-MODULES=$2
-
-if [ ! -f "go.mod" ]; then
-    echo "Error: go.mod not found in the current directory. Run script from the repo root."
-    exit 1
-fi
-
-ROOT_MODULE=$(grep -m 1 '^module' go.mod | awk '{print $2}')
-
-if [[ "$RELEASE_TYPE" != "break" && "$RELEASE_TYPE" != "patch" ]]; then
-    echo "Usage: make release-patch OR make release-break"
-    exit 1
-fi
-
-if [ -z "$ROOT_MODULE" ]; then
-    echo "Error: Could not determine module path from go.mod"
-    exit 1
-fi
-
-REPO_PREFIX=$(echo "$ROOT_MODULE" | sed 's/\//\\\//g')
-
-if [ -z "$MODULES" ]; then
-    echo "Error: MODULES is empty. Make sure Makefile is passing it correctly."
-    exit 1
-fi
-
-# Ensure there are no uncommitted changes
-git update-index -q --refresh
-if ! git diff-index --quiet HEAD --; then
-    echo "Error: You have uncommitted changes. Please commit or stash them first."
-    exit 1
-fi
-
-# 1. Fetch tags and calculate version
-git fetch --tags --quiet
-LATEST_TAG=$(git tag -l "v*" | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
-
-if [ -z "$LATEST_TAG" ]; then
-    LATEST_TAG="v0.0.0"
-fi
-
-VERSION_NO_V=${LATEST_TAG#v}
-IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_NO_V"
-
-if [ "$RELEASE_TYPE" == "break" ]; then
-    if [ "$MAJOR" -eq 0 ]; then
-        MINOR=$((MINOR + 1))
-        PATCH=0
-    else
-        MAJOR=$((MAJOR + 1))
-        MINOR=0
-        PATCH=0
+fail() { echo "Error: $*" >&2; exit 1; }
+release_type=${1:-}
+modules=${2:-}
+[[ "$release_type" == patch || "$release_type" == break ]] || fail 'Expected patch or break.'
+[[ "$modules" == . ]] || fail 'Only the root module (MODULES=.) is supported.'
+[[ -f go.mod ]] || fail 'Run from the repository root.'
+[[ "$(git rev-parse --show-prefix)" == '' ]] || fail 'Run from the repository root.'
+head=$(git rev-parse --verify HEAD)
+git diff --quiet -- || fail 'Tracked worktree changes must be committed first.'
+git diff --cached --quiet -- || fail 'Staged changes must be committed first.'
+destination=$(git remote get-url --push origin)
+# Freeze relative filesystem remotes before changing to the preparation clone.
+case "$destination" in
+    /*|*:*|*://*) ;;
+    *) destination="$(pwd)/$destination" ;;
+esac
+remote_tags=$(git ls-remote --tags --refs "$destination") || fail 'Cannot inspect published tags.'
+major=0; minor=0; patch=0
+while read -r oid ref; do
+    if [[ "$ref" =~ ^refs/tags/v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+        # Avoid ambiguous leading zeroes and shell arithmetic overflow.
+        a=${BASH_REMATCH[1]}; b=${BASH_REMATCH[2]}; c=${BASH_REMATCH[3]}
+        for component in "$a" "$b" "$c"; do
+            [[ "$component" =~ ^(0|[1-9][0-9]{0,8})$ ]] || fail 'Unsupported version component.'
+        done
+        if (( a > major || (a == major && b > minor) || (a == major && b == minor && c > patch) )); then
+            major=$a; minor=$b; patch=$c
+        fi
     fi
-elif [ "$RELEASE_TYPE" == "patch" ]; then
-    PATCH=$((PATCH + 1))
+done <<< "$remote_tags"
+root_module=$(awk '$1 == "module" {print $2; exit}' go.mod)
+[[ -n "$root_module" ]] || fail 'Missing module path.'
+if (( major >= 2 )); then
+    [[ "$root_module" == */v"$major" ]] || fail 'Published major does not match semantic import path.'
 fi
-
-NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
-
-# 3. User confirmation
-echo "========================================"
-echo "Current version: $LATEST_TAG"
-echo "New version:     $NEW_VERSION ($RELEASE_TYPE)"
-echo "========================================"
-read -p "Proceed with release $NEW_VERSION? [y/N] " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "Aborted."
-    exit 1
-fi
-
-echo "🚀 Starting release train for $NEW_VERSION..."
-
-CURRENT_BRANCH=$(git branch --show-current)
-echo "🔀 Detaching HEAD from $CURRENT_BRANCH to keep history clean..."
-git checkout --detach HEAD --quiet
-
-# 4. Update all go.mod files
-echo "📦 Updating go.mod files..."
-for dir in $MODULES; do
-    modfile="$dir/go.mod"
-    sed -i '' "/$REPO_PREFIX/s/ v0.0.0/ $NEW_VERSION/g" "$modfile"
-    sed -i '' "/$REPO_PREFIX.*=>/d" "$modfile"
-    go mod edit -fmt "$modfile"
-done
-
-# 5. Create the release commit
-echo "💾 Committing release state (detached)..."
-git add .
-
-if ! git diff --cached --quiet; then
-    git commit -m "chore: release $NEW_VERSION" --quiet
+latest="v$major.$minor.$patch"
+if [[ "$release_type" == break ]]; then
+    (( major == 0 )) || fail 'Major break requires a reviewed semantic import-version change.'
+    minor=$((minor + 1)); patch=0
 else
-    echo "  ℹ️ No changes in go.mod. Will tag the current state directly."
+    patch=$((patch + 1))
 fi
+version="v$major.$minor.$patch"
+echo "Release $latest -> $version at $head"
+read -r -p "Publish $version? [y/N] " reply || fail 'Confirmation unavailable.'
+[[ "$reply" == y || "$reply" == Y ]] || fail 'Aborted.'
 
-# 6. Tag the root and all submodules
-echo "🏷️ Tagging root and submodules..."
-git tag "$NEW_VERSION"
-
-for dir in $MODULES; do
-    if [ "$dir" != "." ]; then
-        clean_dir=${dir#./}
-        git tag "$clean_dir/$NEW_VERSION"
+prepared=$(mktemp -d "${TMPDIR:-/tmp}/memy-release.XXXXXXXX")
+keep=false
+cleanup() {
+    if [[ "$keep" == false ]]; then rm -rf -- "$prepared"; fi
+}
+trap cleanup EXIT
+# --no-local prevents alternates/hardlinks; --no-tags excludes unrelated local refs.
+git clone --quiet --no-local --no-tags --no-checkout "$(pwd)" "$prepared/repo"
+git -C "$prepared/repo" checkout --quiet --detach "$head"
+git -C "$prepared/repo" -c tag.gpgSign=false tag "$version" "$head"
+echo "State: local-prepared; tag=$version commit=$head"
+if git -C "$prepared/repo" push "$destination" "refs/tags/$version:refs/tags/$version"; then
+    echo "State: published; tag=$version commit=$head"
+    exit 0
+fi
+# A transport failure need not mean the remote transaction failed.
+if observed=$(git ls-remote --tags --refs "$destination" "refs/tags/$version"); then
+    if [[ "$observed" == "$head"$'\t'"refs/tags/$version" ]]; then
+        echo "State: published; tag=$version commit=$head (confirmed after push failure)"
+        exit 0
     fi
-done
-
-# 7. Push ONLY tags to GitHub
-echo "☁️ Pushing tags to GitHub..."
-git push origin --tags
-
-# 8. Return to normal state
-echo "⏪ Returning to $CURRENT_BRANCH..."
-git checkout "$CURRENT_BRANCH" --quiet
-
-echo "✅ Release $NEW_VERSION completed successfully! History is clean."
+    echo "State: rejected; tag=$version commit=$head" >&2
+    exit 1
+fi
+keep=true
+echo "State: unknown; tag=$version commit=$head; recovery=$prepared/repo" >&2
+exit 1

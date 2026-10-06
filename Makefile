@@ -10,7 +10,7 @@ FUZZPARALLEL ?= 2
 MODULES := $(shell find . -type d \( -name ".*" -not -name "." -o -name "vendor" \) -prune -o -type f -name "go.mod" -exec dirname {} \;)
 export GOCACHE GOLANGCI_LINT_CACHE
 
-.PHONY: format vet lint fix test race validate examples bench fuzz cover release release-patch release-break
+.PHONY: format vet lint fix test race validate examples bench fuzz cover release release-patch release-break release-test
 
 format:
 	@test -z "$$(gofmt -l .)"
@@ -42,7 +42,7 @@ test:
 
 race: test
 
-validate: format vet lint test examples
+validate: format vet lint test examples release-test
 
 examples:
 	$(GO) run ./examples/lifecycle
@@ -78,6 +78,9 @@ cover:
 		echo "cover - $$dir"; \
 		(cd "$$dir" && $(GO) test -coverprofile=coverage.out ./... && $(GO) tool cover -func=coverage.out) || exit 1; \
 	done
+
+release-test:
+	python3 scripts/release_test.py
 
 release: validate
 	./scripts/release.sh "$(RELEASE_TYPE)" "$(MODULES)"
