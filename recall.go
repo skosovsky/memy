@@ -275,6 +275,11 @@ func finishProjection[P, R, A, O any](
 	projector Projector[P, R, O],
 ) (Projection[O, R], error) {
 	id := initial.ID
+	snapshot, operationErr := e.projectionSnapshot(initial)
+	if operationErr != nil {
+		return Projection[O, R]{}, operationErr
+	}
+	projectorVersion := projector.Version()
 	projectionInput, operationErr := e.cloneRecord(initial)
 	if operationErr != nil {
 		return Projection[O, R]{}, operationErr
@@ -297,7 +302,16 @@ func finishProjection[P, R, A, O any](
 		if err := e.validateCurrentRead(ctx, b, scope, current); err != nil {
 			return err
 		}
+		finalSnapshot, transactionErr := e.projectionSnapshot(record)
+		if transactionErr != nil {
+			return transactionErr
+		}
+		if finalSnapshot != snapshot {
+			return ErrStaleInput
+		}
 		cacheKey, transactionErr := digest(struct {
+			Domain     string
+			Snapshot   string
 			Actor      string
 			Scope      Scope
 			Policy     string
@@ -307,11 +321,13 @@ func finishProjection[P, R, A, O any](
 			Epoch      Version
 			Options    ReadOptions
 		}{
+			"projection/v2",
+			snapshot,
 			decision.Actor,
 			scope,
 			decision.PolicyVersion,
 			options.Purpose,
-			projector.Version(),
+			projectorVersion,
 			RevisionRef{id, record.Revision},
 			current.Proposal.Epoch,
 			options,

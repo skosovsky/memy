@@ -149,3 +149,10 @@ After or Plan) is ErrStaleCursor, as is changed generation/old format within the
 new bound. Oversized input is ErrInvalid before authentication, including oversized
 old cursors. Restart old scans or continue durable maintenance jobs through their
 fresh scans; schema 3 and the existing database secrets/generations are unchanged.
+
+Projection identity uses projection/v2 with the entire effective Record snapshot,
+consumer codec identities and authority/read/projector bindings. Invalidate all
+old host cache keys on upgrade; cached output never replaces current canonical
+checks. State changes during projection or packing return ErrStaleInput without
+output or implicit callback retries. Unchanged RecordedAsOf snapshots remain
+stable through later current-state transitions. Persisted schema remains 3.

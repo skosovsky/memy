@@ -84,7 +84,7 @@ func RecallProjected[P, R, Q, A, O any](
 		Coverage:    slices.Clone(recalled.Coverage), Progress: recalled.Progress,
 		Omissions: []BudgetOmission{}, Budget: BudgetUsage{Unit: "", Used: 0, Limit: 0, Exact: false},
 	}
-	body, projectedRefs, projectedStates, err := projectRecalled(
+	body, projectedRefs, projectedSnapshots, err := projectRecalled(
 		ctx,
 		e,
 		authority,
@@ -105,7 +105,7 @@ func RecallProjected[P, R, Q, A, O any](
 		}
 	}
 	// Revalidate omitted refs too: their identity/omission metadata is returned.
-	err = revalidateProjected(ctx, e, authority, scope, decision, options.Read, projectedRefs, projectedStates)
+	err = revalidateProjected(ctx, e, authority, scope, decision, options.Read, projectedRefs, projectedSnapshots)
 	if err != nil {
 		return ProjectedRecallResult[O, R]{}, err
 	}
@@ -215,9 +215,9 @@ func projectRecalled[P, R, A, O any](
 	projector Projector[P, R, O],
 	recalled RecallResult[P, R],
 	body ProjectedRecallResult[O, R],
-) (ProjectedRecallResult[O, R], []RevisionRef, map[RevisionRef]RecordState, error) {
+) (ProjectedRecallResult[O, R], []RevisionRef, map[RevisionRef]string, error) {
 	projectedRefs := make([]RevisionRef, 0, len(recalled.Records))
-	projectedStates := make(map[RevisionRef]RecordState, len(recalled.Records))
+	projectedSnapshots := make(map[RevisionRef]string, len(recalled.Records))
 	for _, item := range recalled.Records {
 		if err := ctx.Err(); err != nil {
 			return body, nil, nil, err
@@ -244,9 +244,13 @@ func projectRecalled[P, R, A, O any](
 		}
 		body.Projections = append(body.Projections, projection)
 		projectedRefs = append(projectedRefs, ref)
-		projectedStates[ref] = projection.State
+		snapshot, snapshotErr := e.projectionSnapshot(initial)
+		if snapshotErr != nil {
+			return body, nil, nil, snapshotErr
+		}
+		projectedSnapshots[ref] = snapshot
 	}
-	return body, projectedRefs, projectedStates, nil
+	return body, projectedRefs, projectedSnapshots, nil
 }
 
 func packProjectedBody[P, R, A, O any](
@@ -308,7 +312,7 @@ func revalidateProjected[P, R, A any](
 	decision Decision,
 	read ReadOptions,
 	projectedRefs []RevisionRef,
-	projectedStates map[RevisionRef]RecordState,
+	projectedSnapshots map[RevisionRef]string,
 ) error {
 	return e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
 		ranked := make([]Ranked[P, R], 0, len(projectedRefs))
@@ -319,7 +323,11 @@ func revalidateProjected[P, R, A any](
 			}
 			// Preserve the measured body: a still-readable revision can have
 			// transitioned to superseded/conflict during a policy callback.
-			if record.State != projectedStates[ref] {
+			snapshot, snapshotErr := e.projectionSnapshot(record)
+			if snapshotErr != nil {
+				return snapshotErr
+			}
+			if snapshot != projectedSnapshots[ref] {
 				return ErrStaleInput
 			}
 			if err := e.validateCurrentRead(ctx, b, scope, disk); err != nil {

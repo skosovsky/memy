@@ -310,7 +310,13 @@ Projection, provenance and source metadata serialize with explicit snake_case
 JSON field names. Typed Record and RecallResult metadata use the same naming
 convention for host exports; consumer payload/output/reference objects retain their own codec
 contracts. Projection/cache identity binds authority, scope, policy version, purpose,
-input revisions/epochs and projection version. Derived sinks have lineage,
+complete effective projector input snapshot, codec identities, input revisions/epochs,
+read options and projection version under the projection/v2 cache domain. Final
+revalidation compares all effective Record fields through configured BYOT codecs;
+changed input returns ErrStaleInput without output or repeated projector calls.
+Historical reads compare effective historical state while retaining current
+permission/retention/revocation checks. Packing revalidates selected and omitted
+snapshots after callbacks. Derived sinks have lineage,
 deletion handles and purge acknowledgements. The reference index and
 summary/cache sink have independently injectable failures. Index contents
 restored from stale backup are still filtered canonically. Hosts must restore
