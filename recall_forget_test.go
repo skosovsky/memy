@@ -75,7 +75,7 @@ func TestCanonicalCommitAndSearchVisibility(t *testing.T) {
 	receipt, _ := staged(t, f, index, summary)
 	options := memy.RecallOptions{
 		Read:   memy.ReadOptions{Purpose: "assist"},
-		Search: memy.SearchOptions{Minimum: &receipt.Visibility},
+		Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates, Minimum: &receipt.Visibility},
 		Limit:  5,
 	}
 	// Act.
@@ -112,7 +112,7 @@ func TestCanonicalCommitAndSearchVisibility(t *testing.T) {
 		len(pending.Records) != 0 {
 		t.Fatalf("canonical=%v pending=%v", canonicalErr, pendingErr)
 	}
-	if visibleErr != nil || !visible.Complete || len(visible.Records) != 1 ||
+	if visibleErr != nil || len(visible.Coverage) != 1 || visible.Coverage[0].Status != "ready" || !visible.Coverage[0].MinimumSatisfied || len(visible.Records) != 1 ||
 		visible.Records[0].Record.Revision != receipt.Revision {
 		t.Fatalf("visible=%+v err=%v", visible, visibleErr)
 	}
@@ -126,7 +126,7 @@ func TestVisibilityCancellationAndBackendFailure(t *testing.T) {
 	cancel()
 	options := memy.RecallOptions{
 		Read:   memy.ReadOptions{Purpose: "assist"},
-		Search: memy.SearchOptions{Minimum: &receipt.Visibility},
+		Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates, Minimum: &receipt.Visibility},
 		Limit:  1,
 	}
 	// Act.
@@ -157,7 +157,7 @@ func TestVisibilityCancellationAndBackendFailure(t *testing.T) {
 	if !errors.Is(cancelErr, context.Canceled) || canonicalErr != nil || canonical.Revision != 1 {
 		t.Fatalf("cancel=%v canonical=%v", cancelErr, canonicalErr)
 	}
-	if !errors.Is(failedErr, memy.ErrUnavailable) || failed.Complete || len(failed.Coverage) != 1 ||
+	if !errors.Is(failedErr, memy.ErrUnavailable) || len(failed.Coverage) != 1 ||
 		failed.Coverage[0].Status != "unavailable" {
 		t.Fatalf("failure faked absence: %+v %v", failed, failedErr)
 	}
@@ -224,7 +224,7 @@ func TestForgetPartialPurgeRetryAndLateJobs(t *testing.T) {
 		"timezone",
 		index,
 		memy.ScoreRanker[preference, sourceRef]{},
-		memy.RecallOptions{Limit: 1},
+		memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 1},
 	)
 	// Assert.
 	if pending.State != memy.PurgePending || len(pending.Sinks) != 2 || !pending.Sinks[0].Acknowledged ||

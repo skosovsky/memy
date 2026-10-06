@@ -36,7 +36,7 @@ func TestCancellationDuringVisibilityWaitPreservesCanonicalCommit(t *testing.T) 
 	go func() {
 		_, recallErr := memy.Recall(ctx, f.engine, f.actor, f.scope, "timezone", index,
 			memy.ScoreRanker[preference, sourceRef]{}, memy.RecallOptions{
-				Limit: 1, Search: memy.SearchOptions{Minimum: &receipt.Visibility},
+				Limit: 1, Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates, Minimum: &receipt.Visibility},
 			})
 		done <- recallErr
 	}()

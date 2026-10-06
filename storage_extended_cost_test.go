@@ -98,7 +98,7 @@ func BenchmarkGrowingLineage(b *testing.B) {
 						case "Get":
 							_, err = f.engine.Get(b.Context(), f.actor, f.scope, "cost-0", memy.ReadOptions{})
 						case "Recall":
-							_, err = memy.Recall(b.Context(), f.engine, f.actor, f.scope, "fixed", costSearch{}, memy.ScoreRanker[preference, sourceRef]{}, memy.RecallOptions{Limit: 2})
+							_, err = memy.Recall(b.Context(), f.engine, f.actor, f.scope, "fixed", costSearch{}, memy.ScoreRanker[preference, sourceRef]{}, memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 2})
 						case "Consolidate":
 							req := consolidationRequest([]memy.RevisionRef{{RecordID: "cost-0", Revision: 1}, {RecordID: "cost-1", Revision: 1}}, memy.ExactDedup)
 							req.Budget.InputBytes = 16 << 20
@@ -185,7 +185,7 @@ func BenchmarkCallbackContention(b *testing.B) {
 				entered, release := make(chan struct{}), make(chan struct{})
 				done := make(chan error, 1)
 				go func() {
-					_, err := memy.Recall(b.Context(), f.engine, f.actor, f.scope, "fixed", costSearch{}, heldRanker{entered, release}, memy.RecallOptions{Limit: 2})
+					_, err := memy.Recall(b.Context(), f.engine, f.actor, f.scope, "fixed", costSearch{}, heldRanker{entered, release}, memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 2})
 					done <- err
 				}()
 				<-entered

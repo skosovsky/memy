@@ -291,6 +291,7 @@ func (s *session) recall(
 ) ([]memy.Record[Preference, string], error) {
 	var options memy.RecallOptions
 	options.Read.Purpose, options.Limit = experimentPurpose, 100
+	options.Search.MaxCandidates = 100
 	result, operationErr := memy.Recall(
 		ctx,
 		s.engine,

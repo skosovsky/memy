@@ -61,12 +61,27 @@ func (s *costStore) FencedView(ctx context.Context, scope memy.Scope, fn func(me
 type costSearch struct{}
 
 func (costSearch) Capabilities() memy.SearchCapabilities {
-	return memy.SearchCapabilities{Scoped: true}
+	return memy.SearchCapabilities{Scoped: true, BoundedCandidates: true}
 }
-func (costSearch) Search(context.Context, memy.Scope, string, memy.SearchOptions) (memy.SearchResult, error) {
+func (costSearch) Search(ctx context.Context, _ memy.Scope, _ string, options memy.SearchOptions) (memy.SearchResult, error) {
+	if err := ctx.Err(); err != nil {
+		return memy.SearchResult{}, err
+	}
+	if options.MaxCandidates < 1 || options.MaxCandidates > memy.MaxSearchCandidates {
+		return memy.SearchResult{}, memy.ErrInvalid
+	}
+	candidates := []memy.Candidate{
+		{RecordID: "cost-0", Revision: 1, Signals: []memy.SearchSignal{{Backend: "fixed/v1", Rank: 1}}},
+		{RecordID: "cost-1", Revision: 1, Signals: []memy.SearchSignal{{Backend: "fixed/v1", Rank: 2}}},
+	}
+	truncated := len(candidates) > options.MaxCandidates
+	if truncated {
+		candidates = candidates[:options.MaxCandidates]
+	}
 	return memy.SearchResult{
-		Candidates: []memy.Candidate{{RecordID: "cost-0", Revision: 1}, {RecordID: "cost-1", Revision: 1}},
-		Coverage:   []memy.Coverage{{Backend: "fixed/v1", Status: "complete"}},
+		Candidates:          candidates,
+		Coverage:            []memy.Coverage{{Backend: "fixed/v1", Status: "ready"}},
+		CandidatesTruncated: truncated,
 	}, nil
 }
 
@@ -158,7 +173,7 @@ func BenchmarkLifecycleCost(b *testing.B) {
 						case "Get":
 							_, err = f.engine.Get(ctx, f.actor, f.scope, "cost-0", memy.ReadOptions{})
 						case "Recall":
-							_, err = memy.Recall(ctx, f.engine, f.actor, f.scope, "fixed", costSearch{}, memy.ScoreRanker[preference, sourceRef]{}, memy.RecallOptions{Limit: 2})
+							_, err = memy.Recall(ctx, f.engine, f.actor, f.scope, "fixed", costSearch{}, memy.ScoreRanker[preference, sourceRef]{}, memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 2})
 						case "Consolidate":
 							request := consolidationRequest([]memy.RevisionRef{{RecordID: "cost-0", Revision: 1}, {RecordID: "cost-1", Revision: 1}}, memy.ExactDedup)
 							_, err = memy.Consolidate(ctx, f.engine, f.actor, f.scope, request, nil)

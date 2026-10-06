@@ -189,24 +189,113 @@ clock advanced. Revision identity remains explicit ordering metadata.
 
 ## Recall and derived views
 
-Get reads canonical state. Recall calls Search[Q] with an authorized exact
-scope and receives only candidate IDs/revisions, scores and per-backend
-coverage. It reloads candidates canonically, verifies state, ACL, temporal
-predicates, expiry, sources/lineage and current revocation before ranking and
-projection. Ranker explanations accompany results; access restrictions are
-hard filters. Typed projection output retains provenance, uncertainty,
-conflict/expiry annotations and data trust, never system/tool privileges.
+Get reads canonical state. Search[Q] is a metadata-only, exact-scoped host port;
+query Q and semantic relevance remain consumer-owned. Candidate scores are
+ranking inputs, never truth, authorization or tool permission. Core validates
+canonical state, ACL, temporal predicates, expiry, sources/lineage and current
+revocation before a ranker or projector receives any payload. Ranker and output
+selection can reorder/remove permitted exact revisions, never add a revision or
+replace canonical payload. Expensive callbacks execute outside transactions;
+fresh canonical checks after all callbacks define delivery as in task02.
 
-The deterministic reference index has explicit Publish/Acknowledge steps and
-controllable lag/failure. It does not silently index canonical commits.
-A committed receipt carries the exact revision visibility token; a minimum
-token request is either acknowledged, bounded pending or unsupported.
-Waiting requires a deadline, respects cancellation and never rolls back a
-canonical write. An acknowledged token promises availability for exact
-matching queries and filters, not for arbitrary semantic queries. Search
-failures return unavailable or explicitly declared degraded coverage; empty
-results never stand in for unknown completeness. Mixed backends report each
-coverage independently.
+### Retrieval composition and work budget (task03 contract)
+
+Backend availability/index visibility, candidate truncation, canonical filtering,
+ranking selection and output-budget omission are separate dimensions. The old
+RecallResult.Complete field is removed. Coverage.Status uses ready, eventual,
+pending, degraded or unavailable; ready means the declared index visibility
+profile is available, not that every relevant fact was retrieved. MinimumSatisfied
+is the separate exact-token guarantee. Per-backend coverage identities are unique; at most 64 backends/signals per candidate are supported.
+A limited or empty result makes no relevance-completeness claim.
+
+SearchOptions.MaxCandidates is a mandatory positive bound, at most 10000. It is
+also the Recall bound before expensive canonical work; RecallOptions.Limit is
+the separate maximum selected result count. SearchCapabilities declares support
+for the candidate-return bound. Unsupported requests fail before the external
+call. An adapter returning more than the requested bound yields ErrBudget before
+candidate iteration, record decode or canonical validation; core does not silently
+slice a malformed oversized result. CandidatesTruncated reports intentional
+backend/composition truncation. This constrains returned metadata/core processing,
+not the internal CPU, network or billing of a host backend. Context deadline and
+cancellation propagate to every port, without rolling back earlier commits.
+
+Search candidates carry typed signals: backend identity, positive rank and finite
+raw score. Signals cannot contain vendor payload or mandatory query strings.
+Final composed candidate refs are unique; core rejects duplicate refs, malformed
+identities/ranks, non-finite scores or signals bound to absent coverage. Ranked
+results preserve the declared signals alongside the policy score/explanation.
+Only the composition policy combines independent backend signals.
+
+The reference Composite uses explicit named backend entries and explicit RRF
+configuration. Each entry returns one coverage identity matching its configured
+name; this minimal adapter does not support nested composites. Inputs are visited
+in stable identity order, independent of slice order. Weighted RRF sums
+weight(identity)/(K+rank), with finite positive K/weights; omitted weights mean 1
+and unknown/duplicate identities are invalid. Within each backend, duplicate exact
+refs are removed before assigning distinct ranks and cannot add weight or shift
+later ranks. Raw score scales are never added. Ties use record ID then revision.
+Provided child signal scores are retained; a child without a signal uses its
+Candidate.Score as the raw score. Signal ranks are the distinct child list ranks.
+All component signals survive fusion. Each backend receives MaxCandidates;
+merged output is truncated to the same global bound only after fusion, with an
+explicit truncation flag. Degraded mode may preserve successful backends, but all
+unavailable returns ErrUnavailable, cancellation/deadline abort the operation,
+and minimum visibility cannot be weakened by degraded mode. Host policies other
+than RRF implement the same Search[Q] port outside lifecycle core.
+
+Recall reports processing counts: returned candidates, canonical checks/filters,
+and ranking omissions, plus the separate truncation flag and backend coverage.
+Only unique bounded candidates reach canonical checks. Stale refs may be filtered;
+a forged foreign canonical binding is an error. Unauthorized data never enters
+ranking, cost estimation or output selection. Historical exact refs obey the
+same ReadOptions eligibility contract as canonical snapshots.
+
+### Projected output budget (task03 contract)
+
+One flow, RecallProjected, composes Search -> canonical filtering -> Ranker ->
+exact-revision Projector -> optional consumer budget selection -> final canonical
+revalidation. Existing standalone Recall and Project remain basic operations;
+there is one budgeted composition path, not competing budget wrappers. Projection
+keeps provenance, source references, uncertainty/losses, reconciliation/conflict,
+scope, revision, expiry and Trust=data. Packing removes whole projections; it
+cannot edit their payload or promote trust. Foreign/duplicate selected refs or
+invalid omission decisions fail ErrInvalid. Selection/measurement receive detached
+values via consumer output codec and the configured reference codec; core retains
+its own originals. The host port must be deterministic, bounded and cancellation-
+aware, and must not retain/mutate callback values after return.
+
+The consumer supplies a versioned output policy, unit, positive maximum cost and
+output Codec[O]. Its policy chooses a subset and distinguishes budget omission
+from an individually oversized projection. Measurement evaluates the final typed
+body, including coverage, progress, omissions and complete projection envelopes.
+Budget usage is an out-of-band receipt, excluded from the JSON body to avoid a
+self-referential byte count; a host embedding that receipt in another envelope
+must measure that additional representation itself. Exact and estimated costs
+are explicitly distinguished. A body with zero/invalid cost is rejected;
+cost comparisons use checked integers without wrapping. If even the empty body
+cannot fit, return ErrBudget. A selected body above the limit also returns
+ErrBudget, never a successful oversize output. Estimate mode guarantees only the
+reported host units, never model-specific tokens or final byte size.
+
+The offline reference policy greedily packs ranked projections using exact JSON
+body bytes, including provenance/metadata overhead and omission explanations.
+It measures each resulting body rather than summing payload bytes. A record larger
+than the budget is explicitly omitted or rejected according to policy. No tokenizer,
+embedding, vector database, prompt builder or vendor SDK enters core. Typed output,
+query, source reference, payload, authority and meaningful cost units remain BYOT.
+Source/authority/expiry/revocation changes during selection/measurement invalidate
+delivery; revalidation errors never return a partially certified body.
+If a still-readable revision changes its projected state during a policy callback,
+delivery returns ErrStaleInput rather than changing the already measured body.
+Input already passed to a trusted host callback remains the task02 disclosure boundary.
+
+The reference index has explicit Publish/Acknowledge steps and controllable
+lag/failure; it never silently indexes canonical commits. Waiting for an exact
+visibility token requires a deadline, respects cancellation and never rolls back
+a canonical write. Acknowledgement promises the declared matching-query visibility,
+not relevance completeness. Sparse/dense adapters connect through Search[Q]; the
+runnable offline example must include divergent rankings, stale metadata, partial
+failure, budget omission, final serialized-size verification and nontext queries.
 
 Projection, provenance and source metadata serialize with explicit snake_case
 JSON field names. Typed Record and RecallResult metadata use the same naming
@@ -347,8 +436,9 @@ control. Payload-volume quality metrics remain a separate measurement.
 Reference Index has no global canonical watermark. Without a minimum token it
 reports eventual coverage, or pending when matching staged metadata is known;
 it never certifies canonical absence. With an acknowledged minimum token and no
-matching pending entries, complete means coverage of that requested minimum,
-not a global guarantee that every canonical revision has been staged.
+matching pending entries, ready reports the available index profile and
+MinimumSatisfied certifies that requested minimum, not a global guarantee that
+every canonical revision has been staged.
 
 ### Reusable port conformance
 

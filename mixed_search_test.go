@@ -18,8 +18,9 @@ func TestMixedSearchPreservesCoverageAndRejectsStrongerProfile(t *testing.T) {
 	}
 	eventual := reference.NewIndex[string]("eventual", nil)
 	mixed := reference.Composite[string]{
-		Backends:      []memy.Search[string]{index, reference.Eventual[string]{Index: eventual}},
+		Backends:      []reference.Backend[string]{{ID: "index/v1", Search: index}, {ID: "eventual", Search: reference.Eventual[string]{Index: eventual}}},
 		AllowDegraded: true,
+		RRF:           reference.RRFConfig{K: 60},
 	}
 	// Act.
 	recalled, operationErr := memy.Recall(
@@ -30,7 +31,7 @@ func TestMixedSearchPreservesCoverageAndRejectsStrongerProfile(t *testing.T) {
 		"timezone",
 		mixed,
 		memy.ScoreRanker[preference, sourceRef]{},
-		memy.RecallOptions{Limit: 5},
+		memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 5},
 	)
 	_, strongErr := memy.Recall(
 		context.Background(),
@@ -40,11 +41,12 @@ func TestMixedSearchPreservesCoverageAndRejectsStrongerProfile(t *testing.T) {
 		"timezone",
 		mixed,
 		memy.ScoreRanker[preference, sourceRef]{},
-		memy.RecallOptions{Limit: 5, Search: memy.SearchOptions{Minimum: &receipt.Visibility}},
+		memy.RecallOptions{Limit: 5, Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates, Minimum: &receipt.Visibility}},
 	)
-	// Assert: empty eventual backend cannot imply canonical absence/completeness.
-	if operationErr != nil || recalled.Complete || len(recalled.Records) != 1 || len(recalled.Coverage) != 2 ||
-		recalled.Coverage[1].Status != "eventual" ||
+	// Assert: eventual coverage remains explicit and rejects stronger visibility.
+	if operationErr != nil || len(recalled.Records) != 1 || len(recalled.Coverage) != 2 ||
+		recalled.Coverage[0].Backend != "eventual" || recalled.Coverage[0].Status != "eventual" ||
+		recalled.Coverage[1].Backend != "index/v1" || recalled.Coverage[1].Status != "eventual" ||
 		!errors.Is(strongErr, memy.ErrUnsupported) {
 		t.Fatalf("recall=%+v err=%v strong=%v", recalled, operationErr, strongErr)
 	}
@@ -59,7 +61,7 @@ func TestCompositePartialFailureRequiresExplicitDegradedMode(t *testing.T) {
 	}
 	failed := reference.NewIndex[string]("failed", nil)
 	failed.Fail(errors.New("outage"))
-	mixed := reference.Composite[string]{Backends: []memy.Search[string]{index, failed}, AllowDegraded: false}
+	mixed := reference.Composite[string]{Backends: []reference.Backend[string]{{ID: "index/v1", Search: index}, {ID: "failed", Search: failed}}, AllowDegraded: false, RRF: reference.RRFConfig{K: 60}}
 	// Act.
 	_, strictErr := memy.Recall(
 		context.Background(),
@@ -69,7 +71,7 @@ func TestCompositePartialFailureRequiresExplicitDegradedMode(t *testing.T) {
 		"timezone",
 		mixed,
 		memy.ScoreRanker[preference, sourceRef]{},
-		memy.RecallOptions{Limit: 1},
+		memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 1},
 	)
 	mixed.AllowDegraded = true
 	partial, partialErr := memy.Recall(
@@ -80,7 +82,7 @@ func TestCompositePartialFailureRequiresExplicitDegradedMode(t *testing.T) {
 		"timezone",
 		mixed,
 		memy.ScoreRanker[preference, sourceRef]{},
-		memy.RecallOptions{Limit: 1},
+		memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 1},
 	)
 	index.Fail(errors.New("another outage"))
 	_, allErr := memy.Recall(
@@ -91,13 +93,14 @@ func TestCompositePartialFailureRequiresExplicitDegradedMode(t *testing.T) {
 		"timezone",
 		mixed,
 		memy.ScoreRanker[preference, sourceRef]{},
-		memy.RecallOptions{Limit: 1},
+		memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 1},
 	)
 	// Assert.
-	if !errors.Is(strictErr, memy.ErrUnavailable) || partialErr != nil || partial.Complete ||
+	if !errors.Is(strictErr, memy.ErrUnavailable) || partialErr != nil ||
 		len(partial.Records) != 1 ||
 		len(partial.Coverage) != 2 ||
-		partial.Coverage[1].Status != "unavailable" ||
+		partial.Coverage[0].Backend != "failed" || partial.Coverage[0].Status != "unavailable" ||
+		partial.Coverage[1].Backend != "index/v1" || partial.Coverage[1].Status != "eventual" ||
 		!errors.Is(allErr, memy.ErrUnavailable) {
 		t.Fatalf("strict=%v partial=%+v %v all=%v", strictErr, partial, partialErr, allErr)
 	}
@@ -107,7 +110,7 @@ func TestCompositeRejectsTypedNilBackend(t *testing.T) {
 	// Arrange: the interface itself is nonnil but carries a missing adapter.
 	f := newFixture(t, nil)
 	var absent *reference.Index[string]
-	composite := reference.Composite[string]{Backends: []memy.Search[string]{absent}}
+	composite := reference.Composite[string]{Backends: []reference.Backend[string]{{ID: "absent", Search: absent}}, RRF: reference.RRFConfig{K: 60}}
 	// Act.
 	coverage := composite.Capabilities()
 	result, err := memy.Recall(
@@ -118,7 +121,7 @@ func TestCompositeRejectsTypedNilBackend(t *testing.T) {
 		"timezone",
 		composite,
 		memy.ScoreRanker[preference, sourceRef]{},
-		memy.RecallOptions{Limit: 1},
+		memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 1},
 	)
 	// Assert: missing backend is unsupported, never a panic or successful absence.
 	if coverage.Scoped || !errors.Is(err, memy.ErrUnsupported) || len(result.Records) != 0 {

@@ -3,6 +3,7 @@ package reference
 import (
 	"context"
 	"errors"
+	"slices"
 	"sync"
 
 	"github.com/skosovsky/memy"
@@ -26,8 +27,12 @@ type Index[Q any] struct {
 	purgeFailure error
 }
 
-// NewIndex creates an empty index. Match must be deterministic and pure.
+// NewIndex creates an empty index, or returns nil for an invalid name.
+// Match must be deterministic and pure.
 func NewIndex[Q any](name string, match func(Q, memy.Candidate) bool) *Index[Q] {
+	if !validSearchIdentifier(name) {
+		return nil
+	}
 	return &Index[Q]{
 		name:    name,
 		match:   match,
@@ -42,7 +47,7 @@ func (i *Index[Q]) Name() string { return i.name }
 
 // Capabilities declares scoped exact visibility support.
 func (*Index[Q]) Capabilities() memy.SearchCapabilities {
-	return memy.SearchCapabilities{Scoped: true, Visibility: true}
+	return memy.SearchCapabilities{Scoped: true, Visibility: true, BoundedCandidates: true}
 }
 
 // Stage queues candidate metadata without making it visible.
@@ -53,7 +58,7 @@ func (i *Index[Q]) Stage(ctx context.Context, scope memy.Scope, candidate memy.C
 	if err := scope.Validate(); err != nil {
 		return err
 	}
-	if candidate.RecordID == "" || candidate.Revision == 0 {
+	if i == nil || (memy.RevisionRef{RecordID: candidate.RecordID, Revision: candidate.Revision}).Validate() != nil || !finite(candidate.Score) {
 		return memy.ErrInvalid
 	}
 	i.mu.Lock()
@@ -61,6 +66,7 @@ func (i *Index[Q]) Stage(ctx context.Context, scope memy.Scope, candidate memy.C
 	if i.failure != nil {
 		return i.failure
 	}
+	candidate.Signals = nil
 	i.pending[indexedKey{scope, memy.RevisionRef{RecordID: candidate.RecordID, Revision: candidate.Revision}}] = candidate
 	return nil
 }
@@ -108,10 +114,10 @@ func (i *Index[Q]) Search(
 	query Q,
 	options memy.SearchOptions,
 ) (memy.SearchResult, error) {
-	if err := scope.Validate(); err != nil {
-		return memy.SearchResult{}, err
+	if i == nil {
+		return memy.SearchResult{}, memy.ErrInvalid
 	}
-	if err := validateMinimum(ctx, scope, options.Minimum); err != nil {
+	if err := validSearchOptions(ctx, scope, options); err != nil {
 		return memy.SearchResult{}, err
 	}
 	for {
@@ -137,11 +143,14 @@ func (i *Index[Q]) Search(
 			_, minimumSatisfied = i.visible[indexedKey{scope, memy.RevisionRef{RecordID: options.Minimum.RecordID, Revision: options.Minimum.Revision}}]
 		}
 		if minimumSatisfied {
-			result := i.visibleResult(scope, query)
-			if options.Minimum == nil && result.Coverage[0].Status == "complete" {
+			result := i.visibleResult(scope, query, options.MaxCandidates)
+			if options.Minimum == nil && result.Coverage[0].Status == "ready" {
 				result.Coverage[0].Status = "eventual"
 			}
 			i.mu.Unlock()
+			if err := ctx.Err(); err != nil {
+				return i.pendingResult(err)
+			}
 			return result, nil
 		}
 		changed := i.changed
@@ -158,6 +167,12 @@ func validateMinimum(ctx context.Context, scope memy.Scope, token *memy.Visibili
 	if token == nil {
 		return nil
 	}
+	if err := token.Scope.Validate(); err != nil {
+		return err
+	}
+	if err := (memy.RevisionRef{RecordID: token.RecordID, Revision: token.Revision}).Validate(); err != nil {
+		return err
+	}
 	if token.Scope != scope {
 		return memy.ErrScopeViolation
 	}
@@ -168,10 +183,10 @@ func validateMinimum(ctx context.Context, scope memy.Scope, token *memy.Visibili
 }
 
 // visibleResult requires the caller to hold the index mutex.
-func (i *Index[Q]) visibleResult(scope memy.Scope, query Q) memy.SearchResult {
+func (i *Index[Q]) visibleResult(scope memy.Scope, query Q, maximum int) memy.SearchResult {
 	result := memy.SearchResult{
 		Candidates: make([]memy.Candidate, 0),
-		Coverage:   []memy.Coverage{{Backend: i.name, Status: "complete", MinimumSatisfied: true}},
+		Coverage:   []memy.Coverage{{Backend: i.name, Status: "ready", MinimumSatisfied: true}},
 	}
 	for key, candidate := range i.pending {
 		if key.scope == scope && (i.match == nil || i.match(query, candidate)) {
@@ -183,6 +198,14 @@ func (i *Index[Q]) visibleResult(scope memy.Scope, query Q) memy.SearchResult {
 		if key.scope == scope && (i.match == nil || i.match(query, candidate)) {
 			result.Candidates = append(result.Candidates, candidate)
 		}
+	}
+	slices.SortFunc(result.Candidates, candidateOrder)
+	if len(result.Candidates) > maximum {
+		result.Candidates = result.Candidates[:maximum]
+		result.CandidatesTruncated = true
+	}
+	for n := range result.Candidates {
+		result.Candidates[n].Signals = []memy.SearchSignal{{Backend: i.name, Rank: n + 1, Score: result.Candidates[n].Score}}
 	}
 	return result
 }

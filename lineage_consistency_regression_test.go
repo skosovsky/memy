@@ -66,7 +66,7 @@ func assertReviewedLineageFailsClosed(t *testing.T, f fixture, index *reference.
 	record, getErr := f.engine.Get(context.Background(), f.actor, f.scope, "derived", memy.ReadOptions{})
 	snapshot, snapshotErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
 	recalled, recallErr := memy.Recall(context.Background(), f.engine, f.actor, f.scope, "all", index,
-		memy.ScoreRanker[preference, sourceRef]{}, memy.RecallOptions{Limit: 1})
+		memy.ScoreRanker[preference, sourceRef]{}, memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 1})
 	called := false
 	projection, projectErr := memy.Project(context.Background(), f.engine, f.actor, f.scope, "derived",
 		memy.ReadOptions{}, reference.ProjectorFunc[preference, sourceRef, string]{

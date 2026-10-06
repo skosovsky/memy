@@ -130,7 +130,7 @@ func TestRecallRechecksRetentionAfterRanking(t *testing.T) {
 		"timezone",
 		index,
 		ranker,
-		memy.RecallOptions{Read: memy.ReadOptions{}, Limit: 1},
+		memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Read: memy.ReadOptions{}, Limit: 1},
 	)
 	// Assert: provider output does not bypass the final host decision.
 	if !errors.Is(operationErr, memy.ErrStaleInput) || len(recalled.Records) != 0 {

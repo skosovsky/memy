@@ -11,22 +11,28 @@ func recallCoverage[P, R any](found SearchResult, minimum *VisibilityToken) (Rec
 	result := RecallResult[P, R]{
 		Records:  make([]Ranked[P, R], 0),
 		Coverage: slices.Clone(found.Coverage),
-		Complete: true,
 	}
+	available := false
 	for _, coverage := range found.Coverage {
+		if coverage.Status != "unavailable" {
+			available = true
+		}
 		if !validIdentifier(coverage.Backend) {
 			return RecallResult[P, R]{}, ErrInvalid
 		}
 		switch coverage.Status {
-		case "complete", "degraded", "pending", "unavailable", "eventual":
+		case "ready", "degraded", "pending", "unavailable", "eventual":
 		default:
 			return RecallResult[P, R]{}, ErrInvalid
 		}
-		if coverage.Status != "complete" {
-			result.Complete = false
-		}
+
+	}
+	if !available {
+		return result, ErrUnavailable
+	}
+	for _, coverage := range found.Coverage {
 		if minimum != nil && !coverage.MinimumSatisfied {
-			return RecallResult[P, R]{Coverage: result.Coverage, Records: nil, Complete: false}, ErrVisibilityPending
+			return RecallResult[P, R]{Coverage: result.Coverage, Records: nil}, ErrVisibilityPending
 		}
 	}
 	return result, nil
@@ -35,24 +41,18 @@ func recallCoverage[P, R any](found SearchResult, minimum *VisibilityToken) (Rec
 func (e *Engine[P, R, A]) recallCandidates(
 	ctx context.Context, b Bucket, scope Scope, candidates []Candidate, options ReadOptions,
 ) ([]Ranked[P, R], error) {
-	seen := make(map[RevisionRef]bool)
 	records := make([]Ranked[P, R], 0, len(candidates))
 	for _, candidate := range candidates {
 		if !validIdentifier(candidate.RecordID) || candidate.Revision == 0 || candidate.Revision > MaxVersion ||
 			!finiteScore(candidate.Score) {
 			return nil, ErrInvalid
 		}
-		ref := RevisionRef{RecordID: candidate.RecordID, Revision: candidate.Revision}
-		if seen[ref] {
-			continue
-		}
-		seen[ref] = true
 		record, eligible, candidateErr := e.recallCandidate(ctx, b, scope, candidate, options)
 		if candidateErr != nil {
 			return nil, candidateErr
 		}
 		if eligible {
-			records = append(records, Ranked[P, R]{Record: record, Score: candidate.Score, Explanation: ""})
+			records = append(records, Ranked[P, R]{Record: record, Score: candidate.Score, Explanation: "", Signals: slices.Clone(candidate.Signals)})
 		}
 	}
 	return records, nil
@@ -98,11 +98,15 @@ func (e *Engine[P, R, A]) rankRecall(
 			return nil, cloneErr
 		}
 		original.Record = cloned
+		original.Signals = slices.Clone(original.Signals)
 		input = append(input, original)
 	}
 	ranked, rankingErr := ranker.Rank(ctx, input)
 	if rankingErr != nil {
 		return nil, rankingErr
+	}
+	if len(ranked) > len(candidates) {
+		return nil, ErrInvalid
 	}
 	selected := make([]Ranked[P, R], 0, min(limit, len(ranked)))
 	for _, item := range ranked {
@@ -182,4 +186,54 @@ func (e *Engine[P, R, A]) completeRecall(
 		records = append(records, item.Record)
 	}
 	return e.deliveryDeadlineGate(b, scope, records)
+}
+
+func boundedCoverage(coverage []Coverage) []Coverage {
+	if len(coverage) > MaxSearchBackends {
+		return nil
+	}
+	return slices.Clone(coverage)
+}
+
+// Validate rejects malformed metadata before canonical reads, without fusion.
+func validateSearchResult(found SearchResult, limit int) error {
+	if len(found.Coverage) < 1 || len(found.Coverage) > MaxSearchBackends {
+		return ErrInvalid
+	}
+	backends := make(map[string]string, len(found.Coverage))
+	for _, c := range found.Coverage {
+		if !validIdentifier(c.Backend) || backends[c.Backend] != "" {
+			return ErrInvalid
+		}
+		switch c.Status {
+		case "ready", "degraded", "pending", "unavailable", "eventual":
+		default:
+			return ErrInvalid
+		}
+		backends[c.Backend] = c.Status
+	}
+	refs := make(map[RevisionRef]bool, len(found.Candidates))
+	for _, c := range found.Candidates {
+		ref := RevisionRef{c.RecordID, c.Revision}
+		if !validRef(ref) || !finiteScore(c.Score) || refs[ref] || len(c.Signals) < 1 || len(c.Signals) > MaxSearchBackends {
+			return ErrInvalid
+		}
+		refs[ref] = true
+		signals := make(map[string]bool, len(c.Signals))
+		for _, signal := range c.Signals {
+			if backends[signal.Backend] == "" || backends[signal.Backend] == "unavailable" || signals[signal.Backend] || signal.Rank < 1 || signal.Rank > limit || !finiteScore(signal.Score) {
+				return ErrInvalid
+			}
+			signals[signal.Backend] = true
+		}
+	}
+	return nil
+}
+
+// Validate checks exact revision identity without loading canonical data.
+func (ref RevisionRef) Validate() error {
+	if !validRef(ref) {
+		return ErrInvalid
+	}
+	return nil
 }

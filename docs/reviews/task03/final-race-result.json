@@ -1,0 +1,6 @@
+{
+  "command": ["go", "test", "-race", "-count=1", "-timeout=20m", "./..."],
+  "exit": 0,
+  "root_package_seconds": 682.555,
+  "output": "final-race.txt"
+}

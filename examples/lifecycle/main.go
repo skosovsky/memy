@@ -180,7 +180,7 @@ func demonstrateRecallAndForget(
 			IncludeUnknown:   false,
 			IncludeConflicts: false,
 		},
-		Search: memy.SearchOptions{Minimum: &receipt.Visibility},
+		Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates, Minimum: &receipt.Visibility},
 		Limit:  recallLimit,
 	}
 	wait, cancel := context.WithTimeout(ctx, visibilityProbeTimeout)

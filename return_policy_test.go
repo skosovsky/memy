@@ -33,7 +33,7 @@ func TestRestrictedRecallAndProjectionNeverExposeFieldsToPolicies(t *testing.T) 
 		}}
 	// Act.
 	recalled, recallErr := memy.Recall(context.Background(), f.engine, f.actor, f.scope, "timezone", index, ranker,
-		memy.RecallOptions{Limit: 1})
+		memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 1})
 	projected, projectionErr := memy.Project(
 		context.Background(),
 		f.engine,

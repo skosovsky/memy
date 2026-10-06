@@ -218,10 +218,10 @@ func TestMalformedLineageDoesNotBecomeEmptyRecall(t *testing.T) {
 		"derived",
 		index,
 		memy.ScoreRanker[preference, sourceRef]{},
-		memy.RecallOptions{Limit: 1},
+		memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 1},
 	)
 	snapshot, snapshotErr := fullSnapshot(f.engine, context.Background(), f.actor, f.scope, memy.ReadOptions{})
-	// Assert: corruption is an explicit schema error, not complete empty coverage.
+	// Assert: canonical corruption remains an explicit schema error.
 	if !errors.Is(recallErr, memy.ErrSchema) || !errors.Is(snapshotErr, memy.ErrSchema) || len(recalled.Records) != 0 ||
 		len(snapshot) != 0 {
 		t.Fatalf("recall=%+v err=%v snapshot=%v err=%v", recalled, recallErr, snapshot, snapshotErr)

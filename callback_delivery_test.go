@@ -59,7 +59,7 @@ func TestCallbacksAllowMutationAndRejectRevokedFinalDelivery(t *testing.T) {
 				defer cancel()
 				go func() {
 					if operation == "Recall" {
-						result, err := memy.Recall(ctx, f.engine, f.actor, f.scope, "fixed", costSearch{}, heldRanker{entered, release}, memy.RecallOptions{Limit: 2})
+						result, err := memy.Recall(ctx, f.engine, f.actor, f.scope, "fixed", costSearch{}, heldRanker{entered, release}, memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 2})
 						if len(result.Records) != 0 {
 							done <- errors.New("revoked recall output")
 							return

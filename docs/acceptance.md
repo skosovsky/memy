@@ -16,6 +16,15 @@ A listed fixture alone is not proof; the independent reports inspect the task,
 implementation, contracts and behavioral evidence. See reviews/final-audit.md
 for finding closure and command provenance.
 
+The 85-row inventory and its review statuses below describe the historical
+accepted snapshot. Retrieval API references now use the task03 contract:
+coverage means availability/index visibility, not relevance completeness;
+RecallResult.Complete is removed, and bounded processing is reported separately
+by RecallProgress. The frozen historical denominator is unchanged. Task03 is
+independently accepted at 100%; its separate gates RT03-01..08 are verified below.
+Evidence: [completeness](reviews/task03/completeness.md),
+[correctness](reviews/task03/correctness.md), and [validation](reviews/task03/validation.md).
+
 | ID | Required behavior | API / docs | Behavioral test | Runnable example | Status |
 |---|---|---|---|---|---|
 | BOOT-01 | Pinned compatible toolchain and reproducible CI | go.mod; .github/workflows/ci.yml; Makefile; docs/design.md | make validate on pinned local Go 1.27.1; CI configuration inspected | make validate | verified independently |
@@ -59,13 +68,13 @@ for finding closure and command provenance.
 | MEM-003-09 | Concurrent supersede preserves winning revision | atomic reconciliation + expected head revisions | TestConcurrentCommitAndDurableIdempotency SQLite supersede race/reopen | examples/lifecycle; docs/design.md | verified independently |
 | MEM-004-01 | Typed scoped search distinct from canonical Get | Search[Q]; Recall; Get; Candidate metadata-only | TestCanonicalCommitAndSearchVisibility; TestTypedProjectionAndExportAuthority | examples/lifecycle | verified independently |
 | MEM-004-02 | Canonical ACL/status/tombstone/temporal revalidation | recallCandidate; snapshotCandidate; readable; revocation and lineage checks | TestForgetPartialPurgeRetryAndLateJobs; TestMalformedLineageDoesNotBecomeEmptyRecall; TestRestrictedRecallAndProjectionNeverExposeFieldsToPolicies | examples/lifecycle; docs/design.md | verified independently |
-| MEM-004-03 | Ranking/explanations/provenance/conflict/expiry/completeness | Ranked; ScoreRanker; RecallResult; Record metadata | TestCanonicalCommitAndSearchVisibility; TestRankerCannotRewriteConsumerMapsOrProvenance; TestConflictHistoryAndExplicitResolution; TestCanonicalProposalExpiryClosesReadsAndPurges | examples/lifecycle; examples/quality | verified independently |
+| MEM-004-03 | Ranking/explanations/provenance/conflict/expiry/completeness (historical requirement wording) | Ranked with typed signals; ScoreRanker; RecallResult.Coverage/Progress; Record metadata; current contract makes no relevance-completeness claim | TestCanonicalCommitAndSearchVisibility; TestRankerCannotRewriteConsumerMapsOrProvenance; TestConflictHistoryAndExplicitResolution; TestCanonicalProposalExpiryClosesReadsAndPurges | examples/lifecycle; examples/quality | verified independently |
 | MEM-004-04 | Safe typed data projection/export and cache identity | Project; Projection.Trust/CacheKey; projectionRecord | TestTypedProjectionAndExportAuthority; TestProjectionCacheIdentityBindsReadContext; TestRestrictedRecallAndProjectionNeverExposeFieldsToPolicies | examples/lifecycle; bounded knowledge fixture | verified independently |
 | MEM-004-05 | Controlled deterministic index lag and exact ack recall | reference.Index.Stage/Acknowledge; VisibilityToken | TestCanonicalCommitAndSearchVisibility | examples/lifecycle controlled lag | verified independently |
 | MEM-004-06 | Minimum visibility bounded wait pending/unsupported | SearchCapabilities.Visibility; Index minimum deadline validation | TestCanonicalCommitAndSearchVisibility; TestMixedSearchPreservesCoverageAndRejectsStrongerProfile | examples/lifecycle; docs/design.md | verified independently |
 | MEM-004-07 | Cancel visibility wait leaves canonical commit intact | context-aware index wait; canonical/search separate transactions | TestVisibilityCancellationAndBackendFailure; TestCancellationDuringVisibilityWaitPreservesCanonicalCommit | examples/lifecycle; docs/design.md | verified independently |
 | MEM-004-08 | Backend failure unavailable or explicit degraded coverage | Index.Fail; Composite.AllowDegraded; Coverage | TestVisibilityCancellationAndBackendFailure; TestCancellationDuringVisibilityWaitPreservesCanonicalCommit; TestCompositePartialFailureRequiresExplicitDegradedMode | docs/design.md; runnable mixed-search fixtures | verified independently |
-| MEM-004-09 | Mixed backend coverage and eventual capability honesty | reference.Composite; reference.Eventual | TestMixedSearchPreservesCoverageAndRejectsStrongerProfile; TestCompositePartialFailureRequiresExplicitDegradedMode | docs/design.md; runnable mixed-search fixtures | verified independently |
+| MEM-004-09 | Mixed backend coverage and eventual capability honesty | reference.Composite named Backend/RRFConfig; reference.Eventual; BoundedCandidates separate from Visibility | TestMixedSearchPreservesCoverageAndRejectsStrongerProfile; TestCompositePartialFailureRequiresExplicitDegradedMode | docs/design.md; runnable mixed-search fixtures; task03 example pending current acceptance | verified independently |
 | MEM-004-10 | Final authority version/decision rechecked before return | reauthorize before return/transaction end | TestProjectionRechecksAuthorityAfterConsumerCallback; TestRecallRechecksRetentionAfterRanking; TestProjectionRechecksRetentionAfterProvider | docs/design.md external decision lease boundary | verified independently |
 | MEM-005-01 | Authorized record/source/subject/scope selectors, expected revision | Selector; expectedForgetRevisions; revokeOperation | TestForgetSelectorsRespectExactAuthorityBoundary; TestConcurrentCommitAndDurableIdempotency; TestForgetPartialPurgeRetryAndLateJobs | examples/lifecycle; docs/design.md | verified independently |
 | MEM-005-02 | Durable content-free revoke/epochs immediately close recall | epochDisk; revocationDisk; revokeRecord content-free tombstone | TestDurableForgetFaultPendingReceiptAndReopen; TestNullRevocationEpochCannotResetFence | examples/lifecycle | verified independently |
@@ -137,8 +146,9 @@ pass does not prove the full matrix. SQLite's CGO requirements and logical
 purge boundaries are described in design.md. External vendor integrations are
 not claimed; consumer ports have offline runnable reference paths.
 
-The following entries preserve historical audit states; current status is the
-final matrix above and the final exact snapshot confirmation reports.
+The following entries preserve historical audit states. The final matrix above
+and its exact snapshot confirmation reports certify that historical state;
+subsequent iteration gates have their own acceptance status below.
 
 
 Round 1 independently reported 81/85 complete requirements and six confirmed
@@ -220,3 +230,21 @@ historical evidence rather than claims about unchanged current hashes.
 | ST-08 | Snapshot/Sweep expose bounded continuation and still enforce shortened current retention policies |
 | ST-09 | Before/after memory/SQLite cost corpus covers 1k/10k/100k revisions, fixed payload and growing lineage; counters, allocations, latency and contention are recorded |
 | ST-10 | Race/vet/format/examples pass; two independent reports certify all task02 requirements on the final source snapshot |
+
+## Task03 retrieval acceptance (accepted)
+
+Task03 changes the retrieval runtime contract; prior audit snapshots remain
+historical evidence. All eight gates are independently verified for this iteration:
+[completeness100%](reviews/task03/completeness.md),
+[correctness](reviews/task03/correctness.md), and [validation](reviews/task03/validation.md).
+
+| ID | Requirement | Required evidence | State |
+| --- | --- | --- | --- |
+| RT03-01 | Identity-stable RRF, second signals, duplicate isolation and ties | permutation/score-scale/duplicate/invalid-signal behavioral tests | verified independently |
+| RT03-02 | Availability, visibility and truncation are separate | mixed failure/minimum/cancellation conformance; unavailable-all case | verified independently |
+| RT03-03 | Candidate bound precedes canonical work | oversized adapter + decode/check counters; unsupported/overflow tests | verified independently |
+| RT03-04 | Honest exact/estimated final-body budget | zero/oversize/overflow/tie/cancel/envelope-size tests | verified independently |
+| RT03-05 | BYOT and offline adapter example | two payload/query types including nontext; exact JSON example | verified independently |
+| RT03-06 | Host policies cannot spoof canonical refs/payload | hostile ranker/selector mutation/foreign/duplicate ref tests | verified independently |
+| RT03-07 | Final fresh canonical delivery checks | revoke/source change/expiry during packing and measurement | verified independently |
+| RT03-08 | Complete delivery and two independent reviews | whole race/vet/format/examples; completeness100% and no open errors | verified independently |

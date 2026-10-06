@@ -8,8 +8,9 @@ import (
 
 // SearchCapabilities separates scoped retrieval from visibility guarantees.
 type SearchCapabilities struct {
-	Scoped     bool
-	Visibility bool
+	Scoped            bool
+	Visibility        bool
+	BoundedCandidates bool
 }
 
 // Candidate contains no payload: every result must be revalidated canonically.
@@ -17,9 +18,17 @@ type Candidate struct {
 	RecordID string
 	Revision Version
 	Score    float64
+	Signals  []SearchSignal
 }
 
-// Coverage reports completeness independently for each search backend.
+// SearchSignal retains the typed evidence used by a composition policy.
+type SearchSignal struct {
+	Backend string  `json:"backend"`
+	Rank    int     `json:"rank"`
+	Score   float64 `json:"score"`
+}
+
+// Coverage separates backend availability/index visibility from relevance.
 type Coverage struct {
 	Backend          string `json:"backend"`
 	Status           string `json:"status"`
@@ -28,12 +37,19 @@ type Coverage struct {
 
 // SearchOptions requests an exact minimum revision, optionally waiting until
 // the context deadline. A wait without a deadline is rejected as unbounded.
-type SearchOptions struct{ Minimum *VisibilityToken }
+type SearchOptions struct {
+	Minimum       *VisibilityToken
+	MaxCandidates int
+}
+
+const MaxSearchCandidates = 10000
+const MaxSearchBackends = 64
 
 // SearchResult never conflates an unavailable/pending backend with absence.
 type SearchResult struct {
-	Candidates []Candidate
-	Coverage   []Coverage
+	Candidates          []Candidate
+	Coverage            []Coverage
+	CandidatesTruncated bool
 }
 
 // Search is a consumer-query port separate from canonical storage.
@@ -44,9 +60,10 @@ type Search[Q any] interface {
 
 // Ranked holds a selected typed record and its ranking explanation.
 type Ranked[P, R any] struct {
-	Record      Record[P, R] `json:"record"`
-	Score       float64      `json:"score"`
-	Explanation string       `json:"explanation"`
+	Record      Record[P, R]   `json:"record"`
+	Score       float64        `json:"score"`
+	Explanation string         `json:"explanation"`
+	Signals     []SearchSignal `json:"signals"`
 }
 
 // Ranker operates only on authorized/revalidated candidates.
@@ -61,11 +78,20 @@ type RecallOptions struct {
 	Limit  int
 }
 
+// RecallProgress reports separate processing stages, never knowledge completeness.
+type RecallProgress struct {
+	ReturnedCandidates  int  `json:"returned_candidates"`
+	CanonicalChecked    int  `json:"canonical_checked"`
+	CanonicalFiltered   int  `json:"canonical_filtered"`
+	RankingOmitted      int  `json:"ranking_omitted"`
+	CandidatesTruncated bool `json:"candidates_truncated"`
+}
+
 // RecallResult is explicit about backend coverage and selected provenance.
 type RecallResult[P, R any] struct {
 	Records  []Ranked[P, R] `json:"records"`
 	Coverage []Coverage     `json:"coverage"`
-	Complete bool           `json:"complete"`
+	Progress RecallProgress `json:"progress"`
 }
 
 // Recall searches an authorized exact scope, then validates every candidate
@@ -80,7 +106,7 @@ func Recall[P, R, Q, A any](
 	ranker Ranker[P, R],
 	options RecallOptions,
 ) (RecallResult[P, R], error) {
-	if e == nil || nilPort(search) || nilPort(ranker) || options.Limit <= 0 || options.Limit > 10000 {
+	if e == nil || nilPort(search) || nilPort(ranker) || options.Limit <= 0 || options.Limit > MaxSearchCandidates || options.Search.MaxCandidates < 1 || options.Search.MaxCandidates > MaxSearchCandidates {
 		return RecallResult[P, R]{}, ErrInvalid
 	}
 	decision, operationErr := e.authorize(ctx, authority, scope, ActionRead, options.Read.Purpose)
@@ -88,7 +114,7 @@ func Recall[P, R, Q, A any](
 		return RecallResult[P, R]{}, operationErr
 	}
 	caps := search.Capabilities()
-	if !caps.Scoped || (options.Search.Minimum != nil && !caps.Visibility) {
+	if !caps.Scoped || !caps.BoundedCandidates || (options.Search.Minimum != nil && !caps.Visibility) {
 		return RecallResult[P, R]{}, ErrUnsupported
 	}
 	if options.Search.Minimum != nil && !validRef(RevisionRef{RecordID: options.Search.Minimum.RecordID, Revision: options.Search.Minimum.Revision}) {
@@ -99,15 +125,19 @@ func Recall[P, R, Q, A any](
 	}
 	found, operationErr := search.Search(ctx, scope, query, options.Search)
 	if operationErr != nil {
-		return RecallResult[P, R]{Coverage: found.Coverage, Records: nil, Complete: false}, operationErr
+		return RecallResult[P, R]{Coverage: boundedCoverage(found.Coverage), Records: nil}, operationErr
 	}
-	if len(found.Coverage) == 0 || len(found.Candidates) > 10000 {
-		return RecallResult[P, R]{}, ErrInvalid
+	if len(found.Candidates) > options.Search.MaxCandidates {
+		return RecallResult[P, R]{}, ErrBudget
+	}
+	if err := validateSearchResult(found, options.Search.MaxCandidates); err != nil {
+		return RecallResult[P, R]{}, err
 	}
 	result, coverageErr := recallCoverage[P, R](found, options.Search.Minimum)
 	if coverageErr != nil {
 		return result, coverageErr
 	}
+	result.Progress = RecallProgress{ReturnedCandidates: len(found.Candidates), CandidatesTruncated: found.CandidatesTruncated}
 	var candidates []Ranked[P, R]
 	operationErr = e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
 		var err error
@@ -120,10 +150,13 @@ func Recall[P, R, Q, A any](
 	if operationErr != nil {
 		return RecallResult[P, R]{}, operationErr
 	}
+	result.Progress.CanonicalChecked = len(found.Candidates)
+	result.Progress.CanonicalFiltered = len(found.Candidates) - len(candidates)
 	selected, operationErr := e.rankRecall(ctx, candidates, ranker, options.Limit)
 	if operationErr != nil {
 		return RecallResult[P, R]{}, operationErr
 	}
+	result.Progress.RankingOmitted = len(candidates) - len(selected)
 	operationErr = e.config.Store.FencedView(ctx, scope, func(b Bucket) error {
 		for i := range selected {
 			ref := selected[i].Record
@@ -228,6 +261,11 @@ func Project[P, R, A, O any](
 	if operationErr != nil {
 		return Projection[O, R]{}, operationErr
 	}
+	return finishProjection(ctx, e, authority, scope, decision, initial, options, projector)
+}
+
+func finishProjection[P, R, A, O any](ctx context.Context, e *Engine[P, R, A], authority A, scope Scope, decision Decision, initial Record[P, R], options ReadOptions, projector Projector[P, R, O]) (Projection[O, R], error) {
+	id := initial.ID
 	projectionInput, operationErr := e.cloneRecord(initial)
 	if operationErr != nil {
 		return Projection[O, R]{}, operationErr

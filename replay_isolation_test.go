@@ -215,7 +215,7 @@ func TestRankerCannotRewriteConsumerMapsOrProvenance(t *testing.T) {
 		"map",
 		index,
 		malicious,
-		memy.RecallOptions{Limit: 1},
+		memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 1},
 	)
 	if operationErr != nil {
 		t.Fatal(operationErr)

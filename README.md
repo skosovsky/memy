@@ -34,6 +34,11 @@ canonical read в новой сессии, search visibility, typed projection �
 со сбоем одного sink и повтором очистки. Данные и файл удаляются после примера.
 Никаких credentials не нужно.
 
+`go run ./examples/retrieval` запускает отдельный offline пример: два backend
+с разными ranks и масштабами scores, RRF, stale candidate, partial failure и
+точный бюджет JSON-выдачи. Query — структура потребителя. Пример проверяет
+контракт и размер выдачи, а не качество production retrieval.
+
 ## Типы и ports
 
 ```go
@@ -59,7 +64,52 @@ tombstones сохраняются бессрочно. Retired record IDs не п
 
 `reference` содержит offline policy grants, source registry, clock, deterministic
 index с manual acknowledgement, summary/cache sink, typed extractor/merge/
-projection scripts. Это reference adapters, не vendor integrations.
+projection scripts, RRF composition и JSON packing. Это reference adapters,
+не vendor integrations.
+
+## Retrieval и бюджет выдачи
+
+Каждый вызов `Recall` задаёт `SearchOptions.MaxCandidates` от 1 до 10 000
+и отдельный `RecallOptions.Limit` для выбранных результатов. Search adapter
+объявляет `BoundedCandidates`, возвращает не больше запрошенного количества
+и отмечает намеренное усечение через `CandidatesTruncated`. Oversized result
+отклоняется с `ErrBudget` до декодирования canonical records. Этот bound
+ограничивает возвращённые metadata и работу core; внутренние расходы backend
+определяет host.
+
+`Coverage` описывает availability и index visibility; `ready` не обещает
+полноту релевантных знаний. `MinimumSatisfied` относится к exact visibility
+token. `RecallProgress` отдельно считает candidates, canonical filtering,
+ranking omissions и truncation. Поле `RecallResult.Complete` удалено.
+
+Candidate содержит typed `SearchSignal`: backend identity, rank и конечный raw
+score. `reference.Composite[Q]` принимает именованные `Backend[Q]` и явный
+`RRFConfig{K: 60}`; положительные weights привязаны к identity. RRF использует
+rank, удаляет дубликаты внутри backend и сохраняет каждый независимый сигнал.
+Порядок backend не влияет на fusion; ties разрешаются по ID и revision.
+Каждый child возвращает одну coverage identity, совпадающую с его именем;
+nested composites этот reference adapter не поддерживает. `AllowDegraded`
+разрешает partial failure, но не ослабляет minimum visibility. Если все backend
+недоступны, возвращается `ErrUnavailable`.
+
+`RecallProjected` соединяет Search → canonical checks → Ranker → exact-revision
+Projector → optional output policy → final canonical checks. Для бюджетирования
+host передаёт `ProjectionBudget[O,R]`: положительный `Max`, output `Codec[O]`
+и versioned `OutputPolicy[O,R]`. Policy выбирает только разрешённые exact refs
+и объясняет каждый пропуск (`budget` или `oversized`); изменить canonical payload,
+provenance или trust через selection нельзя. Изменение source, authority,
+expiry или revoke во время callback отклоняет всю выдачу, включая metadata
+пропущенных projections.
+
+Policy измеряет полный финальный `ProjectedRecallResult`: output, provenance,
+projection envelopes, coverage, progress и omissions. `BudgetUsage` — отдельный
+receipt, исключённый из JSON через `json:"-"`; transport envelope с receipt
+требует своего измерения. `reference.JSONPacking[O,R]` считает точные bytes
+`json.Marshal(result)` и сохраняет ranked order. `RejectOversized` выбирает
+ошибку вместо omission для слишком большой projection. Если финальный body
+или metadata-only body не помещается, результат — `ErrBudget`. Host policy
+может использовать estimated units; `Exact=false` не обещает точный размер
+байтов или model-specific tokens. Tokenizer и модель стоимости принадлежат host.
 
 ## Гарантии
 

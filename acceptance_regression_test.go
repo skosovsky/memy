@@ -168,7 +168,7 @@ func canonicalSourceCase(t *testing.T, backend, change string) {
 		"all",
 		index,
 		memy.ScoreRanker[preference, sourceRef]{},
-		memy.RecallOptions{Limit: 1},
+		memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 1},
 	)
 	projection, projectErr := memy.Project(
 		context.Background(),
@@ -293,7 +293,7 @@ func TestSourceRevalidatedAfterReadCallbacks(t *testing.T) {
 				"all",
 				index,
 				sourceChangingRanker{change: change},
-				memy.RecallOptions{Limit: 1},
+				memy.RecallOptions{Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: 1},
 			)
 			if !errors.Is(err, memy.ErrSourceUnavailable) || len(result.Records) != 0 {
 				t.Fatalf("recall=%+v err=%v", result, err)
