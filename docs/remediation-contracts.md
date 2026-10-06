@@ -142,3 +142,38 @@ acknowledgements. Sink checks exercise multiple selected references, chunk bindi
 replay and preservation of unrelated artifacts. CallbackSuite remains cooperative
 context/error checking; core lineage/chunk/ack validation needs explicit engine
 fixtures and cannot be inferred from a host Verify callback or coverage flag.
+
+## API and storage cleanup decisions
+
+SweepResult.Work is renamed BudgetCharged in the Go API, without a compatibility
+field. It is a charged invocation allowance, including conservative callback
+reservation on success, not backend CPU/I/O measurements. The persisted pass and
+operation identity do not include this response field, so schema 3 is unchanged.
+MaxBytes keeps its Go name with an explicit per-storage-page contract; output
+ProjectionBudget.Max is a separate delivered-body budget.
+
+ErrMaintenance is an explicit discriminator on active sweep/purge gates. Those
+gates continue to satisfy errors.Is(err, ErrRevoked) and also satisfy ErrMaintenance;
+hosts inspect the latter first to distinguish recoverable maintenance from retired
+identity. No timer removes a fence. A revoked identity does not gain the maintenance
+discriminator. Reauthorization and all existing exclusion rules remain enforced.
+
+A SQLite file with no application tables can bootstrap schema 3. An existing
+application database must contain its schema row, cursor secret and every required
+data table; missing tables are ErrSchema, never silently recreated. Secondary
+indexes may be recreated after table validation. This is supported local-file
+structural validation, not authentication of a hostile database.
+
+Store.Close is repeatable and prevents post-close operations/callback entry with
+ErrClosed. Accepted callbacks must remain synchronous and non-reentrant; the common
+minimum does not promise forced callback cancellation or an identical shutdown
+barrier. Memory additionally waits for started callbacks; hosts drain their own
+work before closing either adapter. Capability declarations are semantic guarantees,
+not health probes.
+
+Memory writes reject invalid/context/read-only/CAS/overflow requests before cloning
+caller bytes. Accepted writes retain detached byte ownership. collectAll names the
+internal O(total entries) traversal and accumulation; per-page scan bounds do not
+bound its aggregate memory. It stays restricted to existing administrative/history
+paths. Stock JSONPacking remains an offline reference greedy policy until measured
+work and equivalent full-body accounting justify an optimization.

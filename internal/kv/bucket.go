@@ -128,7 +128,7 @@ func (b *Bucket) Put(key string, expected memy.Version, data []byte) (memy.Versi
 	if len(data) == 0 {
 		return 0, memy.ErrInvalid
 	}
-	return b.write(key, expected, bytes.Clone(data))
+	return b.write(key, expected, data)
 }
 
 // Delete leaves a version tombstone. Deleting an absent key is a real CAS write.
@@ -151,7 +151,7 @@ func (b *Bucket) write(key string, expected memy.Version, data []byte) (memy.Ver
 		return 0, memy.ErrConflict
 	}
 	next := expected + 1
-	b.pending[key] = memy.Value{Version: next, Data: data}
+	b.pending[key] = memy.Value{Version: next, Data: bytes.Clone(data)}
 	if data == nil {
 		b.index.Remove(key)
 	} else {

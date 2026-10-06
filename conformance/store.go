@@ -36,6 +36,7 @@ func StoreSuite(t *testing.T, factory Factory) {
 	}{
 		{"capabilities", capabilities},
 		{"scope_isolation", scopeIsolation},
+		{"closed_store", closedStore},
 		{"malformed_scope_identity", malformedScopeIdentity},
 		{"rollback", rollback},
 		{"panic_rollback", panicRollback},
@@ -585,4 +586,18 @@ func checkBoundedScanOwnershipAndBudgets(t *testing.T, store memy.Store, keys []
 		}
 		return nil
 	}))
+}
+
+func closedStore(t *testing.T, store memy.Store) {
+	// Arrange: close returns before new operations are attempted.
+	must(t, store.Close())
+	must(t, store.Close())
+	entered := false
+	callback := func(memy.Bucket) error { entered = true; return nil }
+	// Act and assert: no post-close callback can execute.
+	for _, operate := range []func(context.Context, memy.Scope, func(memy.Bucket) error) error{store.View, store.FencedView, store.Update} {
+		if err := operate(t.Context(), scope(), callback); !errors.Is(err, memy.ErrClosed) || entered {
+			t.Fatalf("post-close entered=%t err=%v", entered, err)
+		}
+	}
 }

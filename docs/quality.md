@@ -232,3 +232,12 @@ The deterministic invariants and retrieval behavior are established only for the
 versioned synthetic corpus and selected adapters. Benefit of memory for a real
 LLM task requires a consumer-owned external experiment with reference judgments,
 provider configuration and answer evaluation.
+
+
+Conformance additionally varies Tenant, Namespace and Subject independently.
+Exact visibility tests include revision upgrades, foreign minima, unstaged tokens
+and delayed acknowledgement of an older published revision. Sink fixtures test
+multiple selected refs, chunks, replay and multi-lineage invalidation. CallbackSuite
+only checks cooperative cancellation/error behavior plus fixture-owned Verify;
+core acceptance, lineage and acknowledgement binding require their engine tests.
+A suite pass covers these declared cases, not every third-party implementation.

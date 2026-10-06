@@ -758,12 +758,12 @@ bounds each storage page. Each result contains only the current bounded receipts
 this call's proposal count, work counters and Complete. Hosts repeat the same
 operation identity. Results never accumulate all receipts inside the library.
 Each Update stages an independent result delta, merged only after confirmed commit.
-On a later error, the response preserves earlier confirmed Work, proposal deletions
+On a later error, the response preserves earlier confirmed BudgetCharged, proposal deletions
 and purge receipts, including pending sink receipts; Complete remains false.
 Rollback and ErrUnknownOutcome exclude that transaction from confirmed counters.
 Hosts must consume result alongside error and retry the same operation identity.
 A lost response or unknown commit outcome cannot guarantee exactly-once metrics.
-Work is charged budget: a successful sink continuation conservatively charges its
+BudgetCharged is charged budget: a successful sink continuation conservatively charges its
 supplied callback allowance. On a failed continuation, only sink callback steps
 with confirmed acknowledgement transactions are charged, alongside earlier storage
 progress; attempted callbacks do not fabricate durable acknowledgements.
@@ -783,7 +783,7 @@ proposal resurrection during multi-call history deletion. Store access remains
 privileged. An interrupted pass requires host continuation after reopen; there
 is no background scheduler and no timeout that silently removes its fence.
 
-Work progresses through record revisions, proposal revisions and selected
+BudgetCharged progresses through record revisions, proposal revisions and selected
 proposal history. Each record revision evaluates both stored expiry and current
 host retention policy; no stored-deadline index replaces that evaluation. An
 expired record starts the existing bounded Forget protocol with exact head

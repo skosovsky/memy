@@ -86,7 +86,10 @@ type StoreCapabilities struct {
 // mutation. Callback errors and panics roll back;
 // panics propagate. Cancellation observed before commit rolls back. A failure
 // after durable commit can return ErrUnknownOutcome. Callbacks must not recurse
-// into this store. Direct use is privileged: authority is enforced by Engine.
+// into this store. Close is repeatable; operations started after it return
+// ErrClosed without entering callbacks. The common contract does not promise
+// forced cancellation or an identical barrier for previously accepted callbacks.
+// Hosts drain their work before Close. Direct use is privileged: Engine enforces authority.
 type Store interface {
 	Capabilities() StoreCapabilities
 	View(context.Context, Scope, func(Bucket) error) error

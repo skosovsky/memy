@@ -689,7 +689,7 @@ func fullSweep[P, R, A any](
 			return total, err
 		}
 		total.ExpiredProposals += page.ExpiredProposals
-		total.Work += page.Work
+		total.BudgetCharged += page.BudgetCharged
 		total.Records = mergeSweepReceipts(total.Records, page.Records)
 		if page.Complete {
 			total.Complete = true

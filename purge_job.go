@@ -97,7 +97,7 @@ func activePurgeGate(b Bucket, scope Scope) error {
 	if active.Scope != scope {
 		return ErrSchema
 	}
-	return ErrRevoked
+	return errors.Join(ErrRevoked, ErrMaintenance)
 }
 func jobPrefix(id string) string             { return objectKey("purge_work", id) + "/" }
 func selectedJobKey(op, id string) string    { return jobPrefix(op) + objectKey("selected", id) }

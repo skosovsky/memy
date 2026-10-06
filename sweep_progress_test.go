@@ -189,7 +189,7 @@ func sweepProgressTransactionCase(t *testing.T, backend, mode string) {
 		count = 0
 	}
 	if !errors.Is(sweepErr, expected) || partial.Complete || partial.ExpiredProposals != 1 ||
-		partial.Work == 0 {
+		partial.BudgetCharged == 0 {
 		t.Fatalf("partial=%+v err=%v", partial, sweepErr)
 	}
 	if resumeErr != nil || !resumed.Complete || resumed.ExpiredProposals != count {
@@ -282,7 +282,7 @@ func TestSweepProgressPreservesFinalAcknowledgements(t *testing.T) {
 			receipt := partial.Records[0]
 			if receipt.State != memy.PurgeComplete || !receipt.Sinks[0].Acknowledged ||
 				!receipt.Sinks[1].Acknowledged ||
-				partial.Work != 13 {
+				partial.BudgetCharged != 13 {
 				t.Fatalf("partial=%+v", partial)
 			}
 		})

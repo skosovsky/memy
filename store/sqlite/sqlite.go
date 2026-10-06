@@ -127,29 +127,30 @@ func (s *Store) initialize(ctx context.Context) error {
 		return storageError(operationErr)
 	}
 	defer func() { _ = tx.Rollback() }()
+	existing, schemaErr := existingSchema(ctx, tx)
+	if schemaErr != nil {
+		return schemaErr
+	}
 	if _, err := tx.ExecContext(
 		ctx,
 		`CREATE TABLE IF NOT EXISTS memy_schema (singleton INTEGER PRIMARY KEY CHECK(singleton=1), version INTEGER NOT NULL, cursor_secret BLOB)`,
 	); err != nil {
 		return storageError(err)
 	}
-	inserted, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO memy_schema(singleton,version) VALUES(1,3)`)
-	if err != nil {
-		return storageError(err)
+	if !existing {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO memy_schema(singleton,version) VALUES(1,3)`); err != nil {
+			return storageError(err)
+		}
 	}
 	var version int
 	if queryErr := tx.QueryRowContext(ctx, `SELECT version FROM memy_schema WHERE singleton=1`).
 		Scan(&version); queryErr != nil {
-		return storageError(queryErr)
+		return errors.Join(memy.ErrSchema, queryErr)
 	}
 	if version != int(memy.SchemaVersion) {
 		return memy.ErrSchema
 	}
-	created, err := inserted.RowsAffected()
-	if err != nil {
-		return storageError(err)
-	}
-	if secretErr := s.initializeSecret(ctx, tx, created == 1); secretErr != nil {
+	if secretErr := s.initializeSecret(ctx, tx, !existing); secretErr != nil {
 		return secretErr
 	}
 	if _, err := tx.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS memy_values (

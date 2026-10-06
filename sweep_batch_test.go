@@ -313,7 +313,7 @@ func runBoundedSweep(
 		// Assert: scan work, output and reported budget never grow with the corpus.
 		checkLifecycleFailuref(
 			t,
-			counted.entries > 1 || page.Work > 1 || len(page.Records) > 1,
+			counted.entries > 1 || page.BudgetCharged > 1 || len(page.Records) > 1,
 			"unbounded: entries=%d page=%+v",
 			counted.entries,
 			page,

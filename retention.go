@@ -204,7 +204,7 @@ func (e *Engine[P, R, A]) reintroduceOperation(
 
 // completedPurges requires all durable participants to finish before retiring a fence.
 func completedPurges(b Bucket, scope Scope) error {
-	entries, listErr := scanAll(b, "purge/")
+	entries, listErr := collectAll(b, "purge/")
 	if listErr != nil {
 		return listErr
 	}

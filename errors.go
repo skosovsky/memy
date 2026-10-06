@@ -24,6 +24,7 @@ var (
 	ErrIncomparable       = errors.New("memy: incomparable claims")
 	ErrVisibilityPending  = errors.New("memy: visibility pending")
 	ErrBudget             = errors.New("memy: budget exhausted")
+	ErrMaintenance        = errors.New("memy: maintenance requires continuation")
 	ErrRevoked            = errors.New("memy: revoked")
 	ErrUnknownOutcome     = errors.New("memy: commit outcome unknown; retry operation identity")
 	ErrClosed             = errors.New("memy: closed")

@@ -185,7 +185,9 @@ func Recall[P, R, Q, A any](
 // revision. It does not claim scores establish truth or alter authorization.
 type ScoreRanker[P, R any] struct{}
 
-// Rank returns a detached ordered selection with a stable explanation.
+// Rank returns a sorted shallow copy of the input slice with a stable explanation.
+// Nested payloads/provenance/signals retain their existing ownership; Engine
+// detaches callback inputs and revalidates selected canonical references.
 func (ScoreRanker[P, R]) Rank(ctx context.Context, records []Ranked[P, R]) ([]Ranked[P, R], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err

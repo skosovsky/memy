@@ -16,8 +16,9 @@ type SweepRequest struct {
 type SweepResult struct {
 	Records          []PurgeReceipt
 	ExpiredProposals int
-	Work             int
-	Complete         bool
+	// BudgetCharged is charged allowance, not measured backend CPU/I/O.
+	BudgetCharged int
+	Complete      bool
 }
 type sweepJobDisk struct {
 	Scope          Scope  `json:"scope"`
@@ -42,7 +43,7 @@ func activeSweepGate(b Bucket, scope Scope) error {
 	if active.Scope != scope {
 		return ErrSchema
 	}
-	return ErrRevoked
+	return errors.Join(ErrRevoked, ErrMaintenance)
 }
 func boundActiveSweep(b Bucket, job sweepJobDisk) (Version, error) {
 	var active activePurgeDisk
@@ -79,7 +80,7 @@ func (e *Engine[P, R, A]) Sweep(
 		return SweepResult{}, err
 	}
 	var result SweepResult
-	for result.Work < request.Limit && !result.Complete {
+	for result.BudgetCharged < request.Limit && !result.Complete {
 		var pending string
 		var delta SweepResult
 		err = e.raw.Update(ctx, scope, func(b Bucket) error {
@@ -88,7 +89,7 @@ func (e *Engine[P, R, A]) Sweep(
 		if err != nil {
 			return result, err
 		}
-		result.Work += delta.Work
+		result.BudgetCharged += delta.BudgetCharged
 		result.ExpiredProposals += delta.ExpiredProposals
 		result.Complete = delta.Complete
 		if pending != "" {
@@ -289,7 +290,7 @@ func (e *Engine[P, R, A]) scanSweep(
 	if err != nil {
 		return err
 	}
-	result.Work++
+	result.BudgetCharged++
 	if len(page.Entries) > 0 {
 		entry := page.Entries[0]
 		if entryErr := e.sweepEntry(
@@ -501,7 +502,7 @@ func (e *Engine[P, R, A]) continueSweepPurge(
 	result *SweepResult,
 	pending string,
 ) (bool, error) {
-	if result.Work >= request.Limit {
+	if result.BudgetCharged >= request.Limit {
 		return true, nil
 	}
 	receipt, used, err := e.advancePurge(
@@ -515,19 +516,19 @@ func (e *Engine[P, R, A]) continueSweepPurge(
 			Expected:      nil,
 			Reason:        "",
 			PolicyVersion: "",
-			Limit:         request.Limit - result.Work,
+			Limit:         request.Limit - result.BudgetCharged,
 			MaxBytes:      request.MaxBytes,
 		},
 	)
 	if err != nil {
 		return false, err
 	}
-	result.Work += used
+	result.BudgetCharged += used
 	if receipt.State != RevocationCommitted {
-		budget := request.Limit - result.Work
+		budget := request.Limit - result.BudgetCharged
 		finished, confirmed, finishErr := e.finishPurge(ctx, authority, scope, purpose, pending, budget)
 		if finishErr != nil {
-			result.Work += confirmed
+			result.BudgetCharged += confirmed
 			if finished.Batch.OperationID != "" {
 				receipt = finished
 			}
@@ -536,7 +537,7 @@ func (e *Engine[P, R, A]) continueSweepPurge(
 		}
 		receipt = finished
 		// Conservatively charge the supplied callback budget; no hidden retry loop.
-		result.Work += budget
+		result.BudgetCharged += budget
 	}
 	result.Records = append(result.Records, receipt)
 	if receipt.State == PurgeFailed || receipt.State == PurgePending {

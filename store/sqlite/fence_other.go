@@ -4,6 +4,7 @@ package sqlite
 
 import (
 	"context"
+
 	"github.com/skosovsky/memy"
 )
 

@@ -11,8 +11,9 @@ import (
 
 const maximumLineageRecords = 10_000
 
-// Config binds the consumer types to executable host ports. All ports are
-// required; none silently substitutes permissive authority or missing evidence.
+// Config requires Store, Authority, Sources, Clock, Retention and both codecs.
+// Sinks are optional; nil Reintroduction denies reintroduction. No permissive
+// authority or missing-evidence defaults are supplied.
 type Config[P, R, A any] struct {
 	Store          Store
 	Authority      Authority[A]
@@ -634,7 +635,7 @@ func (e *Engine[P, R, A]) selectCanonical(
 	if head.State == Revoked {
 		return Record[P, R]{}, ErrNotFound
 	}
-	entries, operationErr := scanAll(b, objectKey("record", id)+"/")
+	entries, operationErr := collectAll(b, objectKey("record", id)+"/")
 	if operationErr != nil {
 		return Record[P, R]{}, operationErr
 	}

@@ -158,7 +158,7 @@ output or implicit callback retries. Unchanged RecordedAsOf snapshots remain
 stable through later current-state transitions. Persisted schema remains 3.
 
 Sweep now returns confirmed partial progress alongside late errors. Consume both
-result and error: earlier committed proposal counts, charged Work and pending
+result and error: earlier committed proposal counts, charged BudgetCharged and pending
 purge receipts remain available. A rolled-back or unknown transaction contributes
 no confirmed delta; retry the same OperationID to recover durable state. Complete
 is false on interruption. This does not promise exactly-once aggregate counters
@@ -166,5 +166,21 @@ after a lost response, or change the persisted pass schema.
 
 A purge receipt may be complete even while Sweep.Complete is false: the purge
 acknowledgements committed before a later final authority/cancellation error.
-On continuation failure, Work includes confirmed callback acknowledgement steps;
+On continuation failure, BudgetCharged includes confirmed callback acknowledgement steps;
 on success it retains the conservative supplied callback budget charge.
+
+
+## API and storage contract cleanup
+
+Replace SweepResult.Work with BudgetCharged; no compatibility field is retained.
+It reports charged allowance, not actual backend work. MaxBytes remains the bound
+on one scanned page; ProjectionBudget.Max independently bounds delivered output.
+This response-field rename leaves durable job identities and schema3 unchanged.
+Inspect ErrMaintenance before ErrRevoked: active purge/sweep gates satisfy both,
+while retired identities do not have the maintenance discriminator. Continue the
+original pass/purge operation; no timer or retry may bypass its exclusion fence.
+Existing SQLite files must retain all required data tables, columns, primary keys,
+schema row and cursor secret. Missing state is ErrSchema and needs reviewed restore,
+not silent bootstrap. Only a genuinely empty file bootstraps; secondary indexes
+can be repaired after table validation. Close prevents future callback entry; hosts
+must drain their operations before shutdown rather than assume forced cancellation.

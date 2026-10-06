@@ -241,3 +241,110 @@ func TestIndependentWriterCancellationAndRecovery(t *testing.T) {
 		t.Fatalf("connection unusable after cancel: %v", retryErr)
 	}
 }
+
+func TestRejectMissingExistingSchemaState(t *testing.T) {
+	for _, damage := range []struct{ name, statement string }{
+		{"values", "DROP TABLE memy_values"},
+		{"generations", "DROP TABLE memy_generations"},
+		{"schema", "DROP TABLE memy_schema"},
+		{"schema-row", "DELETE FROM memy_schema"},
+		{"columns", "ALTER TABLE memy_generations RENAME COLUMN generation TO unsupported"},
+		{"primary-key", "DROP TABLE memy_generations; CREATE TABLE memy_generations(scope TEXT NOT NULL, generation INTEGER NOT NULL)"},
+		{"types", "DROP TABLE memy_generations; CREATE TABLE memy_generations(scope TEXT PRIMARY KEY, generation TEXT NOT NULL) WITHOUT ROWID"},
+	} {
+		t.Run(damage.name, func(t *testing.T) {
+			rejectDamagedSchemaCase(t, damage.name, damage.statement)
+		})
+	}
+}
+
+func rejectDamagedSchemaCase(t *testing.T, name, statement string) {
+	t.Helper()
+	// Arrange: this is an existing schema3 file, not an empty bootstrap target.
+	path := filepath.Join(t.TempDir(), "missing.db")
+	store := open(t, path, sqlite.Options{})
+	if err := store.Close(); err != nil {
+		t.Fatal(err)
+	}
+	db, err := sql.Open("sqlite3", path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = db.Close() }()
+	if _, err = db.Exec(statement); err != nil {
+		t.Fatal(err)
+	}
+	// Act.
+	result, openErr := sqlite.Open(t.Context(), path, sqlite.Options{})
+	// Assert: missing durable state is never recreated as a successful store.
+	if result != nil || !errors.Is(openErr, memy.ErrSchema) {
+		t.Fatalf("result=%v err=%v", result, openErr)
+	}
+	if name == "schema-row" {
+		var count int
+		if err = db.QueryRow("SELECT count(*) FROM memy_schema").Scan(&count); err != nil || count != 0 {
+			t.Fatalf("schema row recreated: %d err=%v", count, err)
+		}
+	}
+}
+
+func TestRepairSecondaryIndexAfterSchemaValidation(t *testing.T) {
+	// Arrange: optional derived index can be reconstructed without resetting state.
+	path := filepath.Join(t.TempDir(), "index.db")
+	store := open(t, path, sqlite.Options{})
+	if err := store.Close(); err != nil {
+		t.Fatal(err)
+	}
+	db, err := sql.Open("sqlite3", path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = db.Close() }()
+	if _, err = db.Exec("DROP INDEX memy_live_keys"); err != nil {
+		t.Fatal(err)
+	}
+	// Act.
+	repaired, openErr := sqlite.Open(t.Context(), path, sqlite.Options{})
+	// Assert.
+	if openErr != nil {
+		t.Fatal(openErr)
+	}
+	if err = repaired.Close(); err != nil {
+		t.Fatal(err)
+	}
+	var count int
+	if err = db.QueryRow("SELECT count(*) FROM sqlite_master WHERE type='index' AND name='memy_live_keys'").
+		Scan(&count); err != nil ||
+		count != 1 {
+		t.Fatalf("index=%d err=%v", count, err)
+	}
+}
+
+func TestBootstrapRejectsForeignApplicationTables(t *testing.T) {
+	for _, name := range []string{"host_data", "sqliteXhost"} {
+		t.Run(name, func(t *testing.T) {
+			// Arrange: '_' in SQLite's reserved prefix is literal, not a LIKE wildcard.
+			path := filepath.Join(t.TempDir(), "foreign.db")
+			db, err := sql.Open("sqlite3", path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() { _ = db.Close() }()
+			if _, err = db.Exec("CREATE TABLE " + name + " (value TEXT)"); err != nil {
+				t.Fatal(err)
+			}
+			// Act.
+			store, openErr := sqlite.Open(t.Context(), path, sqlite.Options{})
+			// Assert: neither ordinary nor prefix-lookalike application data is an empty DB.
+			if store != nil || !errors.Is(openErr, memy.ErrSchema) {
+				t.Fatalf("accepted=%t err=%v", store != nil, openErr)
+			}
+			var count int
+			if err = db.QueryRow("SELECT count(*) FROM sqlite_master WHERE name IN ('memy_schema','memy_values','memy_generations')").
+				Scan(&count); err != nil ||
+				count != 0 {
+				t.Fatalf("bootstrap tables=%d err=%v", count, err)
+			}
+		})
+	}
+}
