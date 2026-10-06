@@ -126,3 +126,13 @@ query, source and comparison types. The offline quality-integration example
 replaces typed extractor/search and optional grader ports without changing the
 checkpoint oracles. Model SDKs, answer rubrics and external evaluation remain
 consumer-owned. See quality.md for the current command and report interpretation.
+
+## Review remediation identities (task2 target)
+
+See [remediation contracts](remediation-contracts.md) for the normative upgrade
+plan approved before source changes: stock json/v2 rejects mismatched json/v1
+records, projection/v2 requires host cache invalidation, and cursor v2 explicitly
+rejects old continuations. Persisted schema stays v3. Import old codec data only
+through fresh host review and the normal lifecycle; no silent relabeling or reader
+fallback. Sweep callers must consume confirmed partial results alongside errors.
+Implementation and acceptance are tracked in the task2 checklist.

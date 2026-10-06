@@ -94,6 +94,10 @@ store. FieldProjection is false in v2; field-restricted authority decisions
 are rejected before consumer policies see content. Search visibility remains
 a separately advertised Search capability.
 
+The task2 [remediation contracts](remediation-contracts.md) supersede the codec,
+projection identity, cursor wire and Sweep reporting descriptions below upon
+implementation of their respective stages; baseline behavior is not acceptance.
+
 ## Codecs, keys and idempotency
 
 Codec[T] supplies versioned Encode/Decode. JSONCodec[T] is the runnable reference
