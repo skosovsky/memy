@@ -803,3 +803,215 @@ and source state before entering the engine. These callbacks may execute inside
 Store.Update or FencedView; they must not perform remote I/O or recursively enter
 the same store. Ranker, Projector and consolidation merge callbacks execute outside
 store transactions and are followed by fresh canonical validation.
+
+
+## Task04 — internal offline quality harness (v2 contract)
+
+This section is the implementation contract for iteration 04; it is not an
+acceptance claim. The harness is a consumer of public memy APIs in
+`internal/quality`. It adds no evaluation types, model SDK, natural-language
+classifier, executable procedure dispatcher or new policy to the root package.
+All inputs are synthetic. Default runs use scripted providers and deterministic
+search; results are not an LLM benchmark or proof of general poisoning resistance.
+The old tea-only global protocol and `Trial.Accepted` report are replaced without
+compatibility aliases.
+
+### Typed fixture plans and pinned manifest
+
+The JSON manifest `testdata/quality-v2.json` selects a closed, versioned set of
+Go-owned fixture plans. A plan has setup, ordered events, typed query, checkpoints
+and expected outcomes. These are ordinary fixture functions and domain types,
+not a public DSL or an interpreter of provider text. At least `Preference` and
+`Procedure`/`Outcome` payload domains execute through independent typed engines.
+Procedure steps and provider instructions stay data. Host acceptance is an
+explicit versioned consumer callback; it cannot be inferred from provenance.
+
+The manifest pins schema/corpus version, each fixture-plan version, extractor
+provider and model identity (`scripted`, explicitly not a commercial model), host
+review and retention policies, resolver/consolidation policy, search/composition,
+projector/output-packing and optional answer-grader versions. Budgets distinguish
+candidate count, recalled record count, full context JSON bytes, consolidation
+input/output payload bytes and abstract provider cost units. Validate supported
+identities, unique scenario IDs, required group coverage, positive bounded budgets,
+seed and bounded positive repeat count before allocating stores. Unknown fixture
+or unsupported version is invalid execution, not an empty successful corpus.
+No global validator requires a domain key, English negation, source ID or identical
+interval. Domain-specific prerequisites belong to their owning plan.
+
+Each scenario/repeat starts with isolated canonical state. A deterministic PRNG
+derived from the pinned seed, scenario identity and repeat number varies insertion
+order/distractor placement or backend order while preserving the expected semantic
+outcome. Record the derived seed and variation identity. Seed/repeats must affect
+actual fixture execution; they are not decorative metadata or statistical quality
+claims. Re-running the same configuration produces the same gates and deterministic
+evidence; wall-clock timings, if retained, are labelled local diagnostics.
+
+### Report stages and final verdict
+
+Report schema identity is `memy-quality/v2`. Report contains the validated manifest
+and actual executed port versions, per-scenario/repeat stage results, evidence and
+one final aggregate verdict. Scenario IDs and diagnostic codes are fixture-owned
+safe identifiers. Never serialize raw payload, rendered model text, source
+references, privacy-fixture secrets, arbitrary provider error strings or raw query
+text. Even malformed manifest/load failures produce a minimal safe report when an
+output destination is writable. Evidence uses counts, synthetic public revision
+aliases, expected/observed safe outcome classes and fixed diagnostic codes. A hash
+of a secret is not a replacement for redaction.
+
+The following stages are distinct:
+
+1. **Candidate quality** evaluates proposed facts, qualifiers/negation, validity,
+   source scope and exact lineage before review. A bad candidate may be recorded
+   as failed candidate quality without making an expected-rejection scenario fail.
+2. **Host review** records `accept`, `reject` or `not_applicable`, its expected
+   decision, version and assertion status. A provider/policy error is `unknown`,
+   never an observed rejection. Acceptance must use ordinary Accept/Commit;
+   rejection must leave the expected baseline intact.
+3. **Effective memory** compares the actual canonical recall against fixture-owned
+   expected exact revisions, payload equality, validity, conflicts and provenance.
+   Record count alone never proves correctness. Expected identities after apply
+   derive from checked commit receipts; rejected proposals must not enter them.
+4. **Canonical invariants** independently check originals/history, scope/privacy,
+   source validity, lineage and current retention/revocation. Read all bounded
+   Snapshot pages when a complete snapshot is required. Snapshot, authorization
+   or assertion errors are not interpreted as zero violations.
+5. **Rendered output** checks the actual output of RecallProjected and any host
+   answer adapter independently of effective recall. Exact final JSON bytes are
+   measured with the task03 output policy, including projection envelopes,
+   provenance, coverage, progress and omissions. Check that only permitted exact
+   revisions survive packing and that omitted required facts are accounted for
+   by the scenario's budget expectation. A scripted answer's abstention does not
+   establish LLM abstention quality.
+6. **Execution** records whether all planned events/checkpoints ran, expected
+   error classes were observed and resources/cancellation completed. Unknown
+   provider/search/policy/grader or evaluator errors mark execution unknown.
+7. **Final verdict** is computed once after all stages, including late privacy
+   and rendered-output checks. It is not host review acceptance.
+
+Each checkpoint has `pass`, `fail` or `unknown`, a mandatory flag, fixed evidence
+codes and expected/observed outcome classes. Every applicable required checkpoint
+must be present; missing evidence is unknown. Non-applicable optional stages are
+explicitly declared by the plan rather than silently reported as passed. Never
+publish zero violations for a checkpoint that did not run or returned an error.
+A scenario passes only when all mandatory protocol assertions pass and execution
+is known. An intentionally invalid candidate can pass the protocol if it was
+rejected and the effective baseline and all subsequent invariants are correct.
+Candidate quality is still reported as bad.
+
+Unknown or invalid execution takes precedence over a known failed mandatory gate
+in the aggregate exit status: CLI exit **2** means execution/evaluation is unknown
+or invalid; exit **1** means execution is known and at least one mandatory gate
+failed; exit **0** means every mandatory protocol gate passed. Exit 0 includes
+expected semantic rejection. Known expected port failures are checked explicitly
+against the plan's allowed error class and require correct fail-closed state;
+they do not turn an arbitrary error into a passed expected-failure check.
+Unexpected errors preserve already observed safe stage evidence in the report.
+The command writes the safe report before choosing the exit code. Serialization or
+report-write failure exits 2 and emits only a fixed safe stderr diagnostic; a
+write failure cannot claim that a report was saved. No raw error is printed.
+
+### Required scenario groups
+
+| Group | Required observable checkpoint |
+| --- | --- |
+| Sessions/corrections | A new session reads accepted corrected memory; superseded, unknown and conflicted records follow explicit read options |
+| Temporal | Valid-time and recorded-time select distinct expected revisions; historical reads still obey current revoke/retention |
+| Retrieval | A typed query distinguishes relevant records from distractors; duplicate backend hits, stale revisions and bounded packing have explicit expected outcomes |
+| Abstention/unavailability | Healthy no-match, conflict and unavailable backend are distinct; provider/search/policy failure and optional grader failure retain safe known/unknown status |
+| Poisoning | Rejecting host policy blocks a synthetic false privilege rule; procedure/instruction data never alters authorized harness event execution |
+| Forget/derived state | Interrupted managed purge and retry, late derived write, source revocation and stale index cannot expose forbidden final context |
+| Consolidation | Baseline, exact/domain and deliberately bad semantic proposals are evaluated after apply/reject; originals, negation, validity and exact lineage are independent checks |
+| Evaluator failures | Same count/wrong record or payload, missing lineage, late privacy leak and false healthy-empty during outage change final verdict to failed or unknown as appropriate |
+
+The poisoning suite also includes a permissive host accepting a false rule or
+instruction-bearing payload. Show explicitly that the library stores accepted
+false data as data and does not discover the lie from provenance. This boundary
+case has descriptive failed semantic-quality evidence and mandatory assertions
+that the weakness was observed and no executable dispatch occurred. It cannot be
+labelled successful semantic protection. The guarded and permissive policies must
+have different recorded identities.
+
+Evaluator mutation probes run as isolated negative scenario reports. Each probe
+modifies an observation/checkpoint result rather than the expected oracle, then
+must produce its own non-passing final verdict and nonzero exit classification.
+A parent self-check passes only if it observes that failure. Do not insert an
+expected-failure flag into normal final aggregation that could launder a real
+late privacy leak or unknown execution. Mutation probes never become the saved
+normal effective output, and their safe nested outcomes remain visible.
+
+### Ports and measurement boundary
+
+A small fixture-owned generic bundle allows substitution of a real
+`memy.Extractor`, `memy.Search` and optional typed answer grader. Version identity
+and execution mode are reported from the actual selected bundle. The runner and
+checkpoint oracles remain the same under substitution. Ship an offline integration
+example supplying custom scripted ports through that seam and label it scripted.
+External network/model evaluation is optional and not required by CI. A model SDK,
+tokenizer, judge prompt, credentials and task-specific answer rubric belong to the
+consumer, not memy or a new universal evaluation framework.
+
+Report consumer payload bytes separately from exact final context JSON bytes.
+Canonical serialized document bytes may be measured through addressed raw store
+inspection of the isolated synthetic fixture; label these as serialized canonical
+footprint, excluding adapter/index/database/WAL overhead. If not measured, report
+explicitly unavailable with a reason, never payload bytes under a storage label.
+Real provider tokens/currency are unknown for scripted runs. Abstract scripted
+cost units and configured cost budgets retain their unit identity; they are not
+converted into tokens or money. No throughput/speedup claim is made; the task02
+performance methodology remains authoritative and is not duplicated here.
+
+### Internal implementation outline
+
+The following division keeps core unchanged and permits disjoint implementation:
+
+- `internal/quality/report.go`: stage/status/evidence/report types, mandatory
+  finalization, aggregate/exit classification and safe error classification.
+  `Finalize` consumes completed stage evidence, never a host acceptance boolean.
+- `internal/quality/corpus.go`: v2 manifest types, strict decoding/validation and
+  closed fixture-version registration metadata; replace the old tea assumptions.
+- `internal/quality/quality.go`: `Load(path) (Corpus, error)` and
+  `Run(ctx, corpus) (Report, error)`, orchestration, safe partial report and actual
+  version/configuration capture. An error never discards report evidence;
+  `Report.ExitCode()` accounts for execution errors as well as mandatory failures.
+- Fixture files own `ScenarioPlan[P, Q, O]`, typed payloads, port bundles, public
+  lifecycle setup/events and domain checkpoint equality. Domain plans yield safe
+  stage evidence to the report layer; neither JSON nor report types carry P/Q/O.
+  A shared fixture helper may wrap extraction, acceptance, commit, acknowledged
+  indexing, bounded Snapshot, RecallProjected and purge continuation.
+- Dedicated evaluator tests inject the four observation faults and exercise safe
+  diagnostics/unknown execution; fixture tests verify actual public API outcomes.
+- `examples/quality` owns command flags/report persistence/exit mapping;
+  an offline port-integration example invokes the same registered checkpoints.
+  `docs/quality.md` and the saved corpus/report are updated after implementation.
+
+A concrete shared orchestration seam is:
+
+```go
+// These types live only in internal/quality. Domains keep their typed ports.
+type CaseRun struct { Repeat int; Seed uint64 }
+type RequiredCheck struct { Stage, ID string }
+type CasePlan struct {
+    ID, Domain, Version string
+    Groups []string
+    Required []RequiredCheck
+    OptionalStages []string
+    Versions PortVersions
+    Run func(context.Context, Corpus, CaseRun) (ScenarioReport, error)
+}
+// ScenarioReport carries Candidate, HostReview, Effective, Canonical, Rendered,
+// Execution StageResult and Final Verdict; stage evidence never contains payload.
+// StageResult owns []Check. A Check owns ID, Mandatory, Status,
+// Expected/Observed fixed outcome classes and []Evidence.
+```
+
+The registry verifies manifest identities before dispatch, and the orchestrator
+enforces declared mandatory check IDs, allowed optional stages and actual port
+versions before finalizing each returned ScenarioReport and its execution outcome.
+Domain runners do not set aggregate success. A measurement has explicit
+known/unavailable status, unit and optional value; absence or an errored check
+cannot be serialized as a measured zero. Optional answer-grader absence is
+explicitly not applicable, while a configured grader error is unknown execution.
+
+Types and helper names may be adjusted coherently during implementation, but the
+stage separation, bounded public-API execution, safe report, typed fixture boundary
+and final-verdict semantics above are mandatory.

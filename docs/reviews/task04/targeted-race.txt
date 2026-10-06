@@ -1,0 +1,3 @@
+ok  	github.com/skosovsky/memy/internal/quality	129.795s
+ok  	github.com/skosovsky/memy/examples/quality	36.361s
+?   	github.com/skosovsky/memy/examples/quality-integration	[no test files]

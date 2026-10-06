@@ -1,0 +1,5 @@
+Extracted 2 proposals; accepted timezone only; canonical revision 1.
+Decision: supersede, resolver=resolver/v1, authority=authority/v1, basis=explicit preference correction.
+New session, no transcript: timezone=UTC+7, revision 2.
+Search acknowledged revision 2; projection (data): Your timezone is UTC+7.
+Forget: one sink failed, retry reached complete at epoch 1.

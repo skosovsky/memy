@@ -1,0 +1,190 @@
+{
+  "schema": "memy-quality/v2",
+  "versions": {
+    "provider": "integration-extractor/v1",
+    "model": "scripted",
+    "host_review": "none",
+    "retention": "procedure-retention/v1",
+    "resolver": "procedure-resolver/v1",
+    "consolidation": "none",
+    "search": "integration-bounded-rrf/v1",
+    "projector": "procedure-projector/v1",
+    "packing": "json-packing/v1",
+    "grader": "integration-exact-grader/v1"
+  },
+  "scenarios": [
+    {
+      "versions": {
+        "provider": "integration-extractor/v1",
+        "model": "scripted",
+        "host_review": "none",
+        "retention": "procedure-retention/v1",
+        "resolver": "procedure-resolver/v1",
+        "consolidation": "none",
+        "search": "integration-bounded-rrf/v1",
+        "projector": "procedure-projector/v1",
+        "packing": "json-packing/v1",
+        "grader": "integration-exact-grader/v1"
+      },
+      "mode": "scripted",
+      "id": "procedure-retrieval",
+      "domain": "procedure",
+      "version": "procedure-fixtures/v2",
+      "repeat": 0,
+      "seed": 5666118649731242188,
+      "variation": "seeded-insertion-order",
+      "candidate": {
+        "status": "not_applicable",
+        "checks": []
+      },
+      "host_review": {
+        "status": "not_applicable",
+        "checks": []
+      },
+      "effective": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "effective-exact",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "two-relevant-exact-revisions",
+            "observed": "two-relevant-exact-revisions",
+            "evidence": [
+              {
+                "code": "effective-exact",
+                "count": 2
+              }
+            ]
+          }
+        ],
+        "version": "integration-bounded-rrf/v1"
+      },
+      "canonical": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "canonical-state",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "exact-originals-source-retention",
+            "observed": "exact-originals-source-retention",
+            "evidence": [
+              {
+                "code": "canonical-state",
+                "count": 3
+              }
+            ]
+          },
+          {
+            "id": "canonical-provenance",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "exact-sources-lineage-validity-expiry",
+            "observed": "exact-sources-lineage-validity-expiry",
+            "evidence": [
+              {
+                "code": "canonical-provenance",
+                "count": 3
+              }
+            ]
+          },
+          {
+            "id": "current-retention",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "expired-current-read-denied",
+            "observed": "expired-current-read-denied",
+            "evidence": [
+              {
+                "code": "current-retention",
+                "count": 1
+              }
+            ]
+          }
+        ],
+        "version": "procedure-retention/v1"
+      },
+      "rendered": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "rendered-context",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "one-packed-exact-data-projection",
+            "observed": "one-packed-exact-data-projection",
+            "evidence": [
+              {
+                "code": "rendered-context",
+                "count": 1
+              }
+            ]
+          }
+        ],
+        "version": "procedure-projector/v1"
+      },
+      "execution": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "procedure-completed",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "completed",
+            "observed": "completed",
+            "evidence": [
+              {
+                "code": "procedure-completed",
+                "count": 1
+              }
+            ]
+          },
+          {
+            "id": "configured-boundaries",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "within-configured-candidate-recall-call-caps",
+            "observed": "within-configured-candidate-recall-call-caps",
+            "evidence": [
+              {
+                "code": "configured-boundaries",
+                "count": 4
+              }
+            ]
+          }
+        ],
+        "version": "integration-extractor/v1"
+      },
+      "metrics": {
+        "payload_bytes": {
+          "status": "known",
+          "unit": "payload-json-bytes",
+          "value": 154
+        },
+        "context_json_bytes": {
+          "status": "known",
+          "unit": "final-body-json-bytes",
+          "value": 1312
+        },
+        "canonical_serialized_bytes": {
+          "status": "unavailable",
+          "unit": "serialized-canonical-bytes",
+          "reason": "not_measured"
+        },
+        "provider_abstract_cost": {
+          "status": "known",
+          "unit": "scripted-call-unit",
+          "value": 3
+        },
+        "real_provider_cost": {
+          "status": "unavailable",
+          "unit": "provider-tokens-currency",
+          "reason": "provider-cost-not-measured"
+        }
+      },
+      "final": "pass"
+    }
+  ],
+  "final": "pass"
+}

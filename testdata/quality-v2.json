@@ -1,0 +1,283 @@
+{
+  "version": "memy-quality-corpus/v2",
+  "seed": 20260601,
+  "repeats": 2,
+  "versions": {
+    "provider": "scripted-provider/v2",
+    "model": "scripted",
+    "host_review": "fixture-host-review/v2",
+    "retention": "fixture-retention/v2",
+    "resolver": "fixture-resolver/v2",
+    "consolidation": "fixture-consolidation/v2",
+    "search": "reference-rrf/v2",
+    "projector": "fixture-projector/v2",
+    "packing": "json-packing/v1",
+    "grader": "none"
+  },
+  "budgets": {
+    "max_candidates": 100,
+    "recall_limit": 100,
+    "context_bytes": 20000,
+    "input_bytes": 10000,
+    "output_bytes": 10000,
+    "cost_units": 5
+  },
+  "scenarios": [
+    {
+      "versions": {
+        "provider": "scripted-preference/v2",
+        "model": "scripted",
+        "host_review": "preference-review/v2",
+        "retention": "retention/v1",
+        "resolver": "resolver/v1",
+        "consolidation": "consolidation/v2",
+        "search": "preference-index/v1+conflict-metadata/v2",
+        "projector": "preference-projection/v2",
+        "packing": "json-packing/v1",
+        "grader": "none"
+      },
+      "id": "preference-sessions",
+      "version": "preference-sessions/v2"
+    },
+    {
+      "versions": {
+        "provider": "scripted-preference/v2",
+        "model": "scripted",
+        "host_review": "preference-review/v2",
+        "retention": "retention/v1",
+        "resolver": "resolver/v1",
+        "consolidation": "consolidation/v2",
+        "search": "preference-index/v1",
+        "projector": "preference-projection/v2",
+        "packing": "json-packing/v1",
+        "grader": "none"
+      },
+      "id": "preference-temporal",
+      "version": "preference-temporal/v2"
+    },
+    {
+      "versions": {
+        "provider": "scripted-preference/v2",
+        "model": "scripted",
+        "host_review": "preference-review/v2",
+        "retention": "retention/v1",
+        "resolver": "resolver/v1",
+        "consolidation": "consolidation/v2",
+        "search": "preference-index/v1",
+        "projector": "preference-projection/v2",
+        "packing": "json-packing/v1",
+        "grader": "none"
+      },
+      "id": "preference-port-failures",
+      "version": "preference-port-failures/v2"
+    },
+    {
+      "versions": {
+        "provider": "scripted-preference/v2",
+        "model": "scripted",
+        "host_review": "preference-review/v2",
+        "retention": "retention/v1",
+        "resolver": "resolver/v1",
+        "consolidation": "consolidation/v2",
+        "search": "preference-index/v1",
+        "projector": "preference-projection/v2",
+        "packing": "json-packing/v1",
+        "grader": "none"
+      },
+      "id": "preference-consolidation-baseline",
+      "version": "preference-consolidation/v2"
+    },
+    {
+      "versions": {
+        "provider": "scripted-preference/v2",
+        "model": "scripted",
+        "host_review": "preference-review/v2",
+        "retention": "retention/v1",
+        "resolver": "resolver/v1",
+        "consolidation": "consolidation/v2",
+        "search": "preference-index/v1",
+        "projector": "preference-projection/v2",
+        "packing": "json-packing/v1",
+        "grader": "none"
+      },
+      "id": "preference-consolidation-exact",
+      "version": "preference-consolidation/v2"
+    },
+    {
+      "versions": {
+        "provider": "scripted-preference/v2",
+        "model": "scripted",
+        "host_review": "preference-review/v2",
+        "retention": "retention/v1",
+        "resolver": "resolver/v1",
+        "consolidation": "consolidation/v2",
+        "search": "preference-index/v1",
+        "projector": "preference-projection/v2",
+        "packing": "json-packing/v1",
+        "grader": "none"
+      },
+      "id": "preference-consolidation-domain",
+      "version": "preference-consolidation/v2"
+    },
+    {
+      "versions": {
+        "provider": "scripted-preference/v2",
+        "model": "scripted",
+        "host_review": "preference-review/v2",
+        "retention": "retention/v1",
+        "resolver": "resolver/v1",
+        "consolidation": "consolidation/v2",
+        "search": "preference-index/v1",
+        "projector": "preference-projection/v2",
+        "packing": "json-packing/v1",
+        "grader": "none"
+      },
+      "id": "preference-consolidation-semantic",
+      "version": "preference-consolidation/v2"
+    },
+    {
+      "versions": {
+        "provider": "procedure-extractor/v1",
+        "model": "scripted",
+        "host_review": "none",
+        "retention": "procedure-retention/v1",
+        "resolver": "procedure-resolver/v1",
+        "consolidation": "none",
+        "search": "procedure-rrf/v1",
+        "projector": "procedure-projector/v1",
+        "packing": "json-packing/v1",
+        "grader": "none"
+      },
+      "id": "procedure-retrieval",
+      "version": "procedure-fixtures/v2"
+    },
+    {
+      "versions": {
+        "provider": "procedure-extractor/v1",
+        "model": "scripted",
+        "host_review": "none",
+        "retention": "procedure-retention/v1",
+        "resolver": "procedure-resolver/v1",
+        "consolidation": "none",
+        "search": "procedure-rrf/v1",
+        "projector": "procedure-projector/v1",
+        "packing": "json-packing/v1",
+        "grader": "none"
+      },
+      "id": "procedure-cross-scope",
+      "version": "procedure-fixtures/v2"
+    },
+    {
+      "versions": {
+        "provider": "procedure-extractor/v1",
+        "model": "scripted",
+        "host_review": "none",
+        "retention": "procedure-retention/v1",
+        "resolver": "procedure-resolver/v1",
+        "consolidation": "none",
+        "search": "procedure-rrf/v1",
+        "projector": "procedure-projector/v1",
+        "packing": "json-packing/v1",
+        "grader": "none"
+      },
+      "id": "procedure-abstention",
+      "version": "procedure-fixtures/v2"
+    },
+    {
+      "versions": {
+        "provider": "procedure-extractor/v1",
+        "model": "scripted",
+        "host_review": "guarded-host/v1",
+        "retention": "procedure-retention/v1",
+        "resolver": "procedure-resolver/v1",
+        "consolidation": "none",
+        "search": "procedure-rrf/v1",
+        "projector": "procedure-projector/v1",
+        "packing": "json-packing/v1",
+        "grader": "none"
+      },
+      "id": "procedure-poisoning-guarded",
+      "version": "procedure-fixtures/v2"
+    },
+    {
+      "versions": {
+        "provider": "procedure-extractor/v1",
+        "model": "scripted",
+        "host_review": "permissive-host/v1",
+        "retention": "procedure-retention/v1",
+        "resolver": "procedure-resolver/v1",
+        "consolidation": "none",
+        "search": "procedure-rrf/v1",
+        "projector": "procedure-projector/v1",
+        "packing": "json-packing/v1",
+        "grader": "none"
+      },
+      "id": "procedure-poisoning-permissive",
+      "version": "procedure-fixtures/v2"
+    },
+    {
+      "versions": {
+        "provider": "procedure-extractor/v1",
+        "model": "scripted",
+        "host_review": "none",
+        "retention": "procedure-retention/v1",
+        "resolver": "procedure-resolver/v1",
+        "consolidation": "none",
+        "search": "procedure-rrf/v1",
+        "projector": "procedure-projector/v1",
+        "packing": "json-packing/v1",
+        "grader": "none"
+      },
+      "id": "procedure-forget-memory",
+      "version": "procedure-fixtures/v2"
+    },
+    {
+      "versions": {
+        "provider": "procedure-extractor/v1",
+        "model": "scripted",
+        "host_review": "none",
+        "retention": "procedure-retention/v1",
+        "resolver": "procedure-resolver/v1",
+        "consolidation": "none",
+        "search": "procedure-rrf/v1",
+        "projector": "procedure-projector/v1",
+        "packing": "json-packing/v1",
+        "grader": "none"
+      },
+      "id": "procedure-forget-sqlite",
+      "version": "procedure-fixtures/v2"
+    },
+    {
+      "versions": {
+        "provider": "procedure-extractor/v1",
+        "model": "scripted",
+        "host_review": "guarded-host/v1",
+        "retention": "procedure-retention/v1",
+        "resolver": "procedure-resolver/v1",
+        "consolidation": "none",
+        "search": "procedure-rrf/v1",
+        "projector": "procedure-projector/v1",
+        "packing": "json-packing/v1",
+        "grader": "controlled-grader/v1"
+      },
+      "id": "procedure-controlled-failures",
+      "version": "procedure-fixtures/v2"
+    },
+    {
+      "versions": {
+        "provider": "manual-remember/v1",
+        "model": "none",
+        "host_review": "preference-review/v2",
+        "retention": "retention/v1",
+        "resolver": "resolver/v1",
+        "consolidation": "none",
+        "search": "preference-index/v1",
+        "projector": "preference-projection/v2",
+        "packing": "json-packing/v1",
+        "grader": "none"
+      },
+      "id": "evaluator-self-check",
+      "version": "evaluator-fixtures/v2"
+    }
+  ]
+}

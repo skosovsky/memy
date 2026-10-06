@@ -1,0 +1,190 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": "memy-quality-corpus/v2"
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "repeats": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "host_review": {
+          "type": "string"
+        },
+        "retention": {
+          "type": "string"
+        },
+        "resolver": {
+          "type": "string"
+        },
+        "consolidation": {
+          "type": "string"
+        },
+        "search": {
+          "type": "string"
+        },
+        "projector": {
+          "type": "string"
+        },
+        "packing": {
+          "type": "string"
+        },
+        "grader": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "host_review",
+        "retention",
+        "resolver",
+        "consolidation",
+        "search",
+        "projector",
+        "packing",
+        "grader"
+      ]
+    },
+    "budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_candidates": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "recall_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "context_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 67108864
+        },
+        "input_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 67108864
+        },
+        "output_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 67108864
+        },
+        "cost_units": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      },
+      "required": [
+        "max_candidates",
+        "recall_limit",
+        "context_bytes",
+        "input_bytes",
+        "output_bytes",
+        "cost_units"
+      ]
+    },
+    "scenarios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "versions": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "provider": {
+                "type": "string"
+              },
+              "model": {
+                "type": "string"
+              },
+              "host_review": {
+                "type": "string"
+              },
+              "retention": {
+                "type": "string"
+              },
+              "resolver": {
+                "type": "string"
+              },
+              "consolidation": {
+                "type": "string"
+              },
+              "search": {
+                "type": "string"
+              },
+              "projector": {
+                "type": "string"
+              },
+              "packing": {
+                "type": "string"
+              },
+              "grader": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "provider",
+              "model",
+              "host_review",
+              "retention",
+              "resolver",
+              "consolidation",
+              "search",
+              "projector",
+              "packing",
+              "grader"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "versions"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 100
+    }
+  },
+  "required": [
+    "version",
+    "seed",
+    "repeats",
+    "versions",
+    "budgets",
+    "scenarios"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memy.dev/schemas/quality-corpus-v2.schema.json"
+}

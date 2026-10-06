@@ -1,0 +1,245 @@
+package quality
+
+import (
+	"context"
+	"errors"
+	"github.com/skosovsky/memy"
+)
+
+type Status string
+
+const (
+	Pass          Status = "pass"
+	Fail          Status = "fail"
+	Unknown       Status = "unknown"
+	NotApplicable Status = "not_applicable"
+)
+
+type Verdict string
+
+const (
+	VerdictPass    Verdict = "pass"
+	VerdictFail    Verdict = "fail"
+	VerdictUnknown Verdict = "unknown"
+)
+
+// Evidence contains synthetic public observations, never input text or errors.
+type Evidence struct {
+	Code    string   `json:"code"`
+	Count   int      `json:"count"`
+	Aliases []string `json:"aliases,omitempty"`
+}
+type Check struct {
+	ID        string     `json:"id"`
+	Mandatory bool       `json:"mandatory"`
+	Status    Status     `json:"status"`
+	Expected  string     `json:"expected"`
+	Observed  string     `json:"observed"`
+	Evidence  []Evidence `json:"evidence"`
+}
+type StageResult struct {
+	Status  Status  `json:"status"`
+	Checks  []Check `json:"checks"`
+	Version string  `json:"version,omitempty"`
+}
+type Measurement struct {
+	Status string  `json:"status"`
+	Unit   string  `json:"unit"`
+	Value  *uint64 `json:"value,omitempty"`
+	Reason string  `json:"reason,omitempty"`
+}
+type Metrics struct {
+	PayloadBytes     Measurement `json:"payload_bytes"`
+	ContextJSONBytes Measurement `json:"context_json_bytes"`
+	CanonicalBytes   Measurement `json:"canonical_serialized_bytes"`
+	ProviderCost     Measurement `json:"provider_abstract_cost"`
+	RealProviderCost Measurement `json:"real_provider_cost"`
+}
+type ScenarioReport struct {
+	Versions   PortVersions     `json:"versions"`
+	Mode       string           `json:"mode"`
+	ID         string           `json:"id"`
+	Domain     string           `json:"domain"`
+	Version    string           `json:"version"`
+	Repeat     int              `json:"repeat"`
+	Seed       uint64           `json:"seed"`
+	Variation  string           `json:"variation"`
+	Candidate  StageResult      `json:"candidate"`
+	HostReview StageResult      `json:"host_review"`
+	Effective  StageResult      `json:"effective"`
+	Canonical  StageResult      `json:"canonical"`
+	Rendered   StageResult      `json:"rendered"`
+	Execution  StageResult      `json:"execution"`
+	Metrics    Metrics          `json:"metrics"`
+	Final      Verdict          `json:"final"`
+	Diagnostic string           `json:"diagnostic,omitempty"`
+	Probes     []ScenarioReport `json:"probes,omitempty"`
+}
+type Report struct {
+	Schema     string           `json:"schema"`
+	Manifest   *Corpus          `json:"manifest,omitempty"`
+	Versions   PortVersions     `json:"versions"`
+	Scenarios  []ScenarioReport `json:"scenarios"`
+	Final      Verdict          `json:"final"`
+	Diagnostic string           `json:"diagnostic,omitempty"`
+}
+
+func KnownMeasurement(unit string, value uint64) Measurement {
+	return Measurement{Status: "known", Unit: unit, Value: &value}
+}
+func UnavailableMeasurement(unit, reason string) Measurement {
+	return Measurement{Status: "unavailable", Unit: unit, Reason: reason}
+}
+func stages(s *ScenarioReport) []*StageResult {
+	return []*StageResult{&s.Candidate, &s.HostReview, &s.Effective, &s.Canonical, &s.Rendered, &s.Execution}
+}
+
+// FinalizeScenario runs after every observation. Descriptive candidate failures
+// have Mandatory=false and cannot erase a later mandatory failure or unknown.
+func FinalizeScenario(s *ScenarioReport) {
+	final := VerdictPass
+	if s.Diagnostic != "" {
+		final = VerdictUnknown
+	}
+	for _, stage := range stages(s) {
+		if stage.Checks == nil {
+			stage.Checks = []Check{}
+		}
+		if stage.Status == NotApplicable {
+			if len(stage.Checks) > 0 {
+				final = VerdictUnknown
+			}
+			continue
+		}
+		if len(stage.Checks) == 0 {
+			stage.Status = Unknown
+			final = VerdictUnknown
+			continue
+		}
+		stage.Status = Pass
+		seenIDs := map[string]bool{}
+		for i := range stage.Checks {
+			c := &stage.Checks[i]
+			if c.Evidence == nil {
+				c.Evidence = []Evidence{}
+			}
+			invalidEvidence := seenIDs[c.ID]
+			seenIDs[c.ID] = true
+			for _, e := range c.Evidence {
+				if e.Code == "" || e.Count < 0 {
+					invalidEvidence = true
+				}
+			}
+			if invalidEvidence || c.ID == "" || c.Expected == "" || c.Observed == "" || len(c.Evidence) == 0 || (c.Status != Pass && c.Status != Fail && c.Status != Unknown) {
+				c.Status = Unknown
+			}
+			if c.Status == Unknown {
+				stage.Status = Unknown
+			} else if c.Status == Fail && stage.Status != Unknown {
+				stage.Status = Fail
+			}
+			if c.Mandatory {
+				if c.Status == Unknown {
+					final = VerdictUnknown
+				} else if c.Status == Fail && final != VerdictUnknown {
+					final = VerdictFail
+				}
+			}
+		}
+	}
+	if s.Execution.Status != Pass {
+		final = VerdictUnknown
+	}
+	s.Final = final
+	defaultMetrics(&s.Metrics)
+}
+func defaultMetrics(m *Metrics) {
+	for _, p := range []*Measurement{&m.PayloadBytes, &m.ContextJSONBytes, &m.CanonicalBytes, &m.ProviderCost, &m.RealProviderCost} {
+		if p.Status == "" || p.Unit == "" || (p.Status == "known" && (p.Value == nil || p.Reason != "")) || (p.Status == "unavailable" && (p.Value != nil || p.Reason == "")) || (p.Status != "known" && p.Status != "unavailable") {
+			*p = UnavailableMeasurement("unmeasured", "not_measured")
+		}
+	}
+}
+func FinalizeReport(r *Report) {
+	r.Final = VerdictPass
+	if r.Diagnostic != "" || len(r.Scenarios) == 0 {
+		r.Final = VerdictUnknown
+	}
+	for i := range r.Scenarios {
+		FinalizeScenario(&r.Scenarios[i])
+		v := r.Scenarios[i].Final
+		if v == VerdictUnknown {
+			r.Final = VerdictUnknown
+		} else if v == VerdictFail && r.Final != VerdictUnknown {
+			r.Final = VerdictFail
+		}
+	}
+}
+func (r Report) ExitCode() int {
+	if r.Diagnostic != "" {
+		return 2
+	}
+	knownFailure := false
+	for _, s := range r.Scenarios {
+		if s.Diagnostic != "" || s.Final == VerdictUnknown {
+			return 2
+		}
+		if s.Final == VerdictFail {
+			knownFailure = true
+		}
+	}
+	if knownFailure && r.Final != VerdictUnknown {
+		return 1
+	}
+	switch r.Final {
+	case VerdictPass:
+		return 0
+	case VerdictFail:
+		return 1
+	default:
+		return 2
+	}
+}
+func FailureReport(err error) Report {
+	return Report{Schema: "memy-quality/v2", Scenarios: []ScenarioReport{}, Final: VerdictUnknown, Diagnostic: ErrorClass(err)}
+}
+
+// ErrorClass intentionally never incorporates err.Error().
+func ErrorClass(err error) string {
+	switch {
+	case err == nil:
+		return "none"
+	case errors.Is(err, context.Canceled):
+		return "cancelled"
+	case errors.Is(err, context.DeadlineExceeded):
+		return "deadline"
+	case errors.Is(err, memy.ErrInvalid):
+		return "invalid"
+	case errors.Is(err, memy.ErrUnauthorized):
+		return "unauthorized"
+	case errors.Is(err, memy.ErrUnavailable):
+		return "unavailable"
+	case errors.Is(err, memy.ErrBudget):
+		return "budget"
+	case errors.Is(err, memy.ErrSourceUnavailable):
+		return "source_unavailable"
+	case errors.Is(err, memy.ErrNotFound):
+		return "not_found"
+	case errors.Is(err, memy.ErrRevoked):
+		return "revoked"
+	case errors.Is(err, memy.ErrPolicyDenied):
+		return "policy_denied"
+	case errors.Is(err, memy.ErrUnresolvedConflict):
+		return "unresolved_conflict"
+	case errors.Is(err, memy.ErrScopeViolation):
+		return "scope_violation"
+	case errors.Is(err, memy.ErrUnsupported):
+		return "unsupported"
+	case errors.Is(err, memy.ErrVisibilityPending):
+		return "visibility_pending"
+	case errors.Is(err, memy.ErrStaleInput):
+		return "stale"
+	default:
+		return "execution_error"
+	}
+}

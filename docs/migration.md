@@ -96,3 +96,33 @@ MaxBytes. Each result describes one bounded invocation. The host repeats that
 identity until Complete, handling pending/failed managed sinks. The maintenance
 fence makes Engine payload unavailable in that scope until the durable pass
 finishes; reopen preserves it. Use a new identity for another pass.
+
+
+## Quality protocol break (task04)
+
+The internal offline protocol now loads only `testdata/quality-v2.json` with
+`memy-quality-corpus/v2` identity; reports use `memy-quality/v2`. Replace the old
+tea-only protocol manifest and `Trial.Accepted`/count-based report readers.
+There is no v1 compatibility mode. The retained `testdata/consolidation-v1.json`
+is a domain fixture for separate consolidation tests, not a supported quality
+manifest. These harness changes do not change persisted storage schema 3.
+
+Read candidate, host_review, effective, canonical, rendered and execution stages
+separately, then use the final verdict. Bad candidate quality may accompany a
+passing expected-rejection protocol. Permissive host acceptance deliberately
+exposes false memory as data and cannot be presented as successful semantic
+protection. A known mandatory violation fails; adapter/checker errors and missing
+checkpoints remain unknown. Never interpret unavailable measurements as zero.
+
+The quality command saves safe evidence before returning 0 (all mandatory gates
+pass), 1 (known mandatory failure) or 2 (unknown/invalid execution or report
+failure). Raw payload/query/provider error text is omitted. Exact process status
+is easiest to observe using a compiled binary; `go run` wraps nonzero exits.
+`-probe` selects isolated evaluator mutation reports through the same aggregator.
+
+The manifest pins scenario/port identities, candidate/recall/context and
+consolidation budgets, meaningful seed and repeats. The Go fixtures own payload,
+query, source and comparison types. The offline quality-integration example
+replaces typed extractor/search and optional grader ports without changing the
+checkpoint oracles. Model SDKs, answer rubrics and external evaluation remain
+consumer-owned. See quality.md for the current command and report interpretation.

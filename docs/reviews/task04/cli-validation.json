@@ -1,0 +1,247 @@
+{
+  "binary_command": [
+    "go",
+    "build",
+    "-buildvcs=false",
+    "-o",
+    "<private binary>",
+    "./examples/quality"
+  ],
+  "deterministic_repeat_equal": true,
+  "results": [
+    {
+      "case": "normal",
+      "command": [
+        "quality",
+        "-out",
+        "<private report>"
+      ],
+      "exit": 0,
+      "verdict": "pass",
+      "scenarios": 32,
+      "report_saved": true,
+      "mode": "0o600",
+      "seconds": 1.819,
+      "stderr": ""
+    },
+    {
+      "case": "repeat",
+      "command": [
+        "quality",
+        "-out",
+        "<private report>"
+      ],
+      "exit": 0,
+      "verdict": "pass",
+      "scenarios": 32,
+      "report_saved": true,
+      "mode": "0o600",
+      "seconds": 1.439,
+      "stderr": ""
+    },
+    {
+      "case": "wrong_payload",
+      "command": [
+        "quality",
+        "-probe",
+        "wrong_payload",
+        "-out",
+        "<private report>"
+      ],
+      "exit": 1,
+      "verdict": "fail",
+      "scenarios": 1,
+      "report_saved": true,
+      "mode": "0o600",
+      "seconds": 0.041,
+      "stderr": "quality: mandatory checkpoint failed\n"
+    },
+    {
+      "case": "wrong_revision",
+      "command": [
+        "quality",
+        "-probe",
+        "wrong_revision",
+        "-out",
+        "<private report>"
+      ],
+      "exit": 1,
+      "verdict": "fail",
+      "scenarios": 1,
+      "report_saved": true,
+      "mode": "0o600",
+      "seconds": 0.036,
+      "stderr": "quality: mandatory checkpoint failed\n"
+    },
+    {
+      "case": "missing_lineage",
+      "command": [
+        "quality",
+        "-probe",
+        "missing_lineage",
+        "-out",
+        "<private report>"
+      ],
+      "exit": 1,
+      "verdict": "fail",
+      "scenarios": 1,
+      "report_saved": true,
+      "mode": "0o600",
+      "seconds": 0.039,
+      "stderr": "quality: mandatory checkpoint failed\n"
+    },
+    {
+      "case": "late_privacy",
+      "command": [
+        "quality",
+        "-probe",
+        "late_privacy",
+        "-out",
+        "<private report>"
+      ],
+      "exit": 1,
+      "verdict": "fail",
+      "scenarios": 1,
+      "report_saved": true,
+      "mode": "0o600",
+      "seconds": 0.034,
+      "stderr": "quality: mandatory checkpoint failed\n"
+    },
+    {
+      "case": "false_empty_outage",
+      "command": [
+        "quality",
+        "-probe",
+        "false_empty_outage",
+        "-out",
+        "<private report>"
+      ],
+      "exit": 1,
+      "verdict": "fail",
+      "scenarios": 1,
+      "report_saved": true,
+      "mode": "0o600",
+      "seconds": 0.031,
+      "stderr": "quality: mandatory checkpoint failed\n"
+    },
+    {
+      "case": "checker_error",
+      "command": [
+        "quality",
+        "-probe",
+        "checker_error",
+        "-out",
+        "<private report>"
+      ],
+      "exit": 2,
+      "verdict": "unknown",
+      "scenarios": 1,
+      "report_saved": true,
+      "mode": "0o600",
+      "seconds": 0.04,
+      "stderr": "quality: execution or evaluation unknown\n"
+    },
+    {
+      "case": "adapter_error",
+      "command": [
+        "quality",
+        "-probe",
+        "adapter_error",
+        "-out",
+        "<private report>"
+      ],
+      "exit": 2,
+      "verdict": "unknown",
+      "scenarios": 1,
+      "report_saved": true,
+      "mode": "0o600",
+      "seconds": 0.031,
+      "stderr": "quality: execution or evaluation unknown\n"
+    },
+    {
+      "case": "budget-1",
+      "command": [
+        "quality",
+        "-corpus",
+        "/private/tmp/memy-task04-budget-1.json",
+        "-out",
+        "<private report>"
+      ],
+      "exit": 2,
+      "verdict": "unknown",
+      "scenarios": 32,
+      "report_saved": true,
+      "mode": "0o600",
+      "seconds": 1.607,
+      "stderr": "quality: execution or evaluation unknown\n"
+    },
+    {
+      "case": "budget-500",
+      "command": [
+        "quality",
+        "-corpus",
+        "/private/tmp/memy-task04-budget-500.json",
+        "-out",
+        "<private report>"
+      ],
+      "exit": 2,
+      "verdict": "unknown",
+      "scenarios": 32,
+      "report_saved": true,
+      "mode": "0o600",
+      "seconds": 2.563,
+      "stderr": "quality: execution or evaluation unknown\n"
+    },
+    {
+      "case": "budget-1100",
+      "command": [
+        "quality",
+        "-corpus",
+        "/private/tmp/memy-task04-budget-1100.json",
+        "-out",
+        "<private report>"
+      ],
+      "exit": 1,
+      "verdict": "fail",
+      "scenarios": 32,
+      "report_saved": true,
+      "mode": "0o600",
+      "seconds": 2.687,
+      "stderr": "quality: mandatory checkpoint failed\n"
+    },
+    {
+      "case": "budget-1300",
+      "command": [
+        "quality",
+        "-corpus",
+        "/private/tmp/memy-task04-budget-1300.json",
+        "-out",
+        "<private report>"
+      ],
+      "exit": 1,
+      "verdict": "fail",
+      "scenarios": 32,
+      "report_saved": true,
+      "mode": "0o600",
+      "seconds": 3.367,
+      "stderr": "quality: mandatory checkpoint failed\n"
+    },
+    {
+      "case": "invalid",
+      "command": [
+        "quality",
+        "-corpus",
+        "/private/tmp/memy-task04-invalid.json",
+        "-out",
+        "<private report>"
+      ],
+      "exit": 2,
+      "verdict": "unknown",
+      "scenarios": 0,
+      "report_saved": true,
+      "mode": "0o600",
+      "seconds": 0.027,
+      "stderr": "quality: execution or evaluation unknown\n"
+    }
+  ]
+}

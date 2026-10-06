@@ -1,0 +1,98 @@
+[
+  {
+    "context_bytes": 1,
+    "exit": 2,
+    "final": "unknown",
+    "runs": 32,
+    "evaluator_context": {
+      "status": "unavailable",
+      "unit": "final-context-json-bytes",
+      "reason": "execution_incomplete"
+    },
+    "mode": "0o600"
+  },
+  {
+    "context_bytes": 200,
+    "exit": 2,
+    "final": "unknown",
+    "runs": 32,
+    "evaluator_context": {
+      "status": "unavailable",
+      "unit": "final-context-json-bytes",
+      "reason": "execution_incomplete"
+    },
+    "mode": "0o600"
+  },
+  {
+    "context_bytes": 500,
+    "exit": 2,
+    "final": "unknown",
+    "runs": 32,
+    "evaluator_context": {
+      "status": "known",
+      "unit": "final-context-json-bytes",
+      "value": 323
+    },
+    "mode": "0o600"
+  },
+  {
+    "context_bytes": 700,
+    "exit": 2,
+    "final": "unknown",
+    "runs": 32,
+    "evaluator_context": {
+      "status": "known",
+      "unit": "final-context-json-bytes",
+      "value": 323
+    },
+    "mode": "0o600"
+  },
+  {
+    "context_bytes": 900,
+    "exit": 2,
+    "final": "unknown",
+    "runs": 32,
+    "evaluator_context": {
+      "status": "known",
+      "unit": "final-context-json-bytes",
+      "value": 323
+    },
+    "mode": "0o600"
+  },
+  {
+    "context_bytes": 1100,
+    "exit": 1,
+    "final": "fail",
+    "runs": 32,
+    "evaluator_context": {
+      "status": "known",
+      "unit": "final-context-json-bytes",
+      "value": 1043
+    },
+    "mode": "0o600"
+  },
+  {
+    "context_bytes": 1300,
+    "exit": 1,
+    "final": "fail",
+    "runs": 32,
+    "evaluator_context": {
+      "status": "known",
+      "unit": "final-context-json-bytes",
+      "value": 1043
+    },
+    "mode": "0o600"
+  },
+  {
+    "context_bytes": 20000,
+    "exit": 0,
+    "final": "pass",
+    "runs": 32,
+    "evaluator_context": {
+      "status": "known",
+      "unit": "final-context-json-bytes",
+      "value": 1043
+    },
+    "mode": "0o600"
+  }
+]

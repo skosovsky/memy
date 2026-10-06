@@ -24,9 +24,13 @@ make examples
 make validate
 ```
 
-Фиксированный quality protocol и сохранённый baseline/consolidation report:
-[docs/quality.md](docs/quality.md). Для новой локальной выборки измерений:
+Offline quality protocol v2 проверяет два typed domain: preferences и знания о
+процедурах/наблюдаемых результатах. Candidate, host review, фактические revisions,
+canonical state и полный JSON-контекст оцениваются отдельно; итог вычисляется
+после всех проверок. [Контракт, exit codes и mutation probes](docs/quality.md):
 `go run ./examples/quality -out docs/quality-report.json`.
+`go run ./examples/quality-integration` заменяет consumer ports и выполняет те же
+checkpoints. Оба примера scripted; результат не является LLM benchmark.
 
 `make examples` запускает полный offline сценарий на временном SQLite-файле:
 extraction, acceptance одного proposal, commit, corrected revision, close/reopen,

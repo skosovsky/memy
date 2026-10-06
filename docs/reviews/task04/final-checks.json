@@ -1,0 +1,61 @@
+[
+  {
+    "command": [
+      "go",
+      "vet",
+      "./..."
+    ],
+    "exit": 0,
+    "seconds": 0.452,
+    "output": "final-check-0.txt"
+  },
+  {
+    "command": [
+      "go",
+      "run",
+      "./examples/lifecycle"
+    ],
+    "exit": 0,
+    "seconds": 0.655,
+    "output": "final-check-1.txt"
+  },
+  {
+    "command": [
+      "go",
+      "run",
+      "./examples/retrieval"
+    ],
+    "exit": 0,
+    "seconds": 0.684,
+    "output": "final-check-2.txt"
+  },
+  {
+    "command": [
+      "go",
+      "run",
+      "./examples/quality-integration"
+    ],
+    "exit": 0,
+    "seconds": 1.203,
+    "output": "final-check-3.txt"
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit": 0,
+    "seconds": 0.037,
+    "output": "final-check-4.txt"
+  },
+  {
+    "command": [
+      "gofmt",
+      "-l",
+      "all Go source"
+    ],
+    "exit": 0,
+    "output": "final-format.txt"
+  }
+]

@@ -1,0 +1,18 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "-count=1",
+    "-timeout=20m",
+    "./..."
+  ],
+  "environment": {
+    "GOCACHE": "/private/tmp/memy-task03-go-cache"
+  },
+  "exit": 0,
+  "output": "race.txt",
+  "root_package": "ok  \tgithub.com/skosovsky/memy\t915.557s",
+  "source_hashes_verified": 127,
+  "source_drift": []
+}
