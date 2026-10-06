@@ -19,7 +19,7 @@ Record.Related and Record.PolicyVersion are removed. All callers and schemas
 use the new contract directly. Basis is purged with knowledge, not retained in
 content-free receipts. JSON wire rejects invalid UTF-8 and unpaired surrogates.
 
-## Retrieval API break (task03)
+## Retrieval API break
 
 The retrieval API changes directly; there are no compatibility aliases or
 implicit defaults. These runtime changes leave persisted schema version 3
@@ -98,7 +98,7 @@ fence makes Engine payload unavailable in that scope until the durable pass
 finishes; reopen preserves it. Use a new identity for another pass.
 
 
-## Quality protocol break (task04)
+## Quality protocol break
 
 The internal offline protocol now loads only `testdata/quality-v2.json` with
 `memy-quality-corpus/v2` identity; reports use `memy-quality/v2`. Replace the old
@@ -127,15 +127,17 @@ replaces typed extractor/search and optional grader ports without changing the
 checkpoint oracles. Model SDKs, answer rubrics and external evaluation remain
 consumer-owned. See quality.md for the current command and report interpretation.
 
-## Review remediation identities (task2)
+## Current remediation identities
 
-See [remediation contracts](remediation-contracts.md) for the normative upgrade
-plan approved before source changes. Stock json/v2 is implemented and rejects mismatched json/v1
+See [remediation contracts](remediation-contracts.md) for the normative implemented upgrade
+contract, approved before source changes. Stock json/v2 is implemented and rejects mismatched json/v1
 records, projection/v2 requires host cache invalidation, and cursor v2 explicitly
 rejects old continuations. Persisted schema stays v3. Import old codec data only
 through fresh host review and the normal lifecycle; no silent relabeling or reader
 fallback. Sweep callers must consume confirmed partial results alongside errors.
-Implementation and acceptance are tracked in the task2 checklist.
+Implementation decisions and verification scope are recorded in
+[remediation decisions](remediation-decisions.md) and the
+[final remediation report](reviews/remediation-final.md).
 
 Consolidation request digests now bind the actual stock codec identity json/v2.
 An old consolidation operation ID with a json/v1-bound digest returns ErrConflict

@@ -43,7 +43,7 @@ checkpoints. Оба примера scripted; результат не являе�
 Lifecycle выполняет полный offline сценарий на временном SQLite-файле:
 extraction, acceptance одного proposal, commit, corrected revision, close/reopen,
 canonical read в новой сессии, search visibility, typed projection и forget
-со сбоем одного sink и повтором очистки. Данные и файл удаляются после примера.
+со сбоем одного sink и восстановлением через bounded Sweep. Данные и файл удаляются после примера.
 Никаких credentials не нужно.
 
 `go run ./examples/retrieval` запускает отдельный offline пример: два backend
@@ -70,7 +70,7 @@ type AuthenticatedUser struct { ID string }
 Рабочая сборка находится в [examples/lifecycle](examples/lifecycle/main.go).
 Все host ports задаются явно через `memy.Config`: transactional store, authority,
 source validation, clock, retention и versioned payload/reference codecs.
-Список `Sinks` определяет managed deletion boundary. `Reintroduction` разрешает
+Опциональный список `Sinks` определяет managed deletion boundary. Опциональный `Reintroduction` разрешает
 host-controlled повторный ввод после scope/source tombstone; по умолчанию
 tombstones сохраняются бессрочно. Retired record IDs не переиспользуются.
 
@@ -164,14 +164,37 @@ authority для безопасного использования через en
 их порт должен давать valid decision/lease на момент проверки. Произвольные
 внешние эффекты не получают exactly-once гарантию.
 
+## Storage и восстановление операций
+
+`Snapshot` возвращает одну `SnapshotPage`: host задаёт `SnapshotOptions.Read`,
+`Limit` и `MaxBytes`, затем явно продолжает `Cursor` до `Complete`. Бюджет
+ограничивает просмотренные revisions, включая не прошедшие read predicates.
+Изменение данных или read policy отклоняет продолжение; старый cursor не
+означает полный актуальный обход.
+
+Store использует `Scan` вместо `List`. `View` даёт consistent read,
+`FencedView` исключает изменения в точном scope до завершения callback.
+SQLite fencing работает между процессами на поддерживаемых локальных Unix
+файловых системах; directory `.memy-fences` сохраняется, пока база используется.
+Текущий persisted формат — schema 3; переход описан в [migration](docs/migration.md).
+
+Ошибки, ownership и поддерживаемые платформы — в
+[API recovery guide](docs/api-recovery.md).
+
 Контракт описан в [design](docs/design.md), версии и импорт — в
 [migration](docs/migration.md). Полные wire-контракты лежат в [schemas](schemas/).
 Фиксированный scope и evidence matrix — в [acceptance](docs/acceptance.md).
-Реализован полный lifecycle знаний. Независимая приёмка исходной реализации подтверждает 85/85 требований
+Реализован полный lifecycle знаний. Историческая независимая приёмка исходной реализации
+(до remediation; [frozen manifest](docs/reviews/snapshot-final.json),
+SHA256 `b39c2bda626b751dfbd035669d6e67852d8e25898ce547819e2ed82c5e9880e1`) подтверждала 85/85 требований
 (100%): [полнота](docs/reviews/completeness-final.md),
 [корректность](docs/reviews/correctness-final.md). Подтверждённые дефекты C1–C13
 закрыты; результаты проверок и границы аудита — в
 [итоговом отчёте](docs/reviews/final-audit.md).
+
+Актуальные исправления F01–F10 и решения D01–D70 описаны в
+[remediation](docs/reviews/remediation-final.md). Исторические проценты выше
+не заменяют эту приёмку.
 
 Обновление toolchain, зависимостей и конфигов описано в
 [maintenance](docs/maintenance.md); прежние audit snapshots относятся к
@@ -198,15 +221,3 @@ Single-module script рассчитывает версию по опублико
 detached HEAD. Для major 0 break увеличивает minor; major-переходы требуют
 отдельного semantic import-version изменения и отклоняются. Неизвестный исход
 push сохраняет recovery clone. См. [release contract](docs/release.md).
-
-`Snapshot` возвращает одну `SnapshotPage`: host задаёт `SnapshotOptions.Read`,
-`Limit` и `MaxBytes`, затем явно продолжает `Cursor` до `Complete`. Бюджет
-ограничивает просмотренные revisions, включая не прошедшие read predicates.
-Изменение данных или read policy отклоняет продолжение; старый cursor не
-означает полный актуальный обход.
-
-Store использует `Scan` вместо `List`. `View` даёт consistent read,
-`FencedView` исключает изменения в точном scope до завершения callback.
-SQLite fencing работает между процессами на поддерживаемых локальных Unix
-файловых системах; directory `.memy-fences` сохраняется, пока база используется.
-Текущий persisted формат — schema 3; переход описан в [migration](docs/migration.md).

@@ -291,12 +291,44 @@ func demonstrateProjectionAndForget(
 		return errors.New("partial deletion incorrectly reported complete")
 	}
 	summary.FailPurge(nil)
-	purge, operationErr = fullForget(ctx, engine, actor, scope, examplePurpose, forget)
+	purge, operationErr = recoverForgetWithSweep(ctx, engine, actor, scope, forget.OperationID)
 	if operationErr != nil {
 		return operationErr
 	}
-	fmt.Printf("Forget: one sink failed, retry reached %s at epoch %d.\n", purge.State, purge.Batch.Epoch)
+	fmt.Printf("Forget: one sink failed, Sweep recovered %s at epoch %d.\n", purge.State, purge.Batch.Epoch)
 	return nil
+}
+
+// The scheduler owns continuation. Sweep adopts the original Forget identity;
+// its own operation ID identifies the durable maintenance pass.
+func recoverForgetWithSweep(
+	ctx context.Context, engine *memy.Engine[Preference, SourceRef, AuthenticatedUser],
+	actor AuthenticatedUser, scope memy.Scope, forgetID string,
+) (memy.PurgeReceipt, error) {
+	const recoveryLimit = 16
+	request := memy.SweepRequest{OperationID: "recover-forget", Limit: recoveryLimit, MaxBytes: defaultForgetMaxBytes}
+	var recovered memy.PurgeReceipt
+	for {
+		result, err := engine.Sweep(ctx, actor, scope, examplePurpose, request)
+		// Consume confirmed receipts even when this call also returns an error.
+		for _, receipt := range result.Records {
+			if receipt.Batch.OperationID == forgetID {
+				recovered = receipt
+			}
+			if receipt.State == memy.PurgePending || receipt.State == memy.PurgeFailed {
+				return recovered, errors.New("sink still unavailable; scheduler must resume later")
+			}
+		}
+		if err != nil {
+			return recovered, err
+		}
+		if result.Complete {
+			if recovered.State != memy.PurgeComplete {
+				return recovered, errors.New("sweep did not complete the original Forget")
+			}
+			return recovered, nil
+		}
+	}
 }
 
 func acceptAndCommit(

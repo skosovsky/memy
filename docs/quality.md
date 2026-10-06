@@ -208,15 +208,20 @@ with two repeats: 32 normal scenario reports, all with final protocol verdict
 `unknown`. Those negative outcomes are the expected evidence of evaluator
 self-checks, not successful memory-quality results.
 
-The compiled CLI's 14-case validation records expected exits, saved reports with
+The historical quality-protocol CLI validation (commit `e68eaf3`, frozen
+[manifest](reviews/task04/source-hashes.json))
+records 14 cases with expected exits, saved reports with
 mode 0600 and byte-identical normal reruns in
-[cli-validation.json](reviews/task04/cli-validation.json). The current vet,
+[cli-validation.json](reviews/task04/cli-validation.json). The historical vet,
 format, diff and lifecycle/retrieval/port-integration checks are recorded in
 [final-checks.json](reviews/task04/final-checks.json). These are local measured
-results. The final full repository race suite passed (exit 0; root package
+results. That historical full repository race suite passed (exit 0; root package
 915.557s), and [independent completeness](reviews/task04/completeness.md) is 100%;
 [independent correctness](reviews/task04/correctness.md) has no unclosed confirmed
-errors. [Validation](reviews/task04/validation.md) records the final gates. No v1 151→104 payload comparison is carried forward as a v2 result.
+errors. [Validation](reviews/task04/validation.md) records the final gates. Current boundary corrections and fresh verification are recorded in
+[remediation final](reviews/remediation-final.md). The saved report above was
+regenerated after remediation through the actual CLI. No v1 151→104 payload
+comparison is carried forward as a v2 result.
 Throughput, speedup and population quality are not conclusions of this harness.
 Storage/performance evidence remains in the task02 review artifacts and
 methodology; this protocol does not duplicate that benchmark framework.

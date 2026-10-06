@@ -1,5 +1,19 @@
 # Toolchain and configuration maintenance
 
+## Current configuration — 2026-10-06
+
+The remediation keeps Go 1.27.1, CGO and golangci-lint 2.14.0. `make validate`
+runs format, vet, strict lint, fresh verbose race tests, four offline examples
+(lifecycle, quality, retrieval, quality-integration), and local-only release
+fixtures. Release targets now call the isolated [release script](release.md);
+no real release or push is part of remediation acceptance. Current verification
+is recorded in [remediation final](reviews/remediation-final.md).
+
+## Historical maintenance snapshot — 2026-10-05
+
+The following records the pre-remediation state reviewed at `e12c8fc`.
+Its removed targets, two examples and no-commit statement describe that run.
+
 Updated on 2026-10-05. This verification follows the original independent
 implementation acceptance; its historical manifests are not current snapshots.
 

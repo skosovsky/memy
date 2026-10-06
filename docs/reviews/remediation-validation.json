@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-06",
+  "command": "make validate > /tmp/memy-final-validation.log 2>&1",
+  "actual_test_command": "go test -v -race -count=1 -timeout=30m ./...",
+  "exit_code": 0,
+  "format": "pass",
+  "vet": "pass",
+  "lint_issues": 0,
+  "root_race_seconds": 590.823,
+  "quality_race_seconds": 75.869,
+  "examples": [
+    "lifecycle",
+    "quality",
+    "retrieval",
+    "quality-integration"
+  ],
+  "local_release_tests": 10,
+  "local_release_seconds": 16.006,
+  "full_output": "remediation-validation.txt",
+  "full_output_sha256": "d7dd02a434a33d4d651c9c3a5ef918f69155558000eaaf797b065a7c18bbc400",
+  "source_manifest": "remediation-source-hashes.json",
+  "earlier_attempt": "lint rejected magic literal and capitalized error; fixed before authoritative full rerun"
+}

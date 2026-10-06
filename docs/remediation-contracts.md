@@ -1,8 +1,7 @@
 # Review remediation contracts
 
-This is the normative target for task2, approved before implementation. Until
-its implementation stages are accepted, the baseline at e12c8fc does not satisfy
-these contracts. Existing persisted schema remains v3; representation identities
+This is the implemented normative remediation contract, approved before source
+changes. The pre-remediation baseline at e12c8fc does not satisfy these contracts. Existing persisted schema remains v3; representation identities
 below change explicitly rather than enabling permissive compatibility readers.
 
 ## JSONCodec: json/v2
@@ -104,9 +103,9 @@ state, without claiming exactly-once counters after a lost response.
 
 Purge receipts already obtained from committed continuation steps remain in the
 partial result, including pending sink receipts. Acknowledgement/purge completion
-must not be fabricated from an attempted callback. Work is charged budget, not a
-measurement of actual backend effort; document or rename it in the subsequent
-API cleanup stage. MaxBytes bounds each storage page, not the whole invocation.
+must not be fabricated from an attempted callback. BudgetCharged is charged allowance, not a
+measurement of actual backend effort. The earlier Work field was removed in the
+explicit API cleanup break. MaxBytes bounds each storage page, not the whole invocation.
 These reporting changes leave the durable pass schema and operation identity
 unchanged. Hosts must consume result plus error and aggregate confirmed progress;
 never discard the result solely because error is nonnil.

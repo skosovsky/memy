@@ -90,13 +90,13 @@ SQLite journals, filesystem snapshots, or unmanaged backups.
 Engine.Capabilities reports the store profile and engine-owned ValidTime,
 RecordedTime and FieldProjection capabilities. Both temporal predicates are
 implemented over canonical revision history for every admitted transactional
-store. FieldProjection is false in v2; field-restricted authority decisions
+store. FieldProjection is false in the current profile; field-restricted authority decisions
 are rejected before consumer policies see content. Search visibility remains
 a separately advertised Search capability.
 
-The task2 [remediation contracts](remediation-contracts.md) supersede the codec,
-projection identity, cursor wire and Sweep reporting descriptions below upon
-implementation of their respective stages; baseline behavior is not acceptance.
+The implemented [remediation contracts](remediation-contracts.md) define the codec,
+projection identity, cursor wire and confirmed partial Sweep reporting.
+[Decisions](remediation-decisions.md) record the scope and measured tradeoffs.
 
 ## Codecs, keys and idempotency
 
@@ -205,9 +205,9 @@ canonical state, ACL, temporal predicates, expiry, sources/lineage and current
 revocation before a ranker or projector receives any payload. Ranker and output
 selection can reorder/remove permitted exact revisions, never add a revision or
 replace canonical payload. Expensive callbacks execute outside transactions;
-fresh canonical checks after all callbacks define delivery as in task02.
+fresh canonical checks after all callbacks define the delivery boundary described below.
 
-### Retrieval composition and work budget (task03 contract)
+### Retrieval composition and work budget
 
 Backend availability/index visibility, candidate truncation, canonical filtering,
 ranking selection and output-budget omission are separate dimensions. The old
@@ -259,7 +259,7 @@ a forged foreign canonical binding is an error. Unauthorized data never enters
 ranking, cost estimation or output selection. Historical exact refs obey the
 same ReadOptions eligibility contract as canonical snapshots.
 
-### Projected output budget (task03 contract)
+### Projected output budget
 
 One flow, RecallProjected, composes Search -> canonical filtering -> Ranker ->
 exact-revision Projector -> optional consumer budget selection -> final canonical
@@ -296,7 +296,7 @@ Source/authority/expiry/revocation changes during selection/measurement invalida
 delivery; revalidation errors never return a partially certified body.
 If a still-readable revision changes its projected state during a policy callback,
 delivery returns ErrStaleInput rather than changing the already measured body.
-Input already passed to a trusted host callback remains the task02 disclosure boundary.
+Input already passed to a trusted host callback remains the disclosure boundary described below.
 
 The reference index has explicit Publish/Acknowledge steps and controllable
 lag/failure; it never silently indexes canonical commits. Waiting for an exact
@@ -567,11 +567,10 @@ Unicode whitespace. JSON Schema maxLength alone counts codepoints, not bytes.
 Consumers validating these schemas must implement this documented format; an
 unconfigured validator checking shape alone is not identity conformance.
 
-## Iteration 02 — storage and delivery contract
+## Storage and delivery contract
 
-This section specifies the target contract for iteration 02. Its implementation
-and independent acceptance are tracked separately in task02 reports; task01
-acceptance does not certify these requirements.
+This section specifies the implemented storage and delivery contract. Historical
+acceptance reports certify only their recorded snapshots and review scope.
 
 ### Transaction and exclusion boundaries
 
@@ -655,9 +654,9 @@ The old Store API is replaced directly. Persisted structural changes require a
 new schema version and explicit incompatible-database rejection; no compatibility
 aliases, automatic imports or parallel old/new paths are retained.
 
-The iteration 02 persisted format is schema 3. Database metadata stores a
+The persisted format is schema 3. Database metadata stores a
 random cursor authentication secret and per-scope mutation generations. Only
-schema 3 is supported after this iteration; earlier envelopes/databases fail
+schema 3 is supported; earlier envelopes/databases fail
 with ErrSchema. Cursor authentication prevents hosts from accidentally forging
 progress or transferring cursors between databases. Prefix/key comparisons use
 exact bytes; cursor encoding preserves key bytes without JSON normalization.
@@ -830,9 +829,9 @@ the same store. Ranker, Projector and consolidation merge callbacks execute outs
 store transactions and are followed by fresh canonical validation.
 
 
-## Task04 — internal offline quality harness (v2 contract)
+## Internal offline quality harness (v2 contract)
 
-This section is the implementation contract for iteration 04; it is not an
+This section specifies the internal consumer protocol; it is not an
 acceptance claim. The harness is a consumer of public memy APIs in
 `internal/quality`. It adds no evaluation types, model SDK, natural-language
 classifier, executable procedure dispatcher or new policy to the root package.
@@ -902,7 +901,7 @@ The following stages are distinct:
    or assertion errors are not interpreted as zero violations.
 5. **Rendered output** checks the actual output of RecallProjected and any host
    answer adapter independently of effective recall. Exact final JSON bytes are
-   measured with the task03 output policy, including projection envelopes,
+   measured with the full-body output policy, including projection envelopes,
    provenance, coverage, progress and omissions. Check that only permitted exact
    revisions survive packing and that omitted required facts are accounted for
    by the scenario's budget expectation. A scripted answer's abstention does not
@@ -982,8 +981,8 @@ footprint, excluding adapter/index/database/WAL overhead. If not measured, repor
 explicitly unavailable with a reason, never payload bytes under a storage label.
 Real provider tokens/currency are unknown for scripted runs. Abstract scripted
 cost units and configured cost budgets retain their unit identity; they are not
-converted into tokens or money. No throughput/speedup claim is made; the task02
-performance methodology remains authoritative and is not duplicated here.
+converted into tokens or money. No throughput/speedup claim is made; the historical storage review
+performance methodology remains the reference and is not duplicated here.
 
 ### Internal implementation outline
 

@@ -1,3 +1,1658 @@
+golangci-lint - .
+0 issues.
+test - .
+=== RUN   TestConsolidationStampExpiryPreservesExplicitDeadline
+=== RUN   TestConsolidationStampExpiryPreservesExplicitDeadline/exact_dedup
+=== RUN   TestConsolidationStampExpiryPreservesExplicitDeadline/domain_merge
+=== RUN   TestConsolidationStampExpiryPreservesExplicitDeadline/semantic_merge
+--- PASS: TestConsolidationStampExpiryPreservesExplicitDeadline (0.00s)
+    --- PASS: TestConsolidationStampExpiryPreservesExplicitDeadline/exact_dedup (0.00s)
+    --- PASS: TestConsolidationStampExpiryPreservesExplicitDeadline/domain_merge (0.00s)
+    --- PASS: TestConsolidationStampExpiryPreservesExplicitDeadline/semantic_merge (0.00s)
+=== RUN   TestProjectionSnapshotCoversAllRecordFields
+=== RUN   TestProjectionSnapshotCoversAllRecordFields/ID
+=== RUN   TestProjectionSnapshotCoversAllRecordFields/Revision
+=== RUN   TestProjectionSnapshotCoversAllRecordFields/Scope
+=== RUN   TestProjectionSnapshotCoversAllRecordFields/Payload
+=== RUN   TestProjectionSnapshotCoversAllRecordFields/State
+=== RUN   TestProjectionSnapshotCoversAllRecordFields/Provenance
+=== RUN   TestProjectionSnapshotCoversAllRecordFields/ObservedAt
+=== RUN   TestProjectionSnapshotCoversAllRecordFields/RecordedAt
+=== RUN   TestProjectionSnapshotCoversAllRecordFields/Valid
+=== RUN   TestProjectionSnapshotCoversAllRecordFields/Retention
+=== RUN   TestProjectionSnapshotCoversAllRecordFields/ExpiresAt
+=== RUN   TestProjectionSnapshotCoversAllRecordFields/AuthorityPolicyVersion
+=== RUN   TestProjectionSnapshotCoversAllRecordFields/Epoch
+=== RUN   TestProjectionSnapshotCoversAllRecordFields/Reconciliation
+--- PASS: TestProjectionSnapshotCoversAllRecordFields (0.02s)
+    --- PASS: TestProjectionSnapshotCoversAllRecordFields/ID (0.00s)
+    --- PASS: TestProjectionSnapshotCoversAllRecordFields/Revision (0.00s)
+    --- PASS: TestProjectionSnapshotCoversAllRecordFields/Scope (0.00s)
+    --- PASS: TestProjectionSnapshotCoversAllRecordFields/Payload (0.00s)
+    --- PASS: TestProjectionSnapshotCoversAllRecordFields/State (0.00s)
+    --- PASS: TestProjectionSnapshotCoversAllRecordFields/Provenance (0.00s)
+    --- PASS: TestProjectionSnapshotCoversAllRecordFields/ObservedAt (0.00s)
+    --- PASS: TestProjectionSnapshotCoversAllRecordFields/RecordedAt (0.00s)
+    --- PASS: TestProjectionSnapshotCoversAllRecordFields/Valid (0.00s)
+    --- PASS: TestProjectionSnapshotCoversAllRecordFields/Retention (0.00s)
+    --- PASS: TestProjectionSnapshotCoversAllRecordFields/ExpiresAt (0.00s)
+    --- PASS: TestProjectionSnapshotCoversAllRecordFields/AuthorityPolicyVersion (0.00s)
+    --- PASS: TestProjectionSnapshotCoversAllRecordFields/Epoch (0.00s)
+    --- PASS: TestProjectionSnapshotCoversAllRecordFields/Reconciliation (0.00s)
+=== RUN   TestProjectionSnapshotCoversNestedInputs
+=== RUN   TestProjectionSnapshotCoversNestedInputs/valid_to
+=== RUN   TestProjectionSnapshotCoversNestedInputs/retention_deadline
+=== RUN   TestProjectionSnapshotCoversNestedInputs/reconciliation_mode
+=== RUN   TestProjectionSnapshotCoversNestedInputs/source_reference
+=== RUN   TestProjectionSnapshotCoversNestedInputs/extractor
+=== RUN   TestProjectionSnapshotCoversNestedInputs/losses
+=== RUN   TestProjectionSnapshotCoversNestedInputs/reconciliation_related
+=== RUN   TestProjectionSnapshotCoversNestedInputs/reconciliation_policy
+=== RUN   TestProjectionSnapshotCoversNestedInputs/source_id
+=== RUN   TestProjectionSnapshotCoversNestedInputs/source_revision
+=== RUN   TestProjectionSnapshotCoversNestedInputs/lineage
+=== RUN   TestProjectionSnapshotCoversNestedInputs/uncertainties
+=== RUN   TestProjectionSnapshotCoversNestedInputs/valid_from
+--- PASS: TestProjectionSnapshotCoversNestedInputs (0.02s)
+    --- PASS: TestProjectionSnapshotCoversNestedInputs/valid_to (0.00s)
+    --- PASS: TestProjectionSnapshotCoversNestedInputs/retention_deadline (0.00s)
+    --- PASS: TestProjectionSnapshotCoversNestedInputs/reconciliation_mode (0.00s)
+    --- PASS: TestProjectionSnapshotCoversNestedInputs/source_reference (0.00s)
+    --- PASS: TestProjectionSnapshotCoversNestedInputs/extractor (0.00s)
+    --- PASS: TestProjectionSnapshotCoversNestedInputs/losses (0.00s)
+    --- PASS: TestProjectionSnapshotCoversNestedInputs/reconciliation_related (0.00s)
+    --- PASS: TestProjectionSnapshotCoversNestedInputs/reconciliation_policy (0.00s)
+    --- PASS: TestProjectionSnapshotCoversNestedInputs/source_id (0.00s)
+    --- PASS: TestProjectionSnapshotCoversNestedInputs/source_revision (0.00s)
+    --- PASS: TestProjectionSnapshotCoversNestedInputs/lineage (0.00s)
+    --- PASS: TestProjectionSnapshotCoversNestedInputs/uncertainties (0.00s)
+    --- PASS: TestProjectionSnapshotCoversNestedInputs/valid_from (0.00s)
+=== RUN   TestProjectionSnapshotUsesBYOTCodecs
+--- PASS: TestProjectionSnapshotUsesBYOTCodecs (0.00s)
+=== RUN   TestCanonicalReadsRevalidateSource
+=== RUN   TestCanonicalReadsRevalidateSource/memory/revision
+=== RUN   TestCanonicalReadsRevalidateSource/memory/remove
+=== RUN   TestCanonicalReadsRevalidateSource/memory/outage
+=== RUN   TestCanonicalReadsRevalidateSource/sqlite/revision
+=== RUN   TestCanonicalReadsRevalidateSource/sqlite/remove
+=== RUN   TestCanonicalReadsRevalidateSource/sqlite/outage
+--- PASS: TestCanonicalReadsRevalidateSource (0.25s)
+    --- PASS: TestCanonicalReadsRevalidateSource/memory/revision (0.04s)
+    --- PASS: TestCanonicalReadsRevalidateSource/memory/remove (0.04s)
+    --- PASS: TestCanonicalReadsRevalidateSource/memory/outage (0.03s)
+    --- PASS: TestCanonicalReadsRevalidateSource/sqlite/revision (0.05s)
+    --- PASS: TestCanonicalReadsRevalidateSource/sqlite/remove (0.05s)
+    --- PASS: TestCanonicalReadsRevalidateSource/sqlite/outage (0.05s)
+=== RUN   TestAcceptanceDeadlineSurvivesPersistence
+=== RUN   TestAcceptanceDeadlineSurvivesPersistence/memory
+=== RUN   TestAcceptanceDeadlineSurvivesPersistence/sqlite
+--- PASS: TestAcceptanceDeadlineSurvivesPersistence (0.04s)
+    --- PASS: TestAcceptanceDeadlineSurvivesPersistence/memory (0.01s)
+    --- PASS: TestAcceptanceDeadlineSurvivesPersistence/sqlite (0.02s)
+=== RUN   TestHistoryKeyAndExactWireFieldBinding
+=== RUN   TestHistoryKeyAndExactWireFieldBinding/revision
+=== RUN   TestHistoryKeyAndExactWireFieldBinding/root_alias
+=== RUN   TestHistoryKeyAndExactWireFieldBinding/nested_alias
+--- PASS: TestHistoryKeyAndExactWireFieldBinding (0.05s)
+    --- PASS: TestHistoryKeyAndExactWireFieldBinding/revision (0.02s)
+    --- PASS: TestHistoryKeyAndExactWireFieldBinding/root_alias (0.01s)
+    --- PASS: TestHistoryKeyAndExactWireFieldBinding/nested_alias (0.02s)
+=== RUN   TestConsolidationBudgetIncludesProviderAnnotations
+--- PASS: TestConsolidationBudgetIncludesProviderAnnotations (0.12s)
+=== RUN   TestSourceRevalidatedAfterReadCallbacks
+=== RUN   TestSourceRevalidatedAfterReadCallbacks/rank
+=== RUN   TestSourceRevalidatedAfterReadCallbacks/project
+--- PASS: TestSourceRevalidatedAfterReadCallbacks (0.05s)
+    --- PASS: TestSourceRevalidatedAfterReadCallbacks/rank (0.02s)
+    --- PASS: TestSourceRevalidatedAfterReadCallbacks/project (0.02s)
+=== RUN   TestFreshDirectSourceCannotValidateStaleTransitiveLineage
+=== RUN   TestFreshDirectSourceCannotValidateStaleTransitiveLineage/accept
+=== RUN   TestFreshDirectSourceCannotValidateStaleTransitiveLineage/commit
+--- PASS: TestFreshDirectSourceCannotValidateStaleTransitiveLineage (0.09s)
+    --- PASS: TestFreshDirectSourceCannotValidateStaleTransitiveLineage/accept (0.03s)
+    --- PASS: TestFreshDirectSourceCannotValidateStaleTransitiveLineage/commit (0.05s)
+=== RUN   TestEpisodeAndProceduralProposalRemainDataAfterReopen
+--- PASS: TestEpisodeAndProceduralProposalRemainDataAfterReopen (0.08s)
+=== RUN   TestCallbacksAllowMutationAndRejectRevokedFinalDelivery
+=== RUN   TestCallbacksAllowMutationAndRejectRevokedFinalDelivery/memory/Recall
+=== RUN   TestCallbacksAllowMutationAndRejectRevokedFinalDelivery/memory/Project
+=== RUN   TestCallbacksAllowMutationAndRejectRevokedFinalDelivery/sqlite/Recall
+=== RUN   TestCallbacksAllowMutationAndRejectRevokedFinalDelivery/sqlite/Project
+--- PASS: TestCallbacksAllowMutationAndRejectRevokedFinalDelivery (0.20s)
+    --- PASS: TestCallbacksAllowMutationAndRejectRevokedFinalDelivery/memory/Recall (0.04s)
+    --- PASS: TestCallbacksAllowMutationAndRejectRevokedFinalDelivery/memory/Project (0.04s)
+    --- PASS: TestCallbacksAllowMutationAndRejectRevokedFinalDelivery/sqlite/Recall (0.07s)
+    --- PASS: TestCallbacksAllowMutationAndRejectRevokedFinalDelivery/sqlite/Project (0.06s)
+=== RUN   TestJSONCodecExactLifecycle
+=== RUN   TestJSONCodecExactLifecycle/memory
+=== RUN   TestJSONCodecExactLifecycle/sqlite
+--- PASS: TestJSONCodecExactLifecycle (0.06s)
+    --- PASS: TestJSONCodecExactLifecycle/memory (0.02s)
+    --- PASS: TestJSONCodecExactLifecycle/sqlite (0.04s)
+=== RUN   TestJSONCodecUnicodeAdmissionLeavesNoLedger
+=== RUN   TestJSONCodecUnicodeAdmissionLeavesNoLedger/payload
+=== RUN   TestJSONCodecUnicodeAdmissionLeavesNoLedger/reference
+--- PASS: TestJSONCodecUnicodeAdmissionLeavesNoLedger (0.00s)
+    --- PASS: TestJSONCodecUnicodeAdmissionLeavesNoLedger/payload (0.00s)
+    --- PASS: TestJSONCodecUnicodeAdmissionLeavesNoLedger/reference (0.00s)
+=== RUN   TestJSONCodecOldIdentityRejected
+--- PASS: TestJSONCodecOldIdentityRejected (0.02s)
+=== RUN   TestJSONCodecGenericConformance
+--- PASS: TestJSONCodecGenericConformance (0.00s)
+=== RUN   TestJSONCodecUnicodeEncode
+=== RUN   TestJSONCodecUnicodeEncode/custom_byte_value
+=== RUN   TestJSONCodecUnicodeEncode/custom_byte_pointer
+=== RUN   TestJSONCodecUnicodeEncode/string
+=== RUN   TestJSONCodecUnicodeEncode/key
+=== RUN   TestJSONCodecUnicodeEncode/raw_surrogate
+=== RUN   TestJSONCodecUnicodeEncode/custom_json
+=== RUN   TestJSONCodecUnicodeEncode/pointer_text
+=== RUN   TestJSONCodecUnicodeEncode/nested
+=== RUN   TestJSONCodecUnicodeEncode/raw_utf8
+=== RUN   TestJSONCodecUnicodeEncode/custom_text
+=== RUN   TestJSONCodecUnicodeEncode/custom_key
+--- PASS: TestJSONCodecUnicodeEncode (0.00s)
+    --- PASS: TestJSONCodecUnicodeEncode/custom_byte_value (0.00s)
+    --- PASS: TestJSONCodecUnicodeEncode/custom_byte_pointer (0.00s)
+    --- PASS: TestJSONCodecUnicodeEncode/string (0.00s)
+    --- PASS: TestJSONCodecUnicodeEncode/key (0.00s)
+    --- PASS: TestJSONCodecUnicodeEncode/raw_surrogate (0.00s)
+    --- PASS: TestJSONCodecUnicodeEncode/custom_json (0.00s)
+    --- PASS: TestJSONCodecUnicodeEncode/pointer_text (0.00s)
+    --- PASS: TestJSONCodecUnicodeEncode/nested (0.00s)
+    --- PASS: TestJSONCodecUnicodeEncode/raw_utf8 (0.00s)
+    --- PASS: TestJSONCodecUnicodeEncode/custom_text (0.00s)
+    --- PASS: TestJSONCodecUnicodeEncode/custom_key (0.00s)
+=== RUN   TestJSONCodecUnicodeDecode
+--- PASS: TestJSONCodecUnicodeDecode (0.00s)
+=== RUN   TestJSONCodecTypedNumbers
+--- PASS: TestJSONCodecTypedNumbers (0.00s)
+=== RUN   TestJSONCodecOwnership
+--- PASS: TestJSONCodecOwnership (0.00s)
+=== RUN   TestJSONCodecConcurrentNumbers
+--- PASS: TestJSONCodecConcurrentNumbers (0.00s)
+=== RUN   TestJSONCodecSharedSliceUnicode
+--- PASS: TestJSONCodecSharedSliceUnicode (0.00s)
+=== RUN   TestJSONCodecRepresentationBoundaries
+--- PASS: TestJSONCodecRepresentationBoundaries (0.00s)
+=== RUN   TestJSONCodecOwnershipConformance
+--- PASS: TestJSONCodecOwnershipConformance (0.00s)
+=== RUN   TestJSONCodecCanonicalMapOrder
+--- PASS: TestJSONCodecCanonicalMapOrder (0.00s)
+=== RUN   TestJSONCodecRejectMalformed
+=== RUN   TestJSONCodecRejectMalformed/{"a":1,"a":2}
+=== RUN   TestJSONCodecRejectMalformed/{"nested":{"a":1,"a":2}}
+=== RUN   TestJSONCodecRejectMalformed/{"a":1}_{}
+=== RUN   TestJSONCodecRejectMalformed/{"a":
+=== RUN   TestJSONCodecRejectMalformed/#00
+=== RUN   TestJSONCodecRejectMalformed/[1,]
+--- PASS: TestJSONCodecRejectMalformed (0.00s)
+    --- PASS: TestJSONCodecRejectMalformed/{"a":1,"a":2} (0.00s)
+    --- PASS: TestJSONCodecRejectMalformed/{"nested":{"a":1,"a":2}} (0.00s)
+    --- PASS: TestJSONCodecRejectMalformed/{"a":1}_{} (0.00s)
+    --- PASS: TestJSONCodecRejectMalformed/{"a": (0.00s)
+    --- PASS: TestJSONCodecRejectMalformed/#00 (0.00s)
+    --- PASS: TestJSONCodecRejectMalformed/[1,] (0.00s)
+=== RUN   TestConsolidationReadsOnlySelectedEvidence
+=== RUN   TestConsolidationReadsOnlySelectedEvidence/memory
+=== RUN   TestConsolidationReadsOnlySelectedEvidence/sqlite
+--- PASS: TestConsolidationReadsOnlySelectedEvidence (0.26s)
+    --- PASS: TestConsolidationReadsOnlySelectedEvidence/memory (0.14s)
+    --- PASS: TestConsolidationReadsOnlySelectedEvidence/sqlite (0.11s)
+=== RUN   TestExactDedupExpiryUsesEachGroup
+=== RUN   TestExactDedupExpiryUsesEachGroup/memory
+=== RUN   TestExactDedupExpiryUsesEachGroup/sqlite
+--- PASS: TestExactDedupExpiryUsesEachGroup (0.87s)
+    --- PASS: TestExactDedupExpiryUsesEachGroup/memory (0.37s)
+    --- PASS: TestExactDedupExpiryUsesEachGroup/sqlite (0.49s)
+=== RUN   TestExactDedupUnlimitedGroupIgnoresFiniteSingleton
+--- PASS: TestExactDedupUnlimitedGroupIgnoresFiniteSingleton (0.19s)
+=== RUN   TestConsolidationQualityGatesPreserveOriginalState
+=== RUN   TestConsolidationQualityGatesPreserveOriginalState/utility
+=== RUN   TestConsolidationQualityGatesPreserveOriginalState/empty_output
+=== RUN   TestConsolidationQualityGatesPreserveOriginalState/missing_evidence
+=== RUN   TestConsolidationQualityGatesPreserveOriginalState/input_bytes
+=== RUN   TestConsolidationQualityGatesPreserveOriginalState/output_bytes
+--- PASS: TestConsolidationQualityGatesPreserveOriginalState (0.46s)
+    --- PASS: TestConsolidationQualityGatesPreserveOriginalState/utility (0.09s)
+    --- PASS: TestConsolidationQualityGatesPreserveOriginalState/empty_output (0.09s)
+    --- PASS: TestConsolidationQualityGatesPreserveOriginalState/missing_evidence (0.09s)
+    --- PASS: TestConsolidationQualityGatesPreserveOriginalState/input_bytes (0.09s)
+    --- PASS: TestConsolidationQualityGatesPreserveOriginalState/output_bytes (0.09s)
+=== RUN   TestSourceOutageCannotBecomeSuccessfulCanonicalCommit
+--- PASS: TestSourceOutageCannotBecomeSuccessfulCanonicalCommit (0.01s)
+=== RUN   TestExactDedupPreservesNegationValidityLineageAndOriginals
+--- PASS: TestExactDedupPreservesNegationValidityLineageAndOriginals (0.13s)
+=== RUN   TestSemanticProposalReviewAndSourceRevocation
+--- PASS: TestSemanticProposalReviewAndSourceRevocation (0.14s)
+=== RUN   TestDomainMergeAndBudgetFailureAreNonDestructive
+--- PASS: TestDomainMergeAndBudgetFailureAreNonDestructive (0.13s)
+=== RUN   TestRetentionUsesManagedPurgeAndResumesPending
+--- PASS: TestRetentionUsesManagedPurgeAndResumesPending (0.07s)
+=== RUN   TestReintroductionNeedsExplicitHostPolicy
+--- PASS: TestReintroductionNeedsExplicitHostPolicy (0.01s)
+=== RUN   TestConsolidationCannotExtendFiniteEvidenceExpiry
+--- PASS: TestConsolidationCannotExtendFiniteEvidenceExpiry (0.06s)
+=== RUN   TestReviewedSemanticSummaryCommitsAndRetainsOriginals
+--- PASS: TestReviewedSemanticSummaryCommitsAndRetainsOriginals (0.30s)
+=== RUN   TestIndependentSQLiteEnginesShareLifecycleIdempotency
+--- PASS: TestIndependentSQLiteEnginesShareLifecycleIdempotency (0.10s)
+=== RUN   TestByteWireRepresentationFailsClosed
+=== RUN   TestByteWireRepresentationFailsClosed/memory/payload/array
+=== RUN   TestByteWireRepresentationFailsClosed/memory/payload/newline
+=== RUN   TestByteWireRepresentationFailsClosed/memory/reference/array
+=== RUN   TestByteWireRepresentationFailsClosed/memory/reference/newline
+=== RUN   TestByteWireRepresentationFailsClosed/sqlite/payload/array
+=== RUN   TestByteWireRepresentationFailsClosed/sqlite/payload/newline
+=== RUN   TestByteWireRepresentationFailsClosed/sqlite/reference/array
+=== RUN   TestByteWireRepresentationFailsClosed/sqlite/reference/newline
+--- PASS: TestByteWireRepresentationFailsClosed (0.16s)
+    --- PASS: TestByteWireRepresentationFailsClosed/memory/payload/array (0.01s)
+    --- PASS: TestByteWireRepresentationFailsClosed/memory/payload/newline (0.01s)
+    --- PASS: TestByteWireRepresentationFailsClosed/memory/reference/array (0.02s)
+    --- PASS: TestByteWireRepresentationFailsClosed/memory/reference/newline (0.01s)
+    --- PASS: TestByteWireRepresentationFailsClosed/sqlite/payload/array (0.03s)
+    --- PASS: TestByteWireRepresentationFailsClosed/sqlite/payload/newline (0.03s)
+    --- PASS: TestByteWireRepresentationFailsClosed/sqlite/reference/array (0.03s)
+    --- PASS: TestByteWireRepresentationFailsClosed/sqlite/reference/newline (0.02s)
+=== RUN   TestDeadlineCrossedDuringCanonicalDelivery
+=== RUN   TestDeadlineCrossedDuringCanonicalDelivery/memory/get
+=== RUN   TestDeadlineCrossedDuringCanonicalDelivery/memory/snapshot
+=== RUN   TestDeadlineCrossedDuringCanonicalDelivery/sqlite/get
+=== RUN   TestDeadlineCrossedDuringCanonicalDelivery/sqlite/snapshot
+--- PASS: TestDeadlineCrossedDuringCanonicalDelivery (0.08s)
+    --- PASS: TestDeadlineCrossedDuringCanonicalDelivery/memory/get (0.02s)
+    --- PASS: TestDeadlineCrossedDuringCanonicalDelivery/memory/snapshot (0.01s)
+    --- PASS: TestDeadlineCrossedDuringCanonicalDelivery/sqlite/get (0.03s)
+    --- PASS: TestDeadlineCrossedDuringCanonicalDelivery/sqlite/snapshot (0.02s)
+=== RUN   TestDeadlineCrossedDuringAcceptance
+=== RUN   TestDeadlineCrossedDuringAcceptance/memory
+=== RUN   TestDeadlineCrossedDuringAcceptance/sqlite
+--- PASS: TestDeadlineCrossedDuringAcceptance (0.02s)
+    --- PASS: TestDeadlineCrossedDuringAcceptance/memory (0.00s)
+    --- PASS: TestDeadlineCrossedDuringAcceptance/sqlite (0.01s)
+=== RUN   TestDependencyDeadlineCrossedDuringCommit
+=== RUN   TestDependencyDeadlineCrossedDuringCommit/memory
+=== RUN   TestDependencyDeadlineCrossedDuringCommit/sqlite
+--- PASS: TestDependencyDeadlineCrossedDuringCommit (0.12s)
+    --- PASS: TestDependencyDeadlineCrossedDuringCommit/memory (0.05s)
+    --- PASS: TestDependencyDeadlineCrossedDuringCommit/sqlite (0.07s)
+=== RUN   TestSnapshotRechecksEarlierRecordAfterLaterSourceIO
+=== RUN   TestSnapshotRechecksEarlierRecordAfterLaterSourceIO/memory
+=== RUN   TestSnapshotRechecksEarlierRecordAfterLaterSourceIO/sqlite
+--- PASS: TestSnapshotRechecksEarlierRecordAfterLaterSourceIO (0.09s)
+    --- PASS: TestSnapshotRechecksEarlierRecordAfterLaterSourceIO/memory (0.03s)
+    --- PASS: TestSnapshotRechecksEarlierRecordAfterLaterSourceIO/sqlite (0.06s)
+=== RUN   TestTimestampWireFormatMatchesExecutableSchema
+=== RUN   TestTimestampWireFormatMatchesExecutableSchema/2026-06-01T00:00:00,0Z
+=== RUN   TestTimestampWireFormatMatchesExecutableSchema/2026-06-01T01:00:00+00:60
+=== RUN   TestTimestampWireFormatMatchesExecutableSchema/2026-06-02T00:00:00+24:00
+--- PASS: TestTimestampWireFormatMatchesExecutableSchema (0.10s)
+    --- PASS: TestTimestampWireFormatMatchesExecutableSchema/2026-06-01T00:00:00,0Z (0.02s)
+    --- PASS: TestTimestampWireFormatMatchesExecutableSchema/2026-06-01T01:00:00+00:60 (0.02s)
+    --- PASS: TestTimestampWireFormatMatchesExecutableSchema/2026-06-02T00:00:00+24:00 (0.02s)
+=== RUN   TestDurableCommitFaultAndOperationRecovery
+=== RUN   TestDurableCommitFaultAndOperationRecovery/before_commit
+=== RUN   TestDurableCommitFaultAndOperationRecovery/after_commit
+--- PASS: TestDurableCommitFaultAndOperationRecovery (0.07s)
+    --- PASS: TestDurableCommitFaultAndOperationRecovery/before_commit (0.04s)
+    --- PASS: TestDurableCommitFaultAndOperationRecovery/after_commit (0.04s)
+=== RUN   TestDurableForgetFaultPendingReceiptAndReopen
+=== RUN   TestDurableForgetFaultPendingReceiptAndReopen/before_commit
+=== RUN   TestDurableForgetFaultPendingReceiptAndReopen/after_commit
+--- PASS: TestDurableForgetFaultPendingReceiptAndReopen (0.27s)
+    --- PASS: TestDurableForgetFaultPendingReceiptAndReopen/before_commit (0.11s)
+    --- PASS: TestDurableForgetFaultPendingReceiptAndReopen/after_commit (0.16s)
+=== RUN   TestProposalAcceptanceIsolation
+--- PASS: TestProposalAcceptanceIsolation (0.03s)
+=== RUN   TestChangedProposalInvalidatesAcceptance
+--- PASS: TestChangedProposalInvalidatesAcceptance (0.01s)
+=== RUN   TestAuthorityAndFieldProfilesFailClosed
+--- PASS: TestAuthorityAndFieldProfilesFailClosed (0.01s)
+=== RUN   TestPolicyAndSourceChangesRejectCommit
+=== RUN   TestPolicyAndSourceChangesRejectCommit/policy
+=== RUN   TestPolicyAndSourceChangesRejectCommit/source
+--- PASS: TestPolicyAndSourceChangesRejectCommit (0.02s)
+    --- PASS: TestPolicyAndSourceChangesRejectCommit/policy (0.01s)
+    --- PASS: TestPolicyAndSourceChangesRejectCommit/source (0.01s)
+=== RUN   TestConcurrentCommitAndDurableIdempotency
+--- PASS: TestConcurrentCommitAndDurableIdempotency (0.08s)
+=== RUN   TestValidAndRecordedTime
+--- PASS: TestValidAndRecordedTime (0.05s)
+=== RUN   TestUnknownValidityAndOverlappingClaims
+--- PASS: TestUnknownValidityAndOverlappingClaims (0.04s)
+=== RUN   TestEngineRejectsMalformedIdentityBeforeMutation
+=== RUN   TestEngineRejectsMalformedIdentityBeforeMutation/scope
+=== RUN   TestEngineRejectsMalformedIdentityBeforeMutation/operation
+=== RUN   TestEngineRejectsMalformedIdentityBeforeMutation/source-id
+=== RUN   TestEngineRejectsMalformedIdentityBeforeMutation/source-revision
+=== RUN   TestEngineRejectsMalformedIdentityBeforeMutation/extractor
+=== RUN   TestEngineRejectsMalformedIdentityBeforeMutation/evidence
+=== RUN   TestEngineRejectsMalformedIdentityBeforeMutation/purpose
+=== RUN   TestEngineRejectsMalformedIdentityBeforeMutation/lineage
+--- PASS: TestEngineRejectsMalformedIdentityBeforeMutation (0.00s)
+    --- PASS: TestEngineRejectsMalformedIdentityBeforeMutation/scope (0.00s)
+    --- PASS: TestEngineRejectsMalformedIdentityBeforeMutation/operation (0.00s)
+    --- PASS: TestEngineRejectsMalformedIdentityBeforeMutation/source-id (0.00s)
+    --- PASS: TestEngineRejectsMalformedIdentityBeforeMutation/source-revision (0.00s)
+    --- PASS: TestEngineRejectsMalformedIdentityBeforeMutation/extractor (0.00s)
+    --- PASS: TestEngineRejectsMalformedIdentityBeforeMutation/evidence (0.00s)
+    --- PASS: TestEngineRejectsMalformedIdentityBeforeMutation/purpose (0.00s)
+    --- PASS: TestEngineRejectsMalformedIdentityBeforeMutation/lineage (0.00s)
+=== RUN   TestUnicodeIdentityCompletesLifecycle
+--- PASS: TestUnicodeIdentityCompletesLifecycle (0.02s)
+=== RUN   TestReconciliationDecisionSurvivesReopenAndReplay
+=== RUN   TestReconciliationDecisionSurvivesReopenAndReplay/append
+=== RUN   TestReconciliationDecisionSurvivesReopenAndReplay/duplicate
+=== RUN   TestReconciliationDecisionSurvivesReopenAndReplay/supersede
+=== RUN   TestReconciliationDecisionSurvivesReopenAndReplay/conflict
+--- PASS: TestReconciliationDecisionSurvivesReopenAndReplay (0.23s)
+    --- PASS: TestReconciliationDecisionSurvivesReopenAndReplay/append (0.05s)
+    --- PASS: TestReconciliationDecisionSurvivesReopenAndReplay/duplicate (0.07s)
+    --- PASS: TestReconciliationDecisionSurvivesReopenAndReplay/supersede (0.05s)
+    --- PASS: TestReconciliationDecisionSurvivesReopenAndReplay/conflict (0.06s)
+=== RUN   TestHistoricalDecisionDoesNotExposeFutureResolution
+--- PASS: TestHistoricalDecisionDoesNotExposeFutureResolution (0.04s)
+=== RUN   TestForgetPurgesDecisionAndManagedProjection
+=== RUN   TestForgetPurgesDecisionAndManagedProjection/append
+=== RUN   TestForgetPurgesDecisionAndManagedProjection/duplicate
+=== RUN   TestForgetPurgesDecisionAndManagedProjection/supersede
+=== RUN   TestForgetPurgesDecisionAndManagedProjection/conflict
+--- PASS: TestForgetPurgesDecisionAndManagedProjection (0.35s)
+    --- PASS: TestForgetPurgesDecisionAndManagedProjection/append (0.06s)
+    --- PASS: TestForgetPurgesDecisionAndManagedProjection/duplicate (0.12s)
+    --- PASS: TestForgetPurgesDecisionAndManagedProjection/supersede (0.08s)
+    --- PASS: TestForgetPurgesDecisionAndManagedProjection/conflict (0.08s)
+=== RUN   TestPersistedIdentityRejectsNormalization
+=== RUN   TestPersistedIdentityRejectsNormalization/"\ud800"
+=== RUN   TestPersistedIdentityRejectsNormalization/"\udfff"
+=== RUN   TestPersistedIdentityRejectsNormalization/"�"
+--- PASS: TestPersistedIdentityRejectsNormalization (0.03s)
+    --- PASS: TestPersistedIdentityRejectsNormalization/"\ud800" (0.01s)
+    --- PASS: TestPersistedIdentityRejectsNormalization/"\udfff" (0.01s)
+    --- PASS: TestPersistedIdentityRejectsNormalization/"�" (0.01s)
+=== RUN   TestPurgeReceiptRejectsMalformedRecordIdentity
+=== RUN   TestPurgeReceiptRejectsMalformedRecordIdentity/#00
+=== RUN   TestPurgeReceiptRejectsMalformedRecordIdentity/a\x00b
+=== RUN   TestPurgeReceiptRejectsMalformedRecordIdentity/xxxxxxxx
+=== RUN   TestPurgeReceiptRejectsMalformedRecordIdentity/яяяяяяяя
+=== RUN   TestPurgeReceiptRejectsMalformedRecordIdentity/_
+--- PASS: TestPurgeReceiptRejectsMalformedRecordIdentity (0.18s)
+    --- PASS: TestPurgeReceiptRejectsMalformedRecordIdentity/#00 (0.04s)
+    --- PASS: TestPurgeReceiptRejectsMalformedRecordIdentity/a\x00b (0.04s)
+    --- PASS: TestPurgeReceiptRejectsMalformedRecordIdentity/xxxxxxxx (0.03s)
+    --- PASS: TestPurgeReceiptRejectsMalformedRecordIdentity/яяяяяяяя (0.03s)
+    --- PASS: TestPurgeReceiptRejectsMalformedRecordIdentity/_ (0.03s)
+=== RUN   TestExecutableSchemaIdentityAssertions
+--- PASS: TestExecutableSchemaIdentityAssertions (0.04s)
+=== RUN   TestAcceptanceCannotReturnExpiredInitialAuthorityLease
+=== RUN   TestAcceptanceCannotReturnExpiredInitialAuthorityLease/memory
+=== RUN   TestAcceptanceCannotReturnExpiredInitialAuthorityLease/sqlite
+--- PASS: TestAcceptanceCannotReturnExpiredInitialAuthorityLease (0.04s)
+    --- PASS: TestAcceptanceCannotReturnExpiredInitialAuthorityLease/memory (0.02s)
+    --- PASS: TestAcceptanceCannotReturnExpiredInitialAuthorityLease/sqlite (0.03s)
+=== RUN   TestTransitiveTargetCannotInvalidateItsOwnCommit
+=== RUN   TestTransitiveTargetCannotInvalidateItsOwnCommit/memory/append
+=== RUN   TestTransitiveTargetCannotInvalidateItsOwnCommit/memory/supersede
+=== RUN   TestTransitiveTargetCannotInvalidateItsOwnCommit/sqlite/append
+=== RUN   TestTransitiveTargetCannotInvalidateItsOwnCommit/sqlite/supersede
+--- PASS: TestTransitiveTargetCannotInvalidateItsOwnCommit (1.38s)
+    --- PASS: TestTransitiveTargetCannotInvalidateItsOwnCommit/memory/append (0.25s)
+    --- PASS: TestTransitiveTargetCannotInvalidateItsOwnCommit/memory/supersede (0.32s)
+    --- PASS: TestTransitiveTargetCannotInvalidateItsOwnCommit/sqlite/append (0.35s)
+    --- PASS: TestTransitiveTargetCannotInvalidateItsOwnCommit/sqlite/supersede (0.46s)
+=== RUN   TestCanonicalCannotDropOrReplaceReviewedLineage
+=== RUN   TestCanonicalCannotDropOrReplaceReviewedLineage/memory/drop
+=== RUN   TestCanonicalCannotDropOrReplaceReviewedLineage/memory/record
+=== RUN   TestCanonicalCannotDropOrReplaceReviewedLineage/memory/revision
+=== RUN   TestCanonicalCannotDropOrReplaceReviewedLineage/sqlite/drop
+=== RUN   TestCanonicalCannotDropOrReplaceReviewedLineage/sqlite/record
+=== RUN   TestCanonicalCannotDropOrReplaceReviewedLineage/sqlite/revision
+--- PASS: TestCanonicalCannotDropOrReplaceReviewedLineage (0.76s)
+    --- PASS: TestCanonicalCannotDropOrReplaceReviewedLineage/memory/drop (0.10s)
+    --- PASS: TestCanonicalCannotDropOrReplaceReviewedLineage/memory/record (0.11s)
+    --- PASS: TestCanonicalCannotDropOrReplaceReviewedLineage/memory/revision (0.10s)
+    --- PASS: TestCanonicalCannotDropOrReplaceReviewedLineage/sqlite/drop (0.16s)
+    --- PASS: TestCanonicalCannotDropOrReplaceReviewedLineage/sqlite/record (0.15s)
+    --- PASS: TestCanonicalCannotDropOrReplaceReviewedLineage/sqlite/revision (0.14s)
+=== RUN   TestMaintenanceErrorDistinguishesRetiredIdentity
+=== RUN   TestMaintenanceErrorDistinguishesRetiredIdentity/memory/sweep
+=== RUN   TestMaintenanceErrorDistinguishesRetiredIdentity/memory/forget
+=== RUN   TestMaintenanceErrorDistinguishesRetiredIdentity/sqlite/sweep
+=== RUN   TestMaintenanceErrorDistinguishesRetiredIdentity/sqlite/forget
+--- PASS: TestMaintenanceErrorDistinguishesRetiredIdentity (0.45s)
+    --- PASS: TestMaintenanceErrorDistinguishesRetiredIdentity/memory/sweep (0.08s)
+    --- PASS: TestMaintenanceErrorDistinguishesRetiredIdentity/memory/forget (0.06s)
+    --- PASS: TestMaintenanceErrorDistinguishesRetiredIdentity/sqlite/sweep (0.16s)
+    --- PASS: TestMaintenanceErrorDistinguishesRetiredIdentity/sqlite/forget (0.14s)
+=== RUN   TestMalformedCanonicalDocumentsFailClosed
+=== RUN   TestMalformedCanonicalDocumentsFailClosed/state
+=== RUN   TestMalformedCanonicalDocumentsFailClosed/initial_state
+=== RUN   TestMalformedCanonicalDocumentsFailClosed/schema
+=== RUN   TestMalformedCanonicalDocumentsFailClosed/unknown_field
+=== RUN   TestMalformedCanonicalDocumentsFailClosed/proposal_payload
+=== RUN   TestMalformedCanonicalDocumentsFailClosed/id
+=== RUN   TestMalformedCanonicalDocumentsFailClosed/missing_lineage
+=== RUN   TestMalformedCanonicalDocumentsFailClosed/null_policy
+--- PASS: TestMalformedCanonicalDocumentsFailClosed (0.11s)
+    --- PASS: TestMalformedCanonicalDocumentsFailClosed/state (0.02s)
+    --- PASS: TestMalformedCanonicalDocumentsFailClosed/initial_state (0.01s)
+    --- PASS: TestMalformedCanonicalDocumentsFailClosed/schema (0.01s)
+    --- PASS: TestMalformedCanonicalDocumentsFailClosed/unknown_field (0.01s)
+    --- PASS: TestMalformedCanonicalDocumentsFailClosed/proposal_payload (0.01s)
+    --- PASS: TestMalformedCanonicalDocumentsFailClosed/id (0.02s)
+    --- PASS: TestMalformedCanonicalDocumentsFailClosed/missing_lineage (0.02s)
+    --- PASS: TestMalformedCanonicalDocumentsFailClosed/null_policy (0.01s)
+=== RUN   TestNullRevocationEpochCannotResetFence
+--- PASS: TestNullRevocationEpochCannotResetFence (0.01s)
+=== RUN   TestCorruptRelatedIdentityCannotReconcile
+--- PASS: TestCorruptRelatedIdentityCannotReconcile (0.03s)
+=== RUN   TestMalformedLineageDoesNotBecomeEmptyRecall
+--- PASS: TestMalformedLineageDoesNotBecomeEmptyRecall (0.05s)
+=== RUN   TestManagedWriteRejectsExpiryDuringFinalReauthorization
+=== RUN   TestManagedWriteRejectsExpiryDuringFinalReauthorization/memory/direct
+=== RUN   TestManagedWriteRejectsExpiryDuringFinalReauthorization/memory/transitive
+=== RUN   TestManagedWriteRejectsExpiryDuringFinalReauthorization/sqlite/direct
+=== RUN   TestManagedWriteRejectsExpiryDuringFinalReauthorization/sqlite/transitive
+--- PASS: TestManagedWriteRejectsExpiryDuringFinalReauthorization (0.39s)
+    --- PASS: TestManagedWriteRejectsExpiryDuringFinalReauthorization/memory/direct (0.04s)
+    --- PASS: TestManagedWriteRejectsExpiryDuringFinalReauthorization/memory/transitive (0.14s)
+    --- PASS: TestManagedWriteRejectsExpiryDuringFinalReauthorization/sqlite/direct (0.07s)
+    --- PASS: TestManagedWriteRejectsExpiryDuringFinalReauthorization/sqlite/transitive (0.14s)
+=== RUN   TestManagedWriteCannotRacePurgeToResurrectArtifacts
+=== RUN   TestManagedWriteCannotRacePurgeToResurrectArtifacts/memory
+=== RUN   TestManagedWriteCannotRacePurgeToResurrectArtifacts/sqlite
+--- PASS: TestManagedWriteCannotRacePurgeToResurrectArtifacts (0.21s)
+    --- PASS: TestManagedWriteCannotRacePurgeToResurrectArtifacts/memory (0.08s)
+    --- PASS: TestManagedWriteCannotRacePurgeToResurrectArtifacts/sqlite (0.13s)
+=== RUN   TestMixedSearchPreservesCoverageAndRejectsStrongerProfile
+--- PASS: TestMixedSearchPreservesCoverageAndRejectsStrongerProfile (0.04s)
+=== RUN   TestCompositePartialFailureRequiresExplicitDegradedMode
+--- PASS: TestCompositePartialFailureRequiresExplicitDegradedMode (0.03s)
+=== RUN   TestCompositeRejectsTypedNilBackend
+--- PASS: TestCompositeRejectsTypedNilBackend (0.00s)
+=== RUN   TestRecallProjectedPolicyMutationIsolation
+--- PASS: TestRecallProjectedPolicyMutationIsolation (0.06s)
+=== RUN   TestRecallProjectedRejectsInvalidSelection
+=== RUN   TestRecallProjectedRejectsInvalidSelection/unknown
+=== RUN   TestRecallProjectedRejectsInvalidSelection/duplicate
+=== RUN   TestRecallProjectedRejectsInvalidSelection/missing
+=== RUN   TestRecallProjectedRejectsInvalidSelection/unknown-omission
+=== RUN   TestRecallProjectedRejectsInvalidSelection/duplicate-omission
+=== RUN   TestRecallProjectedRejectsInvalidSelection/selected-and-omitted
+=== RUN   TestRecallProjectedRejectsInvalidSelection/invalid-reason
+--- PASS: TestRecallProjectedRejectsInvalidSelection (0.80s)
+    --- PASS: TestRecallProjectedRejectsInvalidSelection/unknown (0.12s)
+    --- PASS: TestRecallProjectedRejectsInvalidSelection/duplicate (0.18s)
+    --- PASS: TestRecallProjectedRejectsInvalidSelection/missing (0.11s)
+    --- PASS: TestRecallProjectedRejectsInvalidSelection/unknown-omission (0.09s)
+    --- PASS: TestRecallProjectedRejectsInvalidSelection/duplicate-omission (0.09s)
+    --- PASS: TestRecallProjectedRejectsInvalidSelection/selected-and-omitted (0.12s)
+    --- PASS: TestRecallProjectedRejectsInvalidSelection/invalid-reason (0.10s)
+=== RUN   TestRecallProjectedCostBoundaries
+=== RUN   TestRecallProjectedCostBoundaries/zero
+=== RUN   TestRecallProjectedCostBoundaries/overflow
+=== RUN   TestRecallProjectedCostBoundaries/maximum
+=== RUN   TestRecallProjectedCostBoundaries/estimate
+--- PASS: TestRecallProjectedCostBoundaries (0.20s)
+    --- PASS: TestRecallProjectedCostBoundaries/zero (0.04s)
+    --- PASS: TestRecallProjectedCostBoundaries/overflow (0.04s)
+    --- PASS: TestRecallProjectedCostBoundaries/maximum (0.05s)
+    --- PASS: TestRecallProjectedCostBoundaries/estimate (0.06s)
+=== RUN   TestRecallProjectedUsesExactHistoricalRevision
+--- PASS: TestRecallProjectedUsesExactHistoricalRevision (0.09s)
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/select/source
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/select/authority
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/select/expiry
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/select/forget
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/select/cancel
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/measure/source
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/measure/authority
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/measure/expiry
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/measure/forget
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/measure/cancel
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/select/source
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/select/authority
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/select/expiry
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/select/forget
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/select/cancel
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/measure/source
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/measure/authority
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/measure/expiry
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/measure/forget
+=== RUN   TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/measure/cancel
+--- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks (2.52s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/select/source (0.11s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/select/authority (0.10s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/select/expiry (0.09s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/select/forget (0.12s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/select/cancel (0.09s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/measure/source (0.10s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/measure/authority (0.11s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/measure/expiry (0.10s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/measure/forget (0.12s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/memory/measure/cancel (0.09s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/select/source (0.15s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/select/authority (0.15s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/select/expiry (0.12s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/select/forget (0.16s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/select/cancel (0.16s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/measure/source (0.16s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/measure/authority (0.15s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/measure/expiry (0.14s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/measure/forget (0.17s)
+    --- PASS: TestRecallProjectedRevalidatesAfterPolicyCallbacks/sqlite/measure/cancel (0.11s)
+=== RUN   TestRecallProjectedCapturesRequestedBudget
+--- PASS: TestRecallProjectedCapturesRequestedBudget (0.12s)
+=== RUN   TestRecallProjectedPolicyAllowsConcurrentForget
+=== RUN   TestRecallProjectedPolicyAllowsConcurrentForget/memory/select
+=== RUN   TestRecallProjectedPolicyAllowsConcurrentForget/memory/measure
+=== RUN   TestRecallProjectedPolicyAllowsConcurrentForget/sqlite/select
+=== RUN   TestRecallProjectedPolicyAllowsConcurrentForget/sqlite/measure
+--- PASS: TestRecallProjectedPolicyAllowsConcurrentForget (0.35s)
+    --- PASS: TestRecallProjectedPolicyAllowsConcurrentForget/memory/select (0.07s)
+    --- PASS: TestRecallProjectedPolicyAllowsConcurrentForget/memory/measure (0.07s)
+    --- PASS: TestRecallProjectedPolicyAllowsConcurrentForget/sqlite/select (0.10s)
+    --- PASS: TestRecallProjectedPolicyAllowsConcurrentForget/sqlite/measure (0.11s)
+=== RUN   TestRecallProjectedRejectsChangedEligibleState
+=== RUN   TestRecallProjectedRejectsChangedEligibleState/memory/select/selected
+=== RUN   TestRecallProjectedRejectsChangedEligibleState/memory/select/omitted
+=== RUN   TestRecallProjectedRejectsChangedEligibleState/memory/measure/selected
+=== RUN   TestRecallProjectedRejectsChangedEligibleState/memory/measure/omitted
+=== RUN   TestRecallProjectedRejectsChangedEligibleState/sqlite/select/selected
+=== RUN   TestRecallProjectedRejectsChangedEligibleState/sqlite/select/omitted
+=== RUN   TestRecallProjectedRejectsChangedEligibleState/sqlite/measure/selected
+=== RUN   TestRecallProjectedRejectsChangedEligibleState/sqlite/measure/omitted
+--- PASS: TestRecallProjectedRejectsChangedEligibleState (0.84s)
+    --- PASS: TestRecallProjectedRejectsChangedEligibleState/memory/select/selected (0.07s)
+    --- PASS: TestRecallProjectedRejectsChangedEligibleState/memory/select/omitted (0.11s)
+    --- PASS: TestRecallProjectedRejectsChangedEligibleState/memory/measure/selected (0.07s)
+    --- PASS: TestRecallProjectedRejectsChangedEligibleState/memory/measure/omitted (0.11s)
+    --- PASS: TestRecallProjectedRejectsChangedEligibleState/sqlite/select/selected (0.09s)
+    --- PASS: TestRecallProjectedRejectsChangedEligibleState/sqlite/select/omitted (0.14s)
+    --- PASS: TestRecallProjectedRejectsChangedEligibleState/sqlite/measure/selected (0.09s)
+    --- PASS: TestRecallProjectedRejectsChangedEligibleState/sqlite/measure/omitted (0.16s)
+=== RUN   TestProjectionSnapshotConcurrentConflict
+=== RUN   TestProjectionSnapshotConcurrentConflict/memory/project/historical=false
+=== RUN   TestProjectionSnapshotConcurrentConflict/memory/project/historical=true
+=== RUN   TestProjectionSnapshotConcurrentConflict/memory/recall/historical=false
+=== RUN   TestProjectionSnapshotConcurrentConflict/memory/recall/historical=true
+=== RUN   TestProjectionSnapshotConcurrentConflict/memory/packing/historical=false
+=== RUN   TestProjectionSnapshotConcurrentConflict/memory/packing/historical=true
+=== RUN   TestProjectionSnapshotConcurrentConflict/sqlite/project/historical=false
+=== RUN   TestProjectionSnapshotConcurrentConflict/sqlite/project/historical=true
+=== RUN   TestProjectionSnapshotConcurrentConflict/sqlite/recall/historical=false
+=== RUN   TestProjectionSnapshotConcurrentConflict/sqlite/recall/historical=true
+=== RUN   TestProjectionSnapshotConcurrentConflict/sqlite/packing/historical=false
+=== RUN   TestProjectionSnapshotConcurrentConflict/sqlite/packing/historical=true
+--- PASS: TestProjectionSnapshotConcurrentConflict (0.90s)
+    --- PASS: TestProjectionSnapshotConcurrentConflict/memory/project/historical=false (0.04s)
+    --- PASS: TestProjectionSnapshotConcurrentConflict/memory/project/historical=true (0.04s)
+    --- PASS: TestProjectionSnapshotConcurrentConflict/memory/recall/historical=false (0.06s)
+    --- PASS: TestProjectionSnapshotConcurrentConflict/memory/recall/historical=true (0.07s)
+    --- PASS: TestProjectionSnapshotConcurrentConflict/memory/packing/historical=false (0.06s)
+    --- PASS: TestProjectionSnapshotConcurrentConflict/memory/packing/historical=true (0.07s)
+    --- PASS: TestProjectionSnapshotConcurrentConflict/sqlite/project/historical=false (0.07s)
+    --- PASS: TestProjectionSnapshotConcurrentConflict/sqlite/project/historical=true (0.08s)
+    --- PASS: TestProjectionSnapshotConcurrentConflict/sqlite/recall/historical=false (0.09s)
+    --- PASS: TestProjectionSnapshotConcurrentConflict/sqlite/recall/historical=true (0.11s)
+    --- PASS: TestProjectionSnapshotConcurrentConflict/sqlite/packing/historical=false (0.09s)
+    --- PASS: TestProjectionSnapshotConcurrentConflict/sqlite/packing/historical=true (0.11s)
+=== RUN   TestProjectionSnapshotCacheIdentity
+--- PASS: TestProjectionSnapshotCacheIdentity (0.10s)
+=== RUN   TestBoundedPurgeStaysFencedAndResumesAcrossReopen
+=== RUN   TestBoundedPurgeStaysFencedAndResumesAcrossReopen/memory
+=== RUN   TestBoundedPurgeStaysFencedAndResumesAcrossReopen/sqlite
+--- PASS: TestBoundedPurgeStaysFencedAndResumesAcrossReopen (38.30s)
+    --- PASS: TestBoundedPurgeStaysFencedAndResumesAcrossReopen/memory (18.90s)
+    --- PASS: TestBoundedPurgeStaysFencedAndResumesAcrossReopen/sqlite (19.40s)
+=== RUN   TestPurgeContinuationRejectsCorruptFenceAndProgress
+=== RUN   TestPurgeContinuationRejectsCorruptFenceAndProgress/foreign_fence
+=== RUN   TestPurgeContinuationRejectsCorruptFenceAndProgress/missing_fence
+=== RUN   TestPurgeContinuationRejectsCorruptFenceAndProgress/next_past_queue
+=== RUN   TestPurgeContinuationRejectsCorruptFenceAndProgress/unexpected_resume
+=== RUN   TestPurgeContinuationRejectsCorruptFenceAndProgress/premature_emit
+=== RUN   TestPurgeContinuationRejectsCorruptFenceAndProgress/premature_done
+--- PASS: TestPurgeContinuationRejectsCorruptFenceAndProgress (0.10s)
+    --- PASS: TestPurgeContinuationRejectsCorruptFenceAndProgress/foreign_fence (0.02s)
+    --- PASS: TestPurgeContinuationRejectsCorruptFenceAndProgress/missing_fence (0.02s)
+    --- PASS: TestPurgeContinuationRejectsCorruptFenceAndProgress/next_past_queue (0.02s)
+    --- PASS: TestPurgeContinuationRejectsCorruptFenceAndProgress/unexpected_resume (0.02s)
+    --- PASS: TestPurgeContinuationRejectsCorruptFenceAndProgress/premature_emit (0.02s)
+    --- PASS: TestPurgeContinuationRejectsCorruptFenceAndProgress/premature_done (0.02s)
+=== RUN   TestPurgeRejectsCompletedReceiptDuringSinkCallback
+--- PASS: TestPurgeRejectsCompletedReceiptDuringSinkCallback (0.06s)
+=== RUN   TestFailedPurgeRemainsFencedAndCanRecoverAcrossReopen
+=== RUN   TestFailedPurgeRemainsFencedAndCanRecoverAcrossReopen/missing
+=== RUN   TestFailedPurgeRemainsFencedAndCanRecoverAcrossReopen/unsupported
+=== RUN   TestFailedPurgeRemainsFencedAndCanRecoverAcrossReopen/invalid_ack
+=== RUN   TestFailedPurgeRemainsFencedAndCanRecoverAcrossReopen/invalid_chunk
+--- PASS: TestFailedPurgeRemainsFencedAndCanRecoverAcrossReopen (0.31s)
+    --- PASS: TestFailedPurgeRemainsFencedAndCanRecoverAcrossReopen/missing (0.08s)
+    --- PASS: TestFailedPurgeRemainsFencedAndCanRecoverAcrossReopen/unsupported (0.08s)
+    --- PASS: TestFailedPurgeRemainsFencedAndCanRecoverAcrossReopen/invalid_ack (0.08s)
+    --- PASS: TestFailedPurgeRemainsFencedAndCanRecoverAcrossReopen/invalid_chunk (0.08s)
+=== RUN   TestLifecycleCapabilitiesMatchTemporalAndFieldBehavior
+--- PASS: TestLifecycleCapabilitiesMatchTemporalAndFieldBehavior (0.00s)
+=== RUN   TestPurgeFanInDoesNotRedecodeChildPerParent
+=== RUN   TestPurgeFanInDoesNotRedecodeChildPerParent/memory
+    purge_fanin_cost_test.go:39: parents=100 decoded bytes=2154173 docs=6403
+    purge_fanin_cost_test.go:39: parents=200 decoded bytes=4330406 docs=12703
+    purge_fanin_cost_test.go:39: parents=400 decoded bytes=8736538 docs=25303
+=== RUN   TestPurgeFanInDoesNotRedecodeChildPerParent/sqlite
+    purge_fanin_cost_test.go:39: parents=100 decoded bytes=2154173 docs=6403
+    purge_fanin_cost_test.go:39: parents=200 decoded bytes=4330406 docs=12703
+    purge_fanin_cost_test.go:39: parents=400 decoded bytes=8736538 docs=25303
+--- PASS: TestPurgeFanInDoesNotRedecodeChildPerParent (80.17s)
+    --- PASS: TestPurgeFanInDoesNotRedecodeChildPerParent/memory (33.51s)
+    --- PASS: TestPurgeFanInDoesNotRedecodeChildPerParent/sqlite (46.66s)
+=== RUN   TestNativePurgeTraversesLongHistoricalGraph
+=== RUN   TestNativePurgeTraversesLongHistoricalGraph/memory
+=== RUN   TestNativePurgeTraversesLongHistoricalGraph/sqlite
+--- PASS: TestNativePurgeTraversesLongHistoricalGraph (415.07s)
+    --- PASS: TestNativePurgeTraversesLongHistoricalGraph/memory (182.68s)
+    --- PASS: TestNativePurgeTraversesLongHistoricalGraph/sqlite (232.39s)
+=== RUN   TestCanonicalCommitAndSearchVisibility
+--- PASS: TestCanonicalCommitAndSearchVisibility (0.06s)
+=== RUN   TestVisibilityCancellationAndBackendFailure
+--- PASS: TestVisibilityCancellationAndBackendFailure (0.03s)
+=== RUN   TestForgetPartialPurgeRetryAndLateJobs
+--- PASS: TestForgetPartialPurgeRetryAndLateJobs (0.05s)
+=== RUN   TestSourceForgetPurgesHistoricalPayloadAfterCorrection
+--- PASS: TestSourceForgetPurgesHistoricalPayloadAfterCorrection (0.06s)
+=== RUN   TestLateExtractionFencedByForget
+--- PASS: TestLateExtractionFencedByForget (0.01s)
+=== RUN   TestTypedProjectionAndExportAuthority
+--- PASS: TestTypedProjectionAndExportAuthority (0.02s)
+=== RUN   TestProposalReplayKeepsOriginalRevisionAfterLaterEdits
+--- PASS: TestProposalReplayKeepsOriginalRevisionAfterLaterEdits (0.02s)
+=== RUN   TestDuplicateLineageRevokesTransitiveDependents
+--- PASS: TestDuplicateLineageRevokesTransitiveDependents (0.15s)
+=== RUN   TestRankerCannotRewriteConsumerMapsOrProvenance
+--- PASS: TestRankerCannotRewriteConsumerMapsOrProvenance (0.03s)
+=== RUN   TestConsolidationReplayAfterInputCorrection
+--- PASS: TestConsolidationReplayAfterInputCorrection (0.11s)
+=== RUN   TestAcceptanceRejectsExpiredAncestorBeforeSweep
+--- PASS: TestAcceptanceRejectsExpiredAncestorBeforeSweep (0.08s)
+=== RUN   TestExtractionAbstainsWithoutEvidence
+--- PASS: TestExtractionAbstainsWithoutEvidence (0.00s)
+=== RUN   TestCanonicalProposalExpiryClosesReadsAndPurges
+--- PASS: TestCanonicalProposalExpiryClosesReadsAndPurges (0.05s)
+=== RUN   TestZeroClockCannotPersistMalformedProposal
+=== RUN   TestZeroClockCannotPersistMalformedProposal/remember
+=== RUN   TestZeroClockCannotPersistMalformedProposal/extract
+--- PASS: TestZeroClockCannotPersistMalformedProposal (0.00s)
+    --- PASS: TestZeroClockCannotPersistMalformedProposal/remember (0.00s)
+    --- PASS: TestZeroClockCannotPersistMalformedProposal/extract (0.00s)
+=== RUN   TestZeroClockCannotPersistMalformedCommit
+--- PASS: TestZeroClockCannotPersistMalformedCommit (0.01s)
+=== RUN   TestRetentionChangeInvalidatesAcceptedCommit
+--- PASS: TestRetentionChangeInvalidatesAcceptedCommit (0.01s)
+=== RUN   TestRetentionReadChangesAndOutageFailClosed
+=== RUN   TestRetentionReadChangesAndOutageFailClosed/version
+=== RUN   TestRetentionReadChangesAndOutageFailClosed/deadline
+=== RUN   TestRetentionReadChangesAndOutageFailClosed/outage
+--- PASS: TestRetentionReadChangesAndOutageFailClosed (0.06s)
+    --- PASS: TestRetentionReadChangesAndOutageFailClosed/version (0.02s)
+    --- PASS: TestRetentionReadChangesAndOutageFailClosed/deadline (0.02s)
+    --- PASS: TestRetentionReadChangesAndOutageFailClosed/outage (0.02s)
+=== RUN   TestSweepAppliesShorterCurrentRetentionDeadline
+--- PASS: TestSweepAppliesShorterCurrentRetentionDeadline (0.04s)
+=== RUN   TestRecallRechecksRetentionAfterRanking
+--- PASS: TestRecallRechecksRetentionAfterRanking (0.03s)
+=== RUN   TestProjectionRechecksRetentionAfterProvider
+--- PASS: TestProjectionRechecksRetentionAfterProvider (0.02s)
+=== RUN   TestSweepPurgesDraftsUnderCurrentRetention
+--- PASS: TestSweepPurgesDraftsUnderCurrentRetention (0.01s)
+=== RUN   TestDuplicateRejectsInputWithChangedRetention
+--- PASS: TestDuplicateRejectsInputWithChangedRetention (0.02s)
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/oversized_result
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/blank_identity
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/nul_identity
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/invalid_utf8_identity
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/overlong_identity
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/zero_revision
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/revision_overflow
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/nan_candidate_score
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/infinite_candidate_score
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/missing_signals
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/duplicate_signals
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/unknown_backend_signal
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/unavailable_backend_signal
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/zero_rank
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/rank_exceeds_bound
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/nan_signal_score
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/infinite_signal_score
+=== RUN   TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/duplicate_final_reference
+--- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode (0.17s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/oversized_result (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/blank_identity (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/nul_identity (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/invalid_utf8_identity (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/overlong_identity (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/zero_revision (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/revision_overflow (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/nan_candidate_score (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/infinite_candidate_score (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/missing_signals (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/duplicate_signals (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/unknown_backend_signal (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/unavailable_backend_signal (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/zero_rank (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/rank_exceeds_bound (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/nan_signal_score (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/infinite_signal_score (0.01s)
+    --- PASS: TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode/duplicate_final_reference (0.01s)
+=== RUN   TestRetrievalBudgetRequiresBoundedPortBeforeSearch
+--- PASS: TestRetrievalBudgetRequiresBoundedPortBeforeSearch (0.00s)
+=== RUN   TestRetrievalBudgetUnavailableCoverageCannotReportAbsence
+=== RUN   TestRetrievalBudgetUnavailableCoverageCannotReportAbsence/without_minimum
+=== RUN   TestRetrievalBudgetUnavailableCoverageCannotReportAbsence/with_minimum
+--- PASS: TestRetrievalBudgetUnavailableCoverageCannotReportAbsence (0.00s)
+    --- PASS: TestRetrievalBudgetUnavailableCoverageCannotReportAbsence/without_minimum (0.00s)
+    --- PASS: TestRetrievalBudgetUnavailableCoverageCannotReportAbsence/with_minimum (0.00s)
+=== RUN   TestRetrievalBudgetProgressSeparatesCandidateStages
+--- PASS: TestRetrievalBudgetProgressSeparatesCandidateStages (0.04s)
+=== RUN   TestRetrievalBudgetRankerCannotReplaceSignalsOrAuthorizedReferences
+=== RUN   TestRetrievalBudgetRankerCannotReplaceSignalsOrAuthorizedReferences/preserve_typed_evidence
+=== RUN   TestRetrievalBudgetRankerCannotReplaceSignalsOrAuthorizedReferences/reject_foreign_reference
+--- PASS: TestRetrievalBudgetRankerCannotReplaceSignalsOrAuthorizedReferences (0.04s)
+    --- PASS: TestRetrievalBudgetRankerCannotReplaceSignalsOrAuthorizedReferences/preserve_typed_evidence (0.02s)
+    --- PASS: TestRetrievalBudgetRankerCannotReplaceSignalsOrAuthorizedReferences/reject_foreign_reference (0.01s)
+=== RUN   TestRestrictedRecallAndProjectionNeverExposeFieldsToPolicies
+--- PASS: TestRestrictedRecallAndProjectionNeverExposeFieldsToPolicies (0.02s)
+=== RUN   TestProjectionRechecksAuthorityAfterConsumerCallback
+--- PASS: TestProjectionRechecksAuthorityAfterConsumerCallback (0.02s)
+=== RUN   TestProjectionCacheIdentityBindsReadContext
+--- PASS: TestProjectionCacheIdentityBindsReadContext (0.08s)
+=== RUN   TestPersistedLifecycleMatchesWireSchemas
+--- PASS: TestPersistedLifecycleMatchesWireSchemas (0.10s)
+=== RUN   TestWireSchemaRejectsMalformedEnvelope
+--- PASS: TestWireSchemaRejectsMalformedEnvelope (0.03s)
+=== RUN   TestForgetSelectorsRespectExactAuthorityBoundary
+=== RUN   TestForgetSelectorsRespectExactAuthorityBoundary/record
+=== RUN   TestForgetSelectorsRespectExactAuthorityBoundary/source
+=== RUN   TestForgetSelectorsRespectExactAuthorityBoundary/subject
+=== RUN   TestForgetSelectorsRespectExactAuthorityBoundary/scope
+--- PASS: TestForgetSelectorsRespectExactAuthorityBoundary (0.32s)
+    --- PASS: TestForgetSelectorsRespectExactAuthorityBoundary/record (0.07s)
+    --- PASS: TestForgetSelectorsRespectExactAuthorityBoundary/source (0.07s)
+    --- PASS: TestForgetSelectorsRespectExactAuthorityBoundary/subject (0.08s)
+    --- PASS: TestForgetSelectorsRespectExactAuthorityBoundary/scope (0.08s)
+=== RUN   TestSnapshotPagesBoundScannedWorkAndBindReadPolicy
+=== RUN   TestSnapshotPagesBoundScannedWorkAndBindReadPolicy/memory
+=== RUN   TestSnapshotPagesBoundScannedWorkAndBindReadPolicy/sqlite
+--- PASS: TestSnapshotPagesBoundScannedWorkAndBindReadPolicy (0.11s)
+    --- PASS: TestSnapshotPagesBoundScannedWorkAndBindReadPolicy/memory (0.05s)
+    --- PASS: TestSnapshotPagesBoundScannedWorkAndBindReadPolicy/sqlite (0.07s)
+=== RUN   TestAddressedOperationsDoNotDecodeOrCopyUnrelatedHistory
+=== RUN   TestAddressedOperationsDoNotDecodeOrCopyUnrelatedHistory/memory/Get
+=== RUN   TestAddressedOperationsDoNotDecodeOrCopyUnrelatedHistory/memory/Consolidate
+=== RUN   TestAddressedOperationsDoNotDecodeOrCopyUnrelatedHistory/sqlite/Get
+=== RUN   TestAddressedOperationsDoNotDecodeOrCopyUnrelatedHistory/sqlite/Consolidate
+--- PASS: TestAddressedOperationsDoNotDecodeOrCopyUnrelatedHistory (36.41s)
+    --- PASS: TestAddressedOperationsDoNotDecodeOrCopyUnrelatedHistory/memory/Get (6.02s)
+    --- PASS: TestAddressedOperationsDoNotDecodeOrCopyUnrelatedHistory/memory/Consolidate (6.77s)
+    --- PASS: TestAddressedOperationsDoNotDecodeOrCopyUnrelatedHistory/sqlite/Get (11.12s)
+    --- PASS: TestAddressedOperationsDoNotDecodeOrCopyUnrelatedHistory/sqlite/Consolidate (12.50s)
+=== RUN   TestSweepBoundedPassResumesAfterReopen
+=== RUN   TestSweepBoundedPassResumesAfterReopen/memory
+=== RUN   TestSweepBoundedPassResumesAfterReopen/sqlite
+--- PASS: TestSweepBoundedPassResumesAfterReopen (0.74s)
+    --- PASS: TestSweepBoundedPassResumesAfterReopen/memory (0.29s)
+    --- PASS: TestSweepBoundedPassResumesAfterReopen/sqlite (0.44s)
+=== RUN   TestSweepIdentityAndCancellationDoNotRetireActiveFence
+--- PASS: TestSweepIdentityAndCancellationDoNotRetireActiveFence (0.00s)
+=== RUN   TestSweepCanResumeUnderCurrentAuthorityPolicy
+--- PASS: TestSweepCanResumeUnderCurrentAuthorityPolicy (0.00s)
+=== RUN   TestSweepRejectsFalseCompletedJobWithLiveFence
+--- PASS: TestSweepRejectsFalseCompletedJobWithLiveFence (0.00s)
+=== RUN   TestSweepRejectsForeignCanonicalRevisionKey
+--- PASS: TestSweepRejectsForeignCanonicalRevisionKey (0.01s)
+=== RUN   TestSweepRejectsCompletedReceiptForUnfinishedPurge
+--- PASS: TestSweepRejectsCompletedReceiptForUnfinishedPurge (0.02s)
+=== RUN   TestSweepProgressSurvivesLateRetentionError
+=== RUN   TestSweepProgressSurvivesLateRetentionError/memory
+=== RUN   TestSweepProgressSurvivesLateRetentionError/sqlite
+--- PASS: TestSweepProgressSurvivesLateRetentionError (0.06s)
+    --- PASS: TestSweepProgressSurvivesLateRetentionError/memory (0.02s)
+    --- PASS: TestSweepProgressSurvivesLateRetentionError/sqlite (0.04s)
+=== RUN   TestSweepProgressCountsOnlyConfirmedTransactions
+=== RUN   TestSweepProgressCountsOnlyConfirmedTransactions/memory/rollback
+=== RUN   TestSweepProgressCountsOnlyConfirmedTransactions/memory/unknown
+=== RUN   TestSweepProgressCountsOnlyConfirmedTransactions/memory/cancel
+=== RUN   TestSweepProgressCountsOnlyConfirmedTransactions/sqlite/rollback
+=== RUN   TestSweepProgressCountsOnlyConfirmedTransactions/sqlite/unknown
+=== RUN   TestSweepProgressCountsOnlyConfirmedTransactions/sqlite/cancel
+--- PASS: TestSweepProgressCountsOnlyConfirmedTransactions (0.18s)
+    --- PASS: TestSweepProgressCountsOnlyConfirmedTransactions/memory/rollback (0.02s)
+    --- PASS: TestSweepProgressCountsOnlyConfirmedTransactions/memory/unknown (0.02s)
+    --- PASS: TestSweepProgressCountsOnlyConfirmedTransactions/memory/cancel (0.02s)
+    --- PASS: TestSweepProgressCountsOnlyConfirmedTransactions/sqlite/rollback (0.04s)
+    --- PASS: TestSweepProgressCountsOnlyConfirmedTransactions/sqlite/unknown (0.05s)
+    --- PASS: TestSweepProgressCountsOnlyConfirmedTransactions/sqlite/cancel (0.04s)
+=== RUN   TestSweepProgressPreservesPendingReceiptOnCancellation
+=== RUN   TestSweepProgressPreservesPendingReceiptOnCancellation/memory
+=== RUN   TestSweepProgressPreservesPendingReceiptOnCancellation/sqlite
+--- PASS: TestSweepProgressPreservesPendingReceiptOnCancellation (0.14s)
+    --- PASS: TestSweepProgressPreservesPendingReceiptOnCancellation/memory (0.06s)
+    --- PASS: TestSweepProgressPreservesPendingReceiptOnCancellation/sqlite (0.08s)
+=== RUN   TestSweepProgressPreservesFinalAcknowledgements
+=== RUN   TestSweepProgressPreservesFinalAcknowledgements/memory
+=== RUN   TestSweepProgressPreservesFinalAcknowledgements/sqlite
+--- PASS: TestSweepProgressPreservesFinalAcknowledgements (0.12s)
+    --- PASS: TestSweepProgressPreservesFinalAcknowledgements/memory (0.05s)
+    --- PASS: TestSweepProgressPreservesFinalAcknowledgements/sqlite (0.07s)
+=== RUN   TestTypedDomainResolverMapsClaimWithoutInferringScope
+--- PASS: TestTypedDomainResolverMapsClaimWithoutInferringScope (0.01s)
+=== RUN   TestConflictHistoryAndExplicitResolution
+--- PASS: TestConflictHistoryAndExplicitResolution (0.08s)
+=== RUN   TestRegressedClockCannotBackdateRecordedCorrection
+--- PASS: TestRegressedClockCannotBackdateRecordedCorrection (0.05s)
+=== RUN   TestCancellationDuringVisibilityWaitPreservesCanonicalCommit
+--- PASS: TestCancellationDuringVisibilityWaitPreservesCanonicalCommit (0.04s)
+=== RUN   FuzzJSONCodecGenericNumbers
+=== RUN   FuzzJSONCodecGenericNumbers/seed#0
+=== RUN   FuzzJSONCodecGenericNumbers/seed#1
+=== RUN   FuzzJSONCodecGenericNumbers/seed#2
+=== RUN   FuzzJSONCodecGenericNumbers/seed#3
+--- PASS: FuzzJSONCodecGenericNumbers (0.00s)
+    --- PASS: FuzzJSONCodecGenericNumbers/seed#0 (0.00s)
+    --- PASS: FuzzJSONCodecGenericNumbers/seed#1 (0.00s)
+    --- PASS: FuzzJSONCodecGenericNumbers/seed#2 (0.00s)
+    --- PASS: FuzzJSONCodecGenericNumbers/seed#3 (0.00s)
+=== RUN   FuzzJSONCodec
+=== RUN   FuzzJSONCodec/seed#0
+=== RUN   FuzzJSONCodec/seed#1
+=== RUN   FuzzJSONCodec/seed#2
+=== RUN   FuzzJSONCodec/seed#3
+=== RUN   FuzzJSONCodec/seed#4
+=== RUN   FuzzJSONCodec/seed#5
+--- PASS: FuzzJSONCodec (0.00s)
+    --- PASS: FuzzJSONCodec/seed#0 (0.00s)
+    --- PASS: FuzzJSONCodec/seed#1 (0.00s)
+    --- PASS: FuzzJSONCodec/seed#2 (0.00s)
+    --- PASS: FuzzJSONCodec/seed#3 (0.00s)
+    --- PASS: FuzzJSONCodec/seed#4 (0.00s)
+    --- PASS: FuzzJSONCodec/seed#5 (0.00s)
+=== RUN   FuzzScopeIdentity
+=== RUN   FuzzScopeIdentity/seed#0
+=== RUN   FuzzScopeIdentity/seed#1
+=== RUN   FuzzScopeIdentity/seed#2
+=== RUN   FuzzScopeIdentity/seed#3
+=== RUN   FuzzScopeIdentity/seed#4
+=== RUN   FuzzScopeIdentity/seed#5
+=== RUN   FuzzScopeIdentity/seed#6
+--- PASS: FuzzScopeIdentity (0.00s)
+    --- PASS: FuzzScopeIdentity/seed#0 (0.00s)
+    --- PASS: FuzzScopeIdentity/seed#1 (0.00s)
+    --- PASS: FuzzScopeIdentity/seed#2 (0.00s)
+    --- PASS: FuzzScopeIdentity/seed#3 (0.00s)
+    --- PASS: FuzzScopeIdentity/seed#4 (0.00s)
+    --- PASS: FuzzScopeIdentity/seed#5 (0.00s)
+    --- PASS: FuzzScopeIdentity/seed#6 (0.00s)
+=== RUN   Example
+--- PASS: Example (0.02s)
+=== RUN   ExampleJSONCodec
+--- PASS: ExampleJSONCodec (0.00s)
+PASS
+ok  	github.com/skosovsky/memy	590.823s
+?   	github.com/skosovsky/memy/conformance	[no test files]
+=== RUN   TestOfflineLifecycle
+Extracted 2 proposals; accepted timezone only; canonical revision 1.
+Decision: supersede, resolver=resolver/v1, authority=authority/v1, basis=explicit preference correction.
+New session, no transcript: timezone=UTC+7, revision 2.
+Search acknowledged revision 2; projection (data): Your timezone is UTC+7.
+Forget: one sink failed, Sweep recovered complete at epoch 1.
+--- PASS: TestOfflineLifecycle (0.23s)
+PASS
+ok  	github.com/skosovsky/memy/examples/lifecycle	1.994s
+=== RUN   TestCommandSavesReportBeforeNegativeExit
+=== RUN   TestCommandSavesReportBeforeNegativeExit/wrong_payload
+=== RUN   TestCommandSavesReportBeforeNegativeExit/late_privacy
+=== RUN   TestCommandSavesReportBeforeNegativeExit/false_empty_outage
+=== RUN   TestCommandSavesReportBeforeNegativeExit/checker_error
+=== RUN   TestCommandSavesReportBeforeNegativeExit/adapter_error
+--- PASS: TestCommandSavesReportBeforeNegativeExit (1.76s)
+    --- PASS: TestCommandSavesReportBeforeNegativeExit/wrong_payload (0.35s)
+    --- PASS: TestCommandSavesReportBeforeNegativeExit/late_privacy (0.35s)
+    --- PASS: TestCommandSavesReportBeforeNegativeExit/false_empty_outage (0.32s)
+    --- PASS: TestCommandSavesReportBeforeNegativeExit/checker_error (0.41s)
+    --- PASS: TestCommandSavesReportBeforeNegativeExit/adapter_error (0.34s)
+=== RUN   TestCommandExpectedRejectionPassesProtocol
+--- PASS: TestCommandExpectedRejectionPassesProtocol (11.10s)
+=== RUN   TestCommandMalformedInputProducesSafeUnknownReport
+--- PASS: TestCommandMalformedInputProducesSafeUnknownReport (0.01s)
+=== RUN   TestCommandOutputFailureIsUnknownAndRedacted
+--- PASS: TestCommandOutputFailureIsUnknownAndRedacted (0.01s)
+=== RUN   TestCommandReplacesPublicReportWithPrivateCompleteFile
+--- PASS: TestCommandReplacesPublicReportWithPrivateCompleteFile (0.01s)
+PASS
+ok  	github.com/skosovsky/memy/examples/quality	14.657s
+?   	github.com/skosovsky/memy/examples/quality-integration	[no test files]
+?   	github.com/skosovsky/memy/examples/retrieval	[no test files]
+=== RUN   TestRejectedPutDoesNotClonePayload
+=== RUN   TestRejectedPutDoesNotClonePayload/key
+=== RUN   TestRejectedPutDoesNotClonePayload/cancelled
+=== RUN   TestRejectedPutDoesNotClonePayload/readonly
+=== RUN   TestRejectedPutDoesNotClonePayload/cas
+=== RUN   TestRejectedPutDoesNotClonePayload/overflow
+--- PASS: TestRejectedPutDoesNotClonePayload (0.01s)
+    --- PASS: TestRejectedPutDoesNotClonePayload/key (0.00s)
+    --- PASS: TestRejectedPutDoesNotClonePayload/cancelled (0.00s)
+    --- PASS: TestRejectedPutDoesNotClonePayload/readonly (0.00s)
+    --- PASS: TestRejectedPutDoesNotClonePayload/cas (0.01s)
+    --- PASS: TestRejectedPutDoesNotClonePayload/overflow (0.00s)
+=== RUN   TestCursorMaximumWireBound
+--- PASS: TestCursorMaximumWireBound (0.00s)
+=== RUN   TestCursorRejectsExternalAndOldFormats
+=== RUN   TestCursorRejectsExternalAndOldFormats/no_separator
+=== RUN   TestCursorRejectsExternalAndOldFormats/bad_base64
+=== RUN   TestCursorRejectsExternalAndOldFormats/short_mac
+=== RUN   TestCursorRejectsExternalAndOldFormats/old
+=== RUN   TestCursorRejectsExternalAndOldFormats/unknown_version
+=== RUN   TestCursorRejectsExternalAndOldFormats/oversized_old
+=== RUN   TestCursorRejectsExternalAndOldFormats/empty_payload
+=== RUN   TestCursorRejectsExternalAndOldFormats/short_payload
+--- PASS: TestCursorRejectsExternalAndOldFormats (0.00s)
+    --- PASS: TestCursorRejectsExternalAndOldFormats/no_separator (0.00s)
+    --- PASS: TestCursorRejectsExternalAndOldFormats/bad_base64 (0.00s)
+    --- PASS: TestCursorRejectsExternalAndOldFormats/short_mac (0.00s)
+    --- PASS: TestCursorRejectsExternalAndOldFormats/old (0.00s)
+    --- PASS: TestCursorRejectsExternalAndOldFormats/unknown_version (0.00s)
+    --- PASS: TestCursorRejectsExternalAndOldFormats/oversized_old (0.00s)
+    --- PASS: TestCursorRejectsExternalAndOldFormats/empty_payload (0.00s)
+    --- PASS: TestCursorRejectsExternalAndOldFormats/short_payload (0.00s)
+=== RUN   TestCursorRejectsForgeryAndInvalidContinuation
+--- PASS: TestCursorRejectsForgeryAndInvalidContinuation (0.00s)
+=== RUN   TestIndexMaintainsOrderedRangesThroughMutation
+--- PASS: TestIndexMaintainsOrderedRangesThroughMutation (0.50s)
+=== RUN   TestIndexSnapshotSurvivesRotationsAndRemovals
+--- PASS: TestIndexSnapshotSurvivesRotationsAndRemovals (0.02s)
+=== RUN   FuzzIssuedCursorRoundtrip
+=== RUN   FuzzIssuedCursorRoundtrip/seed#0
+=== RUN   FuzzIssuedCursorRoundtrip/seed#1
+=== RUN   FuzzIssuedCursorRoundtrip/seed#2
+=== RUN   FuzzIssuedCursorRoundtrip/seed#3
+--- PASS: FuzzIssuedCursorRoundtrip (0.00s)
+    --- PASS: FuzzIssuedCursorRoundtrip/seed#0 (0.00s)
+    --- PASS: FuzzIssuedCursorRoundtrip/seed#1 (0.00s)
+    --- PASS: FuzzIssuedCursorRoundtrip/seed#2 (0.00s)
+    --- PASS: FuzzIssuedCursorRoundtrip/seed#3 (0.00s)
+PASS
+ok  	github.com/skosovsky/memy/internal/kv	2.289s
+=== RUN   TestProofBindsEveryRelationAndTreeShape
+=== RUN   TestProofBindsEveryRelationAndTreeShape/1
+=== RUN   TestProofBindsEveryRelationAndTreeShape/2
+=== RUN   TestProofBindsEveryRelationAndTreeShape/3
+=== RUN   TestProofBindsEveryRelationAndTreeShape/7
+=== RUN   TestProofBindsEveryRelationAndTreeShape/16
+=== RUN   TestProofBindsEveryRelationAndTreeShape/31
+=== RUN   TestProofBindsEveryRelationAndTreeShape/100
+--- PASS: TestProofBindsEveryRelationAndTreeShape (0.02s)
+    --- PASS: TestProofBindsEveryRelationAndTreeShape/1 (0.00s)
+    --- PASS: TestProofBindsEveryRelationAndTreeShape/2 (0.00s)
+    --- PASS: TestProofBindsEveryRelationAndTreeShape/3 (0.00s)
+    --- PASS: TestProofBindsEveryRelationAndTreeShape/7 (0.00s)
+    --- PASS: TestProofBindsEveryRelationAndTreeShape/16 (0.00s)
+    --- PASS: TestProofBindsEveryRelationAndTreeShape/31 (0.00s)
+    --- PASS: TestProofBindsEveryRelationAndTreeShape/100 (0.01s)
+PASS
+ok  	github.com/skosovsky/memy/internal/membershipproof	1.769s
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-retrieval/scripted
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-retrieval/integration
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-cross-scope/scripted
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-cross-scope/integration
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-abstention/scripted
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-abstention/integration
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-poisoning-guarded/scripted
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-poisoning-guarded/integration
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-poisoning-permissive/scripted
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-poisoning-permissive/integration
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-forget-memory/scripted
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-forget-memory/integration
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-forget-sqlite/scripted
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-forget-sqlite/integration
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-controlled-failures/scripted
+=== RUN   TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-controlled-failures/integration
+--- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap (7.05s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-retrieval/scripted (0.26s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-retrieval/integration (0.26s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-cross-scope/scripted (0.22s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-cross-scope/integration (0.12s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-abstention/scripted (0.08s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-abstention/integration (0.08s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-poisoning-guarded/scripted (0.12s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-poisoning-guarded/integration (0.12s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-poisoning-permissive/scripted (0.19s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-poisoning-permissive/integration (0.19s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-forget-memory/scripted (0.19s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-forget-memory/integration (0.20s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-forget-sqlite/scripted (0.27s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-forget-sqlite/integration (0.26s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-controlled-failures/scripted (0.08s)
+    --- PASS: TestProcedureEveryDeliveredContextUsesConfiguredCap/procedure-controlled-failures/integration (0.08s)
+=== RUN   TestProcedureReportsMeasuredCapAndActualGraderUse
+=== RUN   TestProcedureReportsMeasuredCapAndActualGraderUse/procedure-cross-scope
+=== RUN   TestProcedureReportsMeasuredCapAndActualGraderUse/procedure-retrieval
+=== RUN   TestProcedureReportsMeasuredCapAndActualGraderUse/procedure-poisoning-guarded
+=== RUN   TestProcedureReportsMeasuredCapAndActualGraderUse/procedure-poisoning-permissive
+=== RUN   TestProcedureReportsMeasuredCapAndActualGraderUse/procedure-abstention
+--- PASS: TestProcedureReportsMeasuredCapAndActualGraderUse (1.05s)
+    --- PASS: TestProcedureReportsMeasuredCapAndActualGraderUse/procedure-cross-scope (0.16s)
+    --- PASS: TestProcedureReportsMeasuredCapAndActualGraderUse/procedure-retrieval (0.36s)
+    --- PASS: TestProcedureReportsMeasuredCapAndActualGraderUse/procedure-poisoning-guarded (0.16s)
+    --- PASS: TestProcedureReportsMeasuredCapAndActualGraderUse/procedure-poisoning-permissive (0.24s)
+    --- PASS: TestProcedureReportsMeasuredCapAndActualGraderUse/procedure-abstention (0.13s)
+=== RUN   TestProcedureValidationPrecedesProviderInvocation
+=== RUN   TestProcedureValidationPrecedesProviderInvocation/unknown-case
+=== RUN   TestProcedureValidationPrecedesProviderInvocation/budget
+=== RUN   TestProcedureValidationPrecedesProviderInvocation/corpus
+=== RUN   TestProcedureValidationPrecedesProviderInvocation/repeat
+=== RUN   TestProcedureValidationPrecedesProviderInvocation/seed
+=== RUN   TestProcedureValidationPrecedesProviderInvocation/nil-grader-version
+=== RUN   TestProcedureValidationPrecedesProviderInvocation/grader-none-version
+--- PASS: TestProcedureValidationPrecedesProviderInvocation (0.00s)
+    --- PASS: TestProcedureValidationPrecedesProviderInvocation/unknown-case (0.00s)
+    --- PASS: TestProcedureValidationPrecedesProviderInvocation/budget (0.00s)
+    --- PASS: TestProcedureValidationPrecedesProviderInvocation/corpus (0.00s)
+    --- PASS: TestProcedureValidationPrecedesProviderInvocation/repeat (0.00s)
+    --- PASS: TestProcedureValidationPrecedesProviderInvocation/seed (0.00s)
+    --- PASS: TestProcedureValidationPrecedesProviderInvocation/nil-grader-version (0.00s)
+    --- PASS: TestProcedureValidationPrecedesProviderInvocation/grader-none-version (0.00s)
+=== RUN   TestMalformedMeasuredValueIsUnknownWithSafeDiagnostic
+--- PASS: TestMalformedMeasuredValueIsUnknownWithSafeDiagnostic (0.00s)
+=== RUN   TestKnownExecutionFailureUsesFailedExitCode
+--- PASS: TestKnownExecutionFailureUsesFailedExitCode (0.00s)
+=== RUN   TestEvaluatorInsufficientBaselineDoesNotRunMutations
+=== RUN   TestEvaluatorInsufficientBaselineDoesNotRunMutations/1
+=== RUN   TestEvaluatorInsufficientBaselineDoesNotRunMutations/200
+=== RUN   TestEvaluatorInsufficientBaselineDoesNotRunMutations/500
+=== RUN   TestEvaluatorInsufficientBaselineDoesNotRunMutations/600
+=== RUN   TestEvaluatorInsufficientBaselineDoesNotRunMutations/700
+=== RUN   TestEvaluatorInsufficientBaselineDoesNotRunMutations/800
+=== RUN   TestEvaluatorInsufficientBaselineDoesNotRunMutations/900
+=== RUN   TestEvaluatorInsufficientBaselineDoesNotRunMutations/1000
+=== RUN   TestEvaluatorInsufficientBaselineDoesNotRunMutations/1100
+=== RUN   TestEvaluatorInsufficientBaselineDoesNotRunMutations/1200
+=== RUN   TestEvaluatorInsufficientBaselineDoesNotRunMutations/1300
+--- PASS: TestEvaluatorInsufficientBaselineDoesNotRunMutations (6.91s)
+    --- PASS: TestEvaluatorInsufficientBaselineDoesNotRunMutations/1 (0.64s)
+    --- PASS: TestEvaluatorInsufficientBaselineDoesNotRunMutations/200 (0.69s)
+    --- PASS: TestEvaluatorInsufficientBaselineDoesNotRunMutations/500 (0.66s)
+    --- PASS: TestEvaluatorInsufficientBaselineDoesNotRunMutations/600 (0.59s)
+    --- PASS: TestEvaluatorInsufficientBaselineDoesNotRunMutations/700 (0.59s)
+    --- PASS: TestEvaluatorInsufficientBaselineDoesNotRunMutations/800 (0.57s)
+    --- PASS: TestEvaluatorInsufficientBaselineDoesNotRunMutations/900 (0.58s)
+    --- PASS: TestEvaluatorInsufficientBaselineDoesNotRunMutations/1000 (0.66s)
+    --- PASS: TestEvaluatorInsufficientBaselineDoesNotRunMutations/1100 (0.65s)
+    --- PASS: TestEvaluatorInsufficientBaselineDoesNotRunMutations/1200 (0.64s)
+    --- PASS: TestEvaluatorInsufficientBaselineDoesNotRunMutations/1300 (0.63s)
+=== RUN   TestEvaluatorMutationsRejectWrongObservations
+=== RUN   TestEvaluatorMutationsRejectWrongObservations/wrong_payload
+=== RUN   TestEvaluatorMutationsRejectWrongObservations/wrong_revision
+=== RUN   TestEvaluatorMutationsRejectWrongObservations/missing_lineage
+=== RUN   TestEvaluatorMutationsRejectWrongObservations/false_empty_outage
+=== RUN   TestEvaluatorMutationsRejectWrongObservations/checker_error
+=== RUN   TestEvaluatorMutationsRejectWrongObservations/adapter_error
+=== RUN   TestEvaluatorMutationsRejectWrongObservations/late_privacy
+--- PASS: TestEvaluatorMutationsRejectWrongObservations (0.32s)
+    --- PASS: TestEvaluatorMutationsRejectWrongObservations/wrong_payload (0.00s)
+    --- PASS: TestEvaluatorMutationsRejectWrongObservations/wrong_revision (0.00s)
+    --- PASS: TestEvaluatorMutationsRejectWrongObservations/missing_lineage (0.00s)
+    --- PASS: TestEvaluatorMutationsRejectWrongObservations/false_empty_outage (0.00s)
+    --- PASS: TestEvaluatorMutationsRejectWrongObservations/checker_error (0.00s)
+    --- PASS: TestEvaluatorMutationsRejectWrongObservations/adapter_error (0.00s)
+    --- PASS: TestEvaluatorMutationsRejectWrongObservations/late_privacy (0.00s)
+=== RUN   TestEvaluatorDiagnosticsDoNotSerializePrivateMarkers
+--- PASS: TestEvaluatorDiagnosticsDoNotSerializePrivateMarkers (0.32s)
+=== RUN   TestRunProbeUsesNormalNegativeAggregation
+=== RUN   TestRunProbeUsesNormalNegativeAggregation/wrong_payload
+=== RUN   TestRunProbeUsesNormalNegativeAggregation/checker_error
+=== RUN   TestRunProbeUsesNormalNegativeAggregation/not-registered
+--- PASS: TestRunProbeUsesNormalNegativeAggregation (0.66s)
+    --- PASS: TestRunProbeUsesNormalNegativeAggregation/wrong_payload (0.32s)
+    --- PASS: TestRunProbeUsesNormalNegativeAggregation/checker_error (0.34s)
+    --- PASS: TestRunProbeUsesNormalNegativeAggregation/not-registered (0.00s)
+=== RUN   TestEvaluatorSeedChangesRealInputAndMutationIsDetached
+--- PASS: TestEvaluatorSeedChangesRealInputAndMutationIsDetached (0.88s)
+=== RUN   TestPreferencePlansPublicLifecycle
+=== RUN   TestPreferencePlansPublicLifecycle/preference-sessions
+=== RUN   TestPreferencePlansPublicLifecycle/preference-temporal
+=== RUN   TestPreferencePlansPublicLifecycle/preference-port-failures
+=== RUN   TestPreferencePlansPublicLifecycle/preference-consolidation-baseline
+=== RUN   TestPreferencePlansPublicLifecycle/preference-consolidation-exact
+=== RUN   TestPreferencePlansPublicLifecycle/preference-consolidation-domain
+=== RUN   TestPreferencePlansPublicLifecycle/preference-consolidation-semantic
+--- PASS: TestPreferencePlansPublicLifecycle (4.31s)
+    --- PASS: TestPreferencePlansPublicLifecycle/preference-sessions (1.15s)
+    --- PASS: TestPreferencePlansPublicLifecycle/preference-temporal (0.84s)
+    --- PASS: TestPreferencePlansPublicLifecycle/preference-port-failures (0.28s)
+    --- PASS: TestPreferencePlansPublicLifecycle/preference-consolidation-baseline (0.32s)
+    --- PASS: TestPreferencePlansPublicLifecycle/preference-consolidation-exact (0.65s)
+    --- PASS: TestPreferencePlansPublicLifecycle/preference-consolidation-domain (0.72s)
+    --- PASS: TestPreferencePlansPublicLifecycle/preference-consolidation-semantic (0.35s)
+=== RUN   TestPreferenceReportsDeterministicAndSafe
+=== RUN   TestPreferenceReportsDeterministicAndSafe/preference-sessions
+=== RUN   TestPreferenceReportsDeterministicAndSafe/preference-temporal
+=== RUN   TestPreferenceReportsDeterministicAndSafe/preference-port-failures
+=== RUN   TestPreferenceReportsDeterministicAndSafe/preference-consolidation-baseline
+=== RUN   TestPreferenceReportsDeterministicAndSafe/preference-consolidation-exact
+=== RUN   TestPreferenceReportsDeterministicAndSafe/preference-consolidation-domain
+=== RUN   TestPreferenceReportsDeterministicAndSafe/preference-consolidation-semantic
+--- PASS: TestPreferenceReportsDeterministicAndSafe (6.87s)
+    --- PASS: TestPreferenceReportsDeterministicAndSafe/preference-sessions (1.31s)
+    --- PASS: TestPreferenceReportsDeterministicAndSafe/preference-temporal (0.83s)
+    --- PASS: TestPreferenceReportsDeterministicAndSafe/preference-port-failures (0.27s)
+    --- PASS: TestPreferenceReportsDeterministicAndSafe/preference-consolidation-baseline (0.74s)
+    --- PASS: TestPreferenceReportsDeterministicAndSafe/preference-consolidation-exact (1.53s)
+    --- PASS: TestPreferenceReportsDeterministicAndSafe/preference-consolidation-domain (1.47s)
+    --- PASS: TestPreferenceReportsDeterministicAndSafe/preference-consolidation-semantic (0.72s)
+=== RUN   TestPreferenceErrorDoesNotCertifyZeroMeasurements
+--- PASS: TestPreferenceErrorDoesNotCertifyZeroMeasurements (0.39s)
+=== RUN   TestPreferenceOracleRejectsSameCountWrongObservation
+=== RUN   TestPreferenceOracleRejectsSameCountWrongObservation/identity
+=== RUN   TestPreferenceOracleRejectsSameCountWrongObservation/revision
+=== RUN   TestPreferenceOracleRejectsSameCountWrongObservation/payload
+=== RUN   TestPreferenceOracleRejectsSameCountWrongObservation/negation
+=== RUN   TestPreferenceOracleRejectsSameCountWrongObservation/validity
+=== RUN   TestPreferenceOracleRejectsSameCountWrongObservation/source
+=== RUN   TestPreferenceOracleRejectsSameCountWrongObservation/lineage
+=== RUN   TestPreferenceOracleRejectsSameCountWrongObservation/scope
+--- PASS: TestPreferenceOracleRejectsSameCountWrongObservation (0.00s)
+    --- PASS: TestPreferenceOracleRejectsSameCountWrongObservation/identity (0.00s)
+    --- PASS: TestPreferenceOracleRejectsSameCountWrongObservation/revision (0.00s)
+    --- PASS: TestPreferenceOracleRejectsSameCountWrongObservation/payload (0.00s)
+    --- PASS: TestPreferenceOracleRejectsSameCountWrongObservation/negation (0.00s)
+    --- PASS: TestPreferenceOracleRejectsSameCountWrongObservation/validity (0.00s)
+    --- PASS: TestPreferenceOracleRejectsSameCountWrongObservation/source (0.00s)
+    --- PASS: TestPreferenceOracleRejectsSameCountWrongObservation/lineage (0.00s)
+    --- PASS: TestPreferenceOracleRejectsSameCountWrongObservation/scope (0.00s)
+=== RUN   TestPreferenceSeedChangesActualInsertionOrder
+--- PASS: TestPreferenceSeedChangesActualInsertionOrder (1.71s)
+=== RUN   TestProcedurePlansExecutePublicLifecycle
+=== RUN   TestProcedurePlansExecutePublicLifecycle/procedure-retrieval
+=== RUN   TestProcedurePlansExecutePublicLifecycle/procedure-cross-scope
+=== RUN   TestProcedurePlansExecutePublicLifecycle/procedure-abstention
+=== RUN   TestProcedurePlansExecutePublicLifecycle/procedure-poisoning-guarded
+=== RUN   TestProcedurePlansExecutePublicLifecycle/procedure-poisoning-permissive
+=== RUN   TestProcedurePlansExecutePublicLifecycle/procedure-forget-memory
+=== RUN   TestProcedurePlansExecutePublicLifecycle/procedure-forget-sqlite
+=== RUN   TestProcedurePlansExecutePublicLifecycle/procedure-controlled-failures
+--- PASS: TestProcedurePlansExecutePublicLifecycle (1.49s)
+    --- PASS: TestProcedurePlansExecutePublicLifecycle/procedure-retrieval (0.30s)
+    --- PASS: TestProcedurePlansExecutePublicLifecycle/procedure-cross-scope (0.14s)
+    --- PASS: TestProcedurePlansExecutePublicLifecycle/procedure-abstention (0.11s)
+    --- PASS: TestProcedurePlansExecutePublicLifecycle/procedure-poisoning-guarded (0.13s)
+    --- PASS: TestProcedurePlansExecutePublicLifecycle/procedure-poisoning-permissive (0.21s)
+    --- PASS: TestProcedurePlansExecutePublicLifecycle/procedure-forget-memory (0.20s)
+    --- PASS: TestProcedurePlansExecutePublicLifecycle/procedure-forget-sqlite (0.28s)
+    --- PASS: TestProcedurePlansExecutePublicLifecycle/procedure-controlled-failures (0.12s)
+=== RUN   TestProcedurePortSubstitutionRetainsCheckpointOracles
+--- PASS: TestProcedurePortSubstitutionRetainsCheckpointOracles (0.30s)
+=== RUN   TestProcedureUnexpectedProviderAndGraderErrorsStayUnknown
+=== RUN   TestProcedureUnexpectedProviderAndGraderErrorsStayUnknown/provider
+=== RUN   TestProcedureUnexpectedProviderAndGraderErrorsStayUnknown/grader
+--- PASS: TestProcedureUnexpectedProviderAndGraderErrorsStayUnknown (0.28s)
+    --- PASS: TestProcedureUnexpectedProviderAndGraderErrorsStayUnknown/provider (0.00s)
+    --- PASS: TestProcedureUnexpectedProviderAndGraderErrorsStayUnknown/grader (0.28s)
+=== RUN   TestProcedureControlledGraderActualVersion
+--- PASS: TestProcedureControlledGraderActualVersion (0.13s)
+=== RUN   TestProcedureSmallContextBudgetKeepsSafeReport
+--- PASS: TestProcedureSmallContextBudgetKeepsSafeReport (5.81s)
+=== RUN   TestProcedurePoisoningRenderedFaultsFailIndependentGate
+=== RUN   TestProcedurePoisoningRenderedFaultsFailIndependentGate/empty
+=== RUN   TestProcedurePoisoningRenderedFaultsFailIndependentGate/missing
+=== RUN   TestProcedurePoisoningRenderedFaultsFailIndependentGate/wrong
+--- PASS: TestProcedurePoisoningRenderedFaultsFailIndependentGate (0.50s)
+    --- PASS: TestProcedurePoisoningRenderedFaultsFailIndependentGate/empty (0.12s)
+    --- PASS: TestProcedurePoisoningRenderedFaultsFailIndependentGate/missing (0.17s)
+    --- PASS: TestProcedurePoisoningRenderedFaultsFailIndependentGate/wrong (0.22s)
+=== RUN   TestProcedureGraderReceivesDetachedProjections
+--- PASS: TestProcedureGraderReceivesDetachedProjections (0.58s)
+=== RUN   TestProcedureCanonicalChecksAfterGraderCallback
+=== RUN   TestProcedureCanonicalChecksAfterGraderCallback/forget
+=== RUN   TestProcedureCanonicalChecksAfterGraderCallback/source
+=== RUN   TestProcedureCanonicalChecksAfterGraderCallback/expiry
+=== RUN   TestProcedureCanonicalChecksAfterGraderCallback/cancel
+--- PASS: TestProcedureCanonicalChecksAfterGraderCallback (1.24s)
+    --- PASS: TestProcedureCanonicalChecksAfterGraderCallback/forget (0.32s)
+    --- PASS: TestProcedureCanonicalChecksAfterGraderCallback/source (0.28s)
+    --- PASS: TestProcedureCanonicalChecksAfterGraderCallback/expiry (0.29s)
+    --- PASS: TestProcedureCanonicalChecksAfterGraderCallback/cancel (0.35s)
+=== RUN   TestFinalVerdictUsesEveryStage
+=== RUN   TestFinalVerdictUsesEveryStage/candidate
+=== RUN   TestFinalVerdictUsesEveryStage/host_review
+=== RUN   TestFinalVerdictUsesEveryStage/effective
+=== RUN   TestFinalVerdictUsesEveryStage/canonical
+=== RUN   TestFinalVerdictUsesEveryStage/rendered
+=== RUN   TestFinalVerdictUsesEveryStage/execution
+--- PASS: TestFinalVerdictUsesEveryStage (0.00s)
+    --- PASS: TestFinalVerdictUsesEveryStage/candidate (0.00s)
+    --- PASS: TestFinalVerdictUsesEveryStage/host_review (0.00s)
+    --- PASS: TestFinalVerdictUsesEveryStage/effective (0.00s)
+    --- PASS: TestFinalVerdictUsesEveryStage/canonical (0.00s)
+    --- PASS: TestFinalVerdictUsesEveryStage/rendered (0.00s)
+    --- PASS: TestFinalVerdictUsesEveryStage/execution (0.00s)
+=== RUN   TestExpectedCandidateRejectionCanPassProtocol
+--- PASS: TestExpectedCandidateRejectionCanPassProtocol (0.00s)
+=== RUN   TestMissingEvidenceAndDeclaredCheckpointAreUnknown
+--- PASS: TestMissingEvidenceAndDeclaredCheckpointAreUnknown (0.00s)
+=== RUN   TestUnknownPrecedenceAndSafeErrors
+--- PASS: TestUnknownPrecedenceAndSafeErrors (0.00s)
+=== RUN   TestMalformedManifestFailsBeforeDispatch
+=== RUN   TestMalformedManifestFailsBeforeDispatch/version
+=== RUN   TestMalformedManifestFailsBeforeDispatch/seed
+=== RUN   TestMalformedManifestFailsBeforeDispatch/repeats
+=== RUN   TestMalformedManifestFailsBeforeDispatch/provider
+=== RUN   TestMalformedManifestFailsBeforeDispatch/budget
+=== RUN   TestMalformedManifestFailsBeforeDispatch/unknown_plan
+=== RUN   TestMalformedManifestFailsBeforeDispatch/duplicate_plan
+=== RUN   TestMalformedManifestFailsBeforeDispatch/plan_version
+=== RUN   TestMalformedManifestFailsBeforeDispatch/plan_ports
+=== RUN   TestMalformedManifestFailsBeforeDispatch/missing_groups
+--- PASS: TestMalformedManifestFailsBeforeDispatch (0.00s)
+    --- PASS: TestMalformedManifestFailsBeforeDispatch/version (0.00s)
+    --- PASS: TestMalformedManifestFailsBeforeDispatch/seed (0.00s)
+    --- PASS: TestMalformedManifestFailsBeforeDispatch/repeats (0.00s)
+    --- PASS: TestMalformedManifestFailsBeforeDispatch/provider (0.00s)
+    --- PASS: TestMalformedManifestFailsBeforeDispatch/budget (0.00s)
+    --- PASS: TestMalformedManifestFailsBeforeDispatch/unknown_plan (0.00s)
+    --- PASS: TestMalformedManifestFailsBeforeDispatch/duplicate_plan (0.00s)
+    --- PASS: TestMalformedManifestFailsBeforeDispatch/plan_version (0.00s)
+    --- PASS: TestMalformedManifestFailsBeforeDispatch/plan_ports (0.00s)
+    --- PASS: TestMalformedManifestFailsBeforeDispatch/missing_groups (0.00s)
+=== RUN   TestSeedAndRepeatsActuallyDispatch
+--- PASS: TestSeedAndRepeatsActuallyDispatch (27.97s)
+=== RUN   TestQualitySchemasExecuteAgainstActualReports
+--- PASS: TestQualitySchemasExecuteAgainstActualReports (5.18s)
+=== RUN   TestStrictManifestDecode
+--- PASS: TestStrictManifestDecode (0.00s)
+=== RUN   TestFailureReportMatchesSchemaAndCannotLeakLoadData
+--- PASS: TestFailureReportMatchesSchemaAndCannotLeakLoadData (0.01s)
+=== RUN   TestSavedManifestPinsRegisteredPlans
+--- PASS: TestSavedManifestPinsRegisteredPlans (0.00s)
+PASS
+ok  	github.com/skosovsky/memy/internal/quality	75.869s
+?   	github.com/skosovsky/memy/internal/workcost	[no test files]
+=== RUN   TestSearchConformance
+=== RUN   TestSearchConformance/index
+=== RUN   TestSearchConformance/index/scope_coverage/0
+=== RUN   TestSearchConformance/index/scope_coverage/1
+=== RUN   TestSearchConformance/index/scope_coverage/2
+=== RUN   TestSearchConformance/index/exact_visibility_bindings
+=== RUN   TestSearchConformance/index/minimum_and_cancel
+=== RUN   TestSearchConformance/index/candidate_bound
+=== RUN   TestSearchConformance/index/failure
+=== RUN   TestSearchConformance/eventual
+=== RUN   TestSearchConformance/eventual/scope_coverage/0
+=== RUN   TestSearchConformance/eventual/scope_coverage/1
+=== RUN   TestSearchConformance/eventual/scope_coverage/2
+=== RUN   TestSearchConformance/eventual/exact_visibility_bindings
+    search.go:209: adapter does not support minimum visibility
+=== RUN   TestSearchConformance/eventual/minimum_and_cancel
+=== RUN   TestSearchConformance/eventual/candidate_bound
+=== RUN   TestSearchConformance/eventual/failure
+=== RUN   TestSearchConformance/composite
+=== RUN   TestSearchConformance/composite/scope_coverage/0
+=== RUN   TestSearchConformance/composite/scope_coverage/1
+=== RUN   TestSearchConformance/composite/scope_coverage/2
+=== RUN   TestSearchConformance/composite/exact_visibility_bindings
+=== RUN   TestSearchConformance/composite/minimum_and_cancel
+=== RUN   TestSearchConformance/composite/candidate_bound
+=== RUN   TestSearchConformance/composite/failure
+--- PASS: TestSearchConformance (0.13s)
+    --- PASS: TestSearchConformance/index (0.06s)
+        --- PASS: TestSearchConformance/index/scope_coverage/0 (0.00s)
+        --- PASS: TestSearchConformance/index/scope_coverage/1 (0.00s)
+        --- PASS: TestSearchConformance/index/scope_coverage/2 (0.00s)
+        --- PASS: TestSearchConformance/index/exact_visibility_bindings (0.03s)
+        --- PASS: TestSearchConformance/index/minimum_and_cancel (0.03s)
+        --- PASS: TestSearchConformance/index/candidate_bound (0.00s)
+        --- PASS: TestSearchConformance/index/failure (0.00s)
+    --- PASS: TestSearchConformance/eventual (0.00s)
+        --- PASS: TestSearchConformance/eventual/scope_coverage/0 (0.00s)
+        --- PASS: TestSearchConformance/eventual/scope_coverage/1 (0.00s)
+        --- PASS: TestSearchConformance/eventual/scope_coverage/2 (0.00s)
+        --- SKIP: TestSearchConformance/eventual/exact_visibility_bindings (0.00s)
+        --- PASS: TestSearchConformance/eventual/minimum_and_cancel (0.00s)
+        --- PASS: TestSearchConformance/eventual/candidate_bound (0.00s)
+        --- PASS: TestSearchConformance/eventual/failure (0.00s)
+    --- PASS: TestSearchConformance/composite (0.06s)
+        --- PASS: TestSearchConformance/composite/scope_coverage/0 (0.00s)
+        --- PASS: TestSearchConformance/composite/scope_coverage/1 (0.00s)
+        --- PASS: TestSearchConformance/composite/scope_coverage/2 (0.00s)
+        --- PASS: TestSearchConformance/composite/exact_visibility_bindings (0.03s)
+        --- PASS: TestSearchConformance/composite/minimum_and_cancel (0.03s)
+        --- PASS: TestSearchConformance/composite/candidate_bound (0.00s)
+        --- PASS: TestSearchConformance/composite/failure (0.00s)
+=== RUN   TestSinkConformance
+=== RUN   TestSinkConformance/index
+=== RUN   TestSinkConformance/index/scoped_repeatable_purge/{"tenant":"A-foreign","namespace":"prefs","subject":"user"}
+=== RUN   TestSinkConformance/index/scoped_repeatable_purge/{"tenant":"A","namespace":"prefs-foreign","subject":"user"}
+=== RUN   TestSinkConformance/index/scoped_repeatable_purge/{"tenant":"A","namespace":"prefs","subject":"user-foreign"}
+=== RUN   TestSinkConformance/index/chunks_and_replay
+=== RUN   TestSinkConformance/index/failure_and_cancel
+=== RUN   TestSinkConformance/projection
+=== RUN   TestSinkConformance/projection/scoped_repeatable_purge/{"tenant":"A-foreign","namespace":"prefs","subject":"user"}
+=== RUN   TestSinkConformance/projection/scoped_repeatable_purge/{"tenant":"A","namespace":"prefs-foreign","subject":"user"}
+=== RUN   TestSinkConformance/projection/scoped_repeatable_purge/{"tenant":"A","namespace":"prefs","subject":"user-foreign"}
+=== RUN   TestSinkConformance/projection/chunks_and_replay
+=== RUN   TestSinkConformance/projection/failure_and_cancel
+--- PASS: TestSinkConformance (0.00s)
+    --- PASS: TestSinkConformance/index (0.00s)
+        --- PASS: TestSinkConformance/index/scoped_repeatable_purge/{"tenant":"A-foreign","namespace":"prefs","subject":"user"} (0.00s)
+        --- PASS: TestSinkConformance/index/scoped_repeatable_purge/{"tenant":"A","namespace":"prefs-foreign","subject":"user"} (0.00s)
+        --- PASS: TestSinkConformance/index/scoped_repeatable_purge/{"tenant":"A","namespace":"prefs","subject":"user-foreign"} (0.00s)
+        --- PASS: TestSinkConformance/index/chunks_and_replay (0.00s)
+        --- PASS: TestSinkConformance/index/failure_and_cancel (0.00s)
+    --- PASS: TestSinkConformance/projection (0.00s)
+        --- PASS: TestSinkConformance/projection/scoped_repeatable_purge/{"tenant":"A-foreign","namespace":"prefs","subject":"user"} (0.00s)
+        --- PASS: TestSinkConformance/projection/scoped_repeatable_purge/{"tenant":"A","namespace":"prefs-foreign","subject":"user"} (0.00s)
+        --- PASS: TestSinkConformance/projection/scoped_repeatable_purge/{"tenant":"A","namespace":"prefs","subject":"user-foreign"} (0.00s)
+        --- PASS: TestSinkConformance/projection/chunks_and_replay (0.00s)
+        --- PASS: TestSinkConformance/projection/failure_and_cancel (0.00s)
+=== RUN   TestHostPortConformance
+=== RUN   TestHostPortConformance/codec
+=== RUN   TestHostPortConformance/authority
+=== RUN   TestHostPortConformance/sources
+=== RUN   TestHostPortConformance/clock
+--- PASS: TestHostPortConformance (0.00s)
+    --- PASS: TestHostPortConformance/codec (0.00s)
+    --- PASS: TestHostPortConformance/authority (0.00s)
+    --- PASS: TestHostPortConformance/sources (0.00s)
+    --- PASS: TestHostPortConformance/clock (0.00s)
+=== RUN   TestTypedCallbackConformance
+=== RUN   TestTypedCallbackConformance/extractor
+=== RUN   TestTypedCallbackConformance/extractor/typed_success
+=== RUN   TestTypedCallbackConformance/extractor/provider_failure
+=== RUN   TestTypedCallbackConformance/extractor/cancellation
+=== RUN   TestTypedCallbackConformance/resolver
+=== RUN   TestTypedCallbackConformance/resolver/typed_success
+=== RUN   TestTypedCallbackConformance/resolver/provider_failure
+=== RUN   TestTypedCallbackConformance/resolver/cancellation
+=== RUN   TestTypedCallbackConformance/ranker
+=== RUN   TestTypedCallbackConformance/ranker/typed_success
+=== RUN   TestTypedCallbackConformance/ranker/provider_failure
+    ports.go:223: deterministic adapter has no injected dependency failure
+=== RUN   TestTypedCallbackConformance/ranker/cancellation
+=== RUN   TestTypedCallbackConformance/projector
+=== RUN   TestTypedCallbackConformance/projector/typed_success
+=== RUN   TestTypedCallbackConformance/projector/provider_failure
+=== RUN   TestTypedCallbackConformance/projector/cancellation
+=== RUN   TestTypedCallbackConformance/consolidator
+=== RUN   TestTypedCallbackConformance/consolidator/typed_success
+=== RUN   TestTypedCallbackConformance/consolidator/provider_failure
+=== RUN   TestTypedCallbackConformance/consolidator/cancellation
+=== RUN   TestTypedCallbackConformance/reintroduction
+=== RUN   TestTypedCallbackConformance/reintroduction/typed_success
+=== RUN   TestTypedCallbackConformance/reintroduction/provider_failure
+=== RUN   TestTypedCallbackConformance/reintroduction/cancellation
+=== RUN   TestTypedCallbackConformance/retention
+=== RUN   TestTypedCallbackConformance/retention/typed_success
+=== RUN   TestTypedCallbackConformance/retention/provider_failure
+    ports.go:223: deterministic adapter has no injected dependency failure
+=== RUN   TestTypedCallbackConformance/retention/cancellation
+--- PASS: TestTypedCallbackConformance (0.00s)
+    --- PASS: TestTypedCallbackConformance/extractor (0.00s)
+        --- PASS: TestTypedCallbackConformance/extractor/typed_success (0.00s)
+        --- PASS: TestTypedCallbackConformance/extractor/provider_failure (0.00s)
+        --- PASS: TestTypedCallbackConformance/extractor/cancellation (0.00s)
+    --- PASS: TestTypedCallbackConformance/resolver (0.00s)
+        --- PASS: TestTypedCallbackConformance/resolver/typed_success (0.00s)
+        --- PASS: TestTypedCallbackConformance/resolver/provider_failure (0.00s)
+        --- PASS: TestTypedCallbackConformance/resolver/cancellation (0.00s)
+    --- PASS: TestTypedCallbackConformance/ranker (0.00s)
+        --- PASS: TestTypedCallbackConformance/ranker/typed_success (0.00s)
+        --- SKIP: TestTypedCallbackConformance/ranker/provider_failure (0.00s)
+        --- PASS: TestTypedCallbackConformance/ranker/cancellation (0.00s)
+    --- PASS: TestTypedCallbackConformance/projector (0.00s)
+        --- PASS: TestTypedCallbackConformance/projector/typed_success (0.00s)
+        --- PASS: TestTypedCallbackConformance/projector/provider_failure (0.00s)
+        --- PASS: TestTypedCallbackConformance/projector/cancellation (0.00s)
+    --- PASS: TestTypedCallbackConformance/consolidator (0.00s)
+        --- PASS: TestTypedCallbackConformance/consolidator/typed_success (0.00s)
+        --- PASS: TestTypedCallbackConformance/consolidator/provider_failure (0.00s)
+        --- PASS: TestTypedCallbackConformance/consolidator/cancellation (0.00s)
+    --- PASS: TestTypedCallbackConformance/reintroduction (0.00s)
+        --- PASS: TestTypedCallbackConformance/reintroduction/typed_success (0.00s)
+        --- PASS: TestTypedCallbackConformance/reintroduction/provider_failure (0.00s)
+        --- PASS: TestTypedCallbackConformance/reintroduction/cancellation (0.00s)
+    --- PASS: TestTypedCallbackConformance/retention (0.00s)
+        --- PASS: TestTypedCallbackConformance/retention/typed_success (0.00s)
+        --- SKIP: TestTypedCallbackConformance/retention/provider_failure (0.00s)
+        --- PASS: TestTypedCallbackConformance/retention/cancellation (0.00s)
+=== RUN   TestProjectionSinkMultipleLineageReferences
+--- PASS: TestProjectionSinkMultipleLineageReferences (0.00s)
+=== RUN   TestJSONPackingWholeBody
+--- PASS: TestJSONPackingWholeBody (0.00s)
+=== RUN   TestJSONPackingLimits
+=== RUN   TestJSONPackingLimits/zero
+=== RUN   TestJSONPackingLimits/metadata_cannot_fit
+=== RUN   TestJSONPackingLimits/explicit_oversized_rejection
+=== RUN   TestJSONPackingLimits/max_uint_does_not_wrap
+--- PASS: TestJSONPackingLimits (0.00s)
+    --- PASS: TestJSONPackingLimits/zero (0.00s)
+    --- PASS: TestJSONPackingLimits/metadata_cannot_fit (0.00s)
+    --- PASS: TestJSONPackingLimits/explicit_oversized_rejection (0.00s)
+    --- PASS: TestJSONPackingLimits/max_uint_does_not_wrap (0.00s)
+=== RUN   TestJSONPackingCancellationAndInvalidInput
+--- PASS: TestJSONPackingCancellationAndInvalidInput (0.00s)
+=== RUN   TestJSONPackingAllOmittedAndEmpty
+--- PASS: TestJSONPackingAllOmittedAndEmpty (0.00s)
+=== RUN   TestJSONPackingPreservesRankedOrder
+--- PASS: TestJSONPackingPreservesRankedOrder (0.00s)
+=== RUN   TestJSONPackingMarshalFailureAndCancellation
+--- PASS: TestJSONPackingMarshalFailureAndCancellation (0.00s)
+=== RUN   TestCompositeRRFPermutationDuplicatesAndScales
+--- PASS: TestCompositeRRFPermutationDuplicatesAndScales (0.00s)
+=== RUN   TestCompositeWeightsAndGlobalBound
+--- PASS: TestCompositeWeightsAndGlobalBound (0.00s)
+=== RUN   TestCompositeRejectsMalformedBeforeFusion
+=== RUN   TestCompositeRejectsMalformedBeforeFusion/zero_K
+=== RUN   TestCompositeRejectsMalformedBeforeFusion/infinite_K
+=== RUN   TestCompositeRejectsMalformedBeforeFusion/unknown_weight
+=== RUN   TestCompositeRejectsMalformedBeforeFusion/negative_weight
+=== RUN   TestCompositeRejectsMalformedBeforeFusion/nan_weight
+=== RUN   TestCompositeRejectsMalformedBeforeFusion/duplicate_names
+=== RUN   TestCompositeRejectsMalformedBeforeFusion/oversized
+=== RUN   TestCompositeRejectsMalformedBeforeFusion/malformed_ref
+=== RUN   TestCompositeRejectsMalformedBeforeFusion/nan_score
+=== RUN   TestCompositeRejectsMalformedBeforeFusion/foreign_coverage
+=== RUN   TestCompositeRejectsMalformedBeforeFusion/foreign_signal
+=== RUN   TestCompositeRejectsMalformedBeforeFusion/invalid_signal_rank
+=== RUN   TestCompositeRejectsMalformedBeforeFusion/infinite_signal
+=== RUN   TestCompositeRejectsMalformedBeforeFusion/unsupported_bound
+--- PASS: TestCompositeRejectsMalformedBeforeFusion (0.00s)
+    --- PASS: TestCompositeRejectsMalformedBeforeFusion/zero_K (0.00s)
+    --- PASS: TestCompositeRejectsMalformedBeforeFusion/infinite_K (0.00s)
+    --- PASS: TestCompositeRejectsMalformedBeforeFusion/unknown_weight (0.00s)
+    --- PASS: TestCompositeRejectsMalformedBeforeFusion/negative_weight (0.00s)
+    --- PASS: TestCompositeRejectsMalformedBeforeFusion/nan_weight (0.00s)
+    --- PASS: TestCompositeRejectsMalformedBeforeFusion/duplicate_names (0.00s)
+    --- PASS: TestCompositeRejectsMalformedBeforeFusion/oversized (0.00s)
+    --- PASS: TestCompositeRejectsMalformedBeforeFusion/malformed_ref (0.00s)
+    --- PASS: TestCompositeRejectsMalformedBeforeFusion/nan_score (0.00s)
+    --- PASS: TestCompositeRejectsMalformedBeforeFusion/foreign_coverage (0.00s)
+    --- PASS: TestCompositeRejectsMalformedBeforeFusion/foreign_signal (0.00s)
+    --- PASS: TestCompositeRejectsMalformedBeforeFusion/invalid_signal_rank (0.00s)
+    --- PASS: TestCompositeRejectsMalformedBeforeFusion/infinite_signal (0.00s)
+    --- PASS: TestCompositeRejectsMalformedBeforeFusion/unsupported_bound (0.00s)
+=== RUN   TestCompositeDegradedMinimumAndCancellation
+=== RUN   TestCompositeDegradedMinimumAndCancellation/partial
+=== RUN   TestCompositeDegradedMinimumAndCancellation/all_failed
+=== RUN   TestCompositeDegradedMinimumAndCancellation/minimum
+=== RUN   TestCompositeDegradedMinimumAndCancellation/canceled
+--- PASS: TestCompositeDegradedMinimumAndCancellation (0.00s)
+    --- PASS: TestCompositeDegradedMinimumAndCancellation/partial (0.00s)
+    --- PASS: TestCompositeDegradedMinimumAndCancellation/all_failed (0.00s)
+    --- PASS: TestCompositeDegradedMinimumAndCancellation/minimum (0.00s)
+    --- PASS: TestCompositeDegradedMinimumAndCancellation/canceled (0.00s)
+=== RUN   TestIndexBoundAndDetachedSignals
+--- PASS: TestIndexBoundAndDetachedSignals (0.00s)
+=== RUN   TestIndexValidationAndEventualMinimum
+--- PASS: TestIndexValidationAndEventualMinimum (0.00s)
+=== RUN   TestCompositeMinimumSatisfiedWithOtherPendingEntries
+--- PASS: TestCompositeMinimumSatisfiedWithOtherPendingEntries (0.00s)
+=== RUN   TestCompositeBackendCountAndPreCallCancellation
+--- PASS: TestCompositeBackendCountAndPreCallCancellation (0.00s)
+=== RUN   TestCompositeCancellationPrecedesChildMetadataValidation
+=== RUN   TestCompositeCancellationPrecedesChildMetadataValidation/empty_canceled
+=== RUN   TestCompositeCancellationPrecedesChildMetadataValidation/empty_deadline
+=== RUN   TestCompositeCancellationPrecedesChildMetadataValidation/canceled_context_malformed_success
+=== RUN   TestCompositeCancellationPrecedesChildMetadataValidation/joined_visibility_deadline
+--- PASS: TestCompositeCancellationPrecedesChildMetadataValidation (0.00s)
+    --- PASS: TestCompositeCancellationPrecedesChildMetadataValidation/empty_canceled (0.00s)
+    --- PASS: TestCompositeCancellationPrecedesChildMetadataValidation/empty_deadline (0.00s)
+    --- PASS: TestCompositeCancellationPrecedesChildMetadataValidation/canceled_context_malformed_success (0.00s)
+    --- PASS: TestCompositeCancellationPrecedesChildMetadataValidation/joined_visibility_deadline (0.00s)
+=== RUN   TestCompositePreservesProvidedRawScoreWithDistinctRanks
+--- PASS: TestCompositePreservesProvidedRawScoreWithDistinctRanks (0.00s)
+PASS
+ok  	github.com/skosovsky/memy/reference	1.980s
+=== RUN   TestSlowScopedCallbackAllowsIndependentScope
+--- PASS: TestSlowScopedCallbackAllowsIndependentScope (0.00s)
+=== RUN   TestConformance
+=== RUN   TestConformance/capabilities
+=== RUN   TestConformance/scope_isolation
+=== RUN   TestConformance/closed_store
+=== RUN   TestConformance/malformed_scope_identity
+=== RUN   TestConformance/rollback
+=== RUN   TestConformance/panic_rollback
+=== RUN   TestConformance/cancel_rollback
+=== RUN   TestConformance/detached_bytes
+=== RUN   TestConformance/read_only_and_escaped_bucket
+=== RUN   TestConformance/delete_aba_fence
+=== RUN   TestConformance/concurrent_cas
+=== RUN   TestConformance/context_aware_wait
+=== RUN   TestConformance/malformed_input
+=== RUN   TestConformance/closed
+=== RUN   TestConformance/bounded_scan
+=== RUN   TestConformance/scan_cursor_binding
+=== RUN   TestConformance/scan_cursor_boundaries
+--- PASS: TestConformance (0.06s)
+    --- PASS: TestConformance/capabilities (0.00s)
+    --- PASS: TestConformance/scope_isolation (0.00s)
+    --- PASS: TestConformance/closed_store (0.00s)
+    --- PASS: TestConformance/malformed_scope_identity (0.00s)
+    --- PASS: TestConformance/rollback (0.00s)
+    --- PASS: TestConformance/panic_rollback (0.00s)
+    --- PASS: TestConformance/cancel_rollback (0.00s)
+    --- PASS: TestConformance/detached_bytes (0.00s)
+    --- PASS: TestConformance/read_only_and_escaped_bucket (0.00s)
+    --- PASS: TestConformance/delete_aba_fence (0.00s)
+    --- PASS: TestConformance/concurrent_cas (0.00s)
+    --- PASS: TestConformance/context_aware_wait (0.03s)
+    --- PASS: TestConformance/malformed_input (0.00s)
+    --- PASS: TestConformance/closed (0.00s)
+    --- PASS: TestConformance/bounded_scan (0.01s)
+    --- PASS: TestConformance/scan_cursor_binding (0.00s)
+    --- PASS: TestConformance/scan_cursor_boundaries (0.01s)
+PASS
+ok  	github.com/skosovsky/memy/store/memory	1.894s
+=== RUN   TestFencedProcessHelper
+    fence_test.go:22: subprocess helper
+--- SKIP: TestFencedProcessHelper (0.00s)
+=== RUN   TestScopeFencingAcrossProcesses
+=== RUN   TestScopeFencingAcrossProcesses/crash-false
+=== RUN   TestScopeFencingAcrossProcesses/crash-true
+--- PASS: TestScopeFencingAcrossProcesses (1.13s)
+    --- PASS: TestScopeFencingAcrossProcesses/crash-false (1.07s)
+    --- PASS: TestScopeFencingAcrossProcesses/crash-true (0.06s)
+=== RUN   TestCursorSurvivesHandleReopenButNotMutationOrDatabaseCopy
+--- PASS: TestCursorSurvivesHandleReopenButNotMutationOrDatabaseCopy (0.02s)
+=== RUN   TestConformance
+=== RUN   TestConformance/capabilities
+=== RUN   TestConformance/scope_isolation
+=== RUN   TestConformance/closed_store
+=== RUN   TestConformance/malformed_scope_identity
+=== RUN   TestConformance/rollback
+=== RUN   TestConformance/panic_rollback
+=== RUN   TestConformance/cancel_rollback
+=== RUN   TestConformance/detached_bytes
+=== RUN   TestConformance/read_only_and_escaped_bucket
+=== RUN   TestConformance/delete_aba_fence
+=== RUN   TestConformance/concurrent_cas
+=== RUN   TestConformance/context_aware_wait
+=== RUN   TestConformance/malformed_input
+=== RUN   TestConformance/closed
+=== RUN   TestConformance/bounded_scan
+=== RUN   TestConformance/scan_cursor_binding
+=== RUN   TestConformance/scan_cursor_boundaries
+--- PASS: TestConformance (0.29s)
+    --- PASS: TestConformance/capabilities (0.00s)
+    --- PASS: TestConformance/scope_isolation (0.01s)
+    --- PASS: TestConformance/closed_store (0.01s)
+    --- PASS: TestConformance/malformed_scope_identity (0.01s)
+    --- PASS: TestConformance/rollback (0.01s)
+    --- PASS: TestConformance/panic_rollback (0.01s)
+    --- PASS: TestConformance/cancel_rollback (0.01s)
+    --- PASS: TestConformance/detached_bytes (0.01s)
+    --- PASS: TestConformance/read_only_and_escaped_bucket (0.01s)
+    --- PASS: TestConformance/delete_aba_fence (0.01s)
+    --- PASS: TestConformance/concurrent_cas (0.01s)
+    --- PASS: TestConformance/context_aware_wait (0.04s)
+    --- PASS: TestConformance/malformed_input (0.00s)
+    --- PASS: TestConformance/closed (0.00s)
+    --- PASS: TestConformance/bounded_scan (0.13s)
+    --- PASS: TestConformance/scan_cursor_binding (0.01s)
+    --- PASS: TestConformance/scan_cursor_boundaries (0.02s)
+=== RUN   TestDurableReopen
+--- PASS: TestDurableReopen (0.01s)
+=== RUN   TestIndependentConcurrentWriters
+--- PASS: TestIndependentConcurrentWriters (0.02s)
+=== RUN   TestFaultRecovery
+=== RUN   TestFaultRecovery/before_commit
+=== RUN   TestFaultRecovery/after_commit
+--- PASS: TestFaultRecovery (0.02s)
+    --- PASS: TestFaultRecovery/before_commit (0.01s)
+    --- PASS: TestFaultRecovery/after_commit (0.01s)
+=== RUN   TestRejectIncompatibleSchema
+=== RUN   TestRejectIncompatibleSchema/1
+=== RUN   TestRejectIncompatibleSchema/2
+=== RUN   TestRejectIncompatibleSchema/4
+--- PASS: TestRejectIncompatibleSchema (0.03s)
+    --- PASS: TestRejectIncompatibleSchema/1 (0.01s)
+    --- PASS: TestRejectIncompatibleSchema/2 (0.01s)
+    --- PASS: TestRejectIncompatibleSchema/4 (0.01s)
+=== RUN   TestIndependentWriterCancellationAndRecovery
+--- PASS: TestIndependentWriterCancellationAndRecovery (0.04s)
+=== RUN   TestRejectMissingExistingSchemaState
+=== RUN   TestRejectMissingExistingSchemaState/values
+=== RUN   TestRejectMissingExistingSchemaState/generations
+=== RUN   TestRejectMissingExistingSchemaState/schema
+=== RUN   TestRejectMissingExistingSchemaState/schema-row
+=== RUN   TestRejectMissingExistingSchemaState/columns
+=== RUN   TestRejectMissingExistingSchemaState/primary-key
+=== RUN   TestRejectMissingExistingSchemaState/types
+--- PASS: TestRejectMissingExistingSchemaState (0.06s)
+    --- PASS: TestRejectMissingExistingSchemaState/values (0.01s)
+    --- PASS: TestRejectMissingExistingSchemaState/generations (0.01s)
+    --- PASS: TestRejectMissingExistingSchemaState/schema (0.01s)
+    --- PASS: TestRejectMissingExistingSchemaState/schema-row (0.01s)
+    --- PASS: TestRejectMissingExistingSchemaState/columns (0.02s)
+    --- PASS: TestRejectMissingExistingSchemaState/primary-key (0.01s)
+    --- PASS: TestRejectMissingExistingSchemaState/types (0.01s)
+=== RUN   TestRepairSecondaryIndexAfterSchemaValidation
+--- PASS: TestRepairSecondaryIndexAfterSchemaValidation (0.01s)
+=== RUN   TestBootstrapRejectsForeignApplicationTables
+=== RUN   TestBootstrapRejectsForeignApplicationTables/host_data
+=== RUN   TestBootstrapRejectsForeignApplicationTables/sqliteXhost
+--- PASS: TestBootstrapRejectsForeignApplicationTables (0.01s)
+    --- PASS: TestBootstrapRejectsForeignApplicationTables/host_data (0.00s)
+    --- PASS: TestBootstrapRejectsForeignApplicationTables/sqliteXhost (0.01s)
+PASS
+ok  	github.com/skosovsky/memy/store/sqlite	3.493s
+go run ./examples/lifecycle
+Extracted 2 proposals; accepted timezone only; canonical revision 1.
+Decision: supersede, resolver=resolver/v1, authority=authority/v1, basis=explicit preference correction.
+New session, no transcript: timezone=UTC+7, revision 2.
+Search acknowledged revision 2; projection (data): Your timezone is UTC+7.
+Forget: one sink failed, Sweep recovered complete at epoch 1.
+go run ./examples/quality
 {
   "schema": "memy-quality/v2",
   "manifest": {
@@ -9651,3 +11306,243 @@
   ],
   "final": "pass"
 }
+go run ./examples/retrieval
+RRF a score=0.032522 signals=[{Backend:dense Rank:2 Score:0.89} {Backend:sparse Rank:1 Score:9000}]
+RRF b score=0.032522 signals=[{Backend:dense Rank:1 Score:0.92} {Backend:sparse Rank:2 Score:7000}]
+RRF c score=0.031250 signals=[{Backend:dense Rank:4 Score:0.79} {Backend:sparse Rank:4 Score:5000}]
+Final body (1183/1183 bytes/json, receipt excluded): {"projections":[{"output":{"service":"payments","procedure":"Check queue lag."},"provenance":{"sources":[{"id":"runbook","revision":"r1","reference":{"document":42,"section":"payments"}}],"extractor":"operator/v1","evidence":"approved runbook excerpt","lineage":null,"losses":["Original formatting omitted"],"uncertainties":["Confirm incident conditions before acting"]},"scope":{"tenant":"demo","namespace":"runbooks","subject":"oncall"},"record_id":"a","revision":1,"state":"active","expires_at":"2026-10-07T00:00:00Z","trust":"data","cache_key":"d68b7d2eb7c65349438a2b264ff1b2dade851cafe2e2213d38b9b3434d064bcf","reconciliation":{"mode":"append","related":null,"policy_version":"resolver/v1","basis":"independent runbook entry"},"authority_policy_version":"authority/v1"}],"coverage":[{"backend":"dense","status":"eventual","minimum_satisfied":false},{"backend":"sparse","status":"eventual","minimum_satisfied":false}],"progress":{"returned_candidates":4,"canonical_checked":4,"canonical_filtered":1,"ranking_omitted":0,"candidates_truncated":true},"omissions":[{"ref":{"record_id":"b","revision":1},"reason":"budget"},{"ref":{"record_id":"c","revision":1},"reason":"oversized"}]}
+Partial failure: coverage=[{Backend:dense Status:unavailable MinimumSatisfied:false} {Backend:sparse Status:eventual MinimumSatisfied:false}] checked=4 filtered=1 truncated=true omissions=[{Ref:{RecordID:a Revision:1} Reason:budget} {Ref:{RecordID:b Revision:1} Reason:budget} {Ref:{RecordID:c Revision:1} Reason:oversized}] bytes=485
+Fixture proves contract behavior; it does not measure production retrieval quality or external backend billing.
+go run ./examples/quality-integration
+{
+  "schema": "memy-quality/v2",
+  "versions": {
+    "provider": "integration-extractor/v1",
+    "model": "scripted",
+    "host_review": "none",
+    "retention": "procedure-retention/v1",
+    "resolver": "procedure-resolver/v1",
+    "consolidation": "none",
+    "search": "integration-bounded-rrf/v1",
+    "projector": "procedure-projector/v1",
+    "packing": "json-packing/v1",
+    "grader": "integration-exact-grader/v1"
+  },
+  "scenarios": [
+    {
+      "versions": {
+        "provider": "integration-extractor/v1",
+        "model": "scripted",
+        "host_review": "none",
+        "retention": "procedure-retention/v1",
+        "resolver": "procedure-resolver/v1",
+        "consolidation": "none",
+        "search": "integration-bounded-rrf/v1",
+        "projector": "procedure-projector/v1",
+        "packing": "json-packing/v1",
+        "grader": "integration-exact-grader/v1"
+      },
+      "mode": "scripted",
+      "id": "procedure-retrieval",
+      "domain": "procedure",
+      "version": "procedure-fixtures/v2",
+      "repeat": 0,
+      "seed": 5666118649731242188,
+      "variation": "seeded-insertion-order",
+      "candidate": {
+        "status": "not_applicable",
+        "checks": []
+      },
+      "host_review": {
+        "status": "not_applicable",
+        "checks": []
+      },
+      "effective": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "effective-exact",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "two-relevant-exact-revisions",
+            "observed": "two-relevant-exact-revisions",
+            "evidence": [
+              {
+                "code": "effective-exact",
+                "count": 2
+              }
+            ]
+          }
+        ],
+        "version": "integration-bounded-rrf/v1"
+      },
+      "canonical": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "canonical-state",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "exact-originals-source-retention",
+            "observed": "exact-originals-source-retention",
+            "evidence": [
+              {
+                "code": "canonical-state",
+                "count": 3
+              }
+            ]
+          },
+          {
+            "id": "canonical-provenance",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "exact-sources-lineage-validity-expiry",
+            "observed": "exact-sources-lineage-validity-expiry",
+            "evidence": [
+              {
+                "code": "canonical-provenance",
+                "count": 3
+              }
+            ]
+          },
+          {
+            "id": "current-retention",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "expired-current-read-denied",
+            "observed": "expired-current-read-denied",
+            "evidence": [
+              {
+                "code": "current-retention",
+                "count": 1
+              }
+            ]
+          }
+        ],
+        "version": "procedure-retention/v1"
+      },
+      "rendered": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "rendered-context",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "one-packed-exact-data-projection",
+            "observed": "one-packed-exact-data-projection",
+            "evidence": [
+              {
+                "code": "rendered-context",
+                "count": 1
+              }
+            ]
+          }
+        ],
+        "version": "procedure-projector/v1"
+      },
+      "execution": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "procedure-completed",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "completed",
+            "observed": "completed",
+            "evidence": [
+              {
+                "code": "procedure-completed",
+                "count": 1
+              }
+            ]
+          },
+          {
+            "id": "configured-boundaries",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "within-configured-candidate-recall-call-caps",
+            "observed": "within-configured-candidate-recall-call-caps",
+            "evidence": [
+              {
+                "code": "configured-boundaries",
+                "count": 4
+              }
+            ]
+          },
+          {
+            "id": "context-budget",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "full-body-json-bytes\u003c=20000",
+            "observed": "1312",
+            "evidence": [
+              {
+                "code": "bounded-body-observations",
+                "count": 1
+              }
+            ]
+          },
+          {
+            "id": "configured-grader",
+            "mandatory": true,
+            "status": "pass",
+            "expected": "actual-invocation-count",
+            "observed": "executed",
+            "evidence": [
+              {
+                "code": "configured-grader-calls",
+                "count": 1
+              }
+            ]
+          }
+        ],
+        "version": "integration-extractor/v1"
+      },
+      "metrics": {
+        "payload_bytes": {
+          "status": "known",
+          "unit": "payload-json-bytes",
+          "value": 154
+        },
+        "context_json_bytes": {
+          "status": "known",
+          "unit": "maximum-observed-body-json-bytes",
+          "value": 1312
+        },
+        "canonical_serialized_bytes": {
+          "status": "unavailable",
+          "unit": "serialized-canonical-bytes",
+          "reason": "not_measured"
+        },
+        "provider_abstract_cost": {
+          "status": "known",
+          "unit": "scripted-call-unit",
+          "value": 3
+        },
+        "real_provider_cost": {
+          "status": "unavailable",
+          "unit": "provider-tokens-currency",
+          "reason": "provider-cost-not-measured"
+        }
+      },
+      "final": "pass"
+    }
+  ],
+  "final": "pass"
+}
+python3 scripts/release_test.py
+test_clean_break_and_published_version (__main__.ReleaseTests.test_clean_break_and_published_version) ... ok
+test_detached_start (__main__.ReleaseTests.test_detached_start) ... ok
+test_failure_before_tag (__main__.ReleaseTests.test_failure_before_tag) ... ok
+test_happy_excludes_untracked_and_unrelated_tags (__main__.ReleaseTests.test_happy_excludes_untracked_and_unrelated_tags) ... ok
+test_lost_push_response_is_reconciled (__main__.ReleaseTests.test_lost_push_response_is_reconciled) ... ok
+test_major_import_path_mismatch (__main__.ReleaseTests.test_major_import_path_mismatch) ... ok
+test_rejected_push_retry_keeps_same_version (__main__.ReleaseTests.test_rejected_push_retry_keeps_same_version) ... ok
+test_staged_and_unstaged_rejected (__main__.ReleaseTests.test_staged_and_unstaged_rejected) ... ok
+test_unknown_preserves_recovery_refs (__main__.ReleaseTests.test_unknown_preserves_recovery_refs) ... ok
+test_unsupported_modules_and_major_break (__main__.ReleaseTests.test_unsupported_modules_and_major_break) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 16.006s
+
+OK
