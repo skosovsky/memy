@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"reflect"
 )
 
 // Codec is a versioned deterministic consumer-type encoding. Encode must not
@@ -20,14 +21,19 @@ type Codec[T any] interface {
 }
 
 // JSONCodec implements deterministic JSON with strict decoding and duplicate
-// object-key rejection. Consumers may supply another codec for their own types.
+// object-key rejection and Unicode scalar validation. Generic numbers decode as
+// [json.Number]; explicit numeric fields follow their declared Go type. Consumers
+// may supply another codec for their own types.
 type JSONCodec[T any] struct{}
 
 // Version identifies the payload representation contract.
-func (JSONCodec[T]) Version() string { return "json/v1" }
+func (JSONCodec[T]) Version() string { return "json/v2" }
 
 // Encode canonicalizes map ordering and rejects invalid JSON values.
 func (JSONCodec[T]) Encode(value T) ([]byte, error) {
+	if err := jsonUnicodeValue(reflect.ValueOf(value), make(map[unicodeVisit]bool)); err != nil {
+		return nil, errors.Join(ErrInvalid, err)
+	}
 	raw, operationErr := json.Marshal(value)
 	if operationErr != nil {
 		return nil, errors.Join(ErrInvalid, operationErr)
@@ -43,6 +49,7 @@ func (JSONCodec[T]) Decode(raw []byte) (T, error) {
 		return value, operationErr
 	}
 	decoder := json.NewDecoder(bytes.NewReader(canonical))
+	decoder.UseNumber()
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&value); err != nil {
 		return value, errors.Join(ErrInvalid, err)
@@ -51,6 +58,9 @@ func (JSONCodec[T]) Decode(raw []byte) (T, error) {
 }
 
 func canonicalJSON(raw []byte) ([]byte, error) {
+	if !strictWireText(raw) {
+		return nil, ErrInvalid
+	}
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.UseNumber()
 	value, operationErr := jsonValue(decoder)

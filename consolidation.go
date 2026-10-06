@@ -464,7 +464,7 @@ func consolidationDigest(scope Scope, actor string, request ConsolidationRequest
 		Codec    string
 		Provider string
 		Scope    Scope
-	}{encodedRequest, "json/v1", request.PolicyVersion, scope})
+	}{encodedRequest, (JSONCodec[ConsolidationRequest]{}).Version(), request.PolicyVersion, scope})
 }
 
 func (e *Engine[P, R, A]) budgetRecord(r Record[P, R]) ([]byte, error) {

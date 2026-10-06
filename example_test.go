@@ -118,7 +118,7 @@ func ExampleJSONCodec() {
 	fmt.Println(string(encoded))
 	fmt.Println(decoded["key"], decoded["value"])
 	// Output:
-	// json/v1
+	// json/v2
 	// {"key":"timezone","value":"UTC+7"}
 	// timezone UTC+7
 }

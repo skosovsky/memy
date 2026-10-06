@@ -127,12 +127,18 @@ replaces typed extractor/search and optional grader ports without changing the
 checkpoint oracles. Model SDKs, answer rubrics and external evaluation remain
 consumer-owned. See quality.md for the current command and report interpretation.
 
-## Review remediation identities (task2 target)
+## Review remediation identities (task2)
 
 See [remediation contracts](remediation-contracts.md) for the normative upgrade
-plan approved before source changes: stock json/v2 rejects mismatched json/v1
+plan approved before source changes. Stock json/v2 is implemented and rejects mismatched json/v1
 records, projection/v2 requires host cache invalidation, and cursor v2 explicitly
 rejects old continuations. Persisted schema stays v3. Import old codec data only
 through fresh host review and the normal lifecycle; no silent relabeling or reader
 fallback. Sweep callers must consume confirmed partial results alongside errors.
 Implementation and acceptance are tracked in the task2 checklist.
+
+Consolidation request digests now bind the actual stock codec identity json/v2.
+An old consolidation operation ID with a json/v1-bound digest returns ErrConflict
+on a new request; no silent replay reinterpretation occurs. Recover the old
+receipt/state offline before issuing a newly reviewed operation identity. Old
+proposal/canonical content still requires the explicit import described above.

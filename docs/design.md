@@ -100,10 +100,15 @@ implementation of their respective stages; baseline behavior is not acceptance.
 
 ## Codecs, keys and idempotency
 
-Codec[T] supplies versioned Encode/Decode. JSONCodec[T] is the runnable reference
-codec; encoding/json orders string map keys. The supported JSON domain excludes
-NaN, infinity, cycles, custom marshalers with unstable output and duplicate
-object keys. Validation rejects malformed/unknown versions. Encode outputs
+Codec[T] supplies versioned Encode/Decode. Stock JSONCodec[T] uses json/v2,
+orders string map keys and admits valid Unicode scalar strings only. Encode
+checks strings/keys and custom emitted JSON/text before encoding/json replacement;
+Decode rejects invalid UTF-8 and unpaired surrogate escapes. Generic numbers,
+including source references and nested maps/arrays, decode as json.Number with
+lexemes retained. Typed numeric fields follow their declared Go type. 1/1.0/1e0
+can have distinct identities; arbitrary dynamic numeric types are not recovered.
+The supported domain excludes NaN, infinity, cycles and duplicate object keys;
+custom callback determinism is a host obligation, not runtime certification. Validation rejects malformed/unknown versions. Encode outputs
 are canonicalized before digesting; the digest binds envelope metadata,
 source revisions, scope, codec versions, lineage, epochs and payload. A
 consumer codec must obey the deterministic representation contract.

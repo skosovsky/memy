@@ -11,8 +11,17 @@ import (
 )
 
 // CodecSuite verifies deterministic encoding, typed round trips and invalid input.
-// Equal and samples belong to the host; no domain representation is imposed.
-func CodecSuite[T any](t *testing.T, codec memy.Codec[T], samples []T, equal func(T, T) bool, malformed [][]byte) {
+// Equal, samples and optional mutable-value probes belong to the host; no domain
+// representation is imposed. Mutation probes verify independent decoded trees
+// and retained Encode buffers. A suite pass does not certify arbitrary callbacks.
+func CodecSuite[T any](
+	t *testing.T,
+	codec memy.Codec[T],
+	samples []T,
+	equal func(T, T) bool,
+	malformed [][]byte,
+	mutations ...func(T),
+) {
 	t.Helper()
 	if codec.Version() == "" || len(samples) == 0 || len(malformed) == 0 {
 		t.Fatal("codec fixtures require version, samples and malformed input")
@@ -21,21 +30,58 @@ func CodecSuite[T any](t *testing.T, codec memy.Codec[T], samples []T, equal fun
 		// Arrange and act: encode independently and decode the canonical result.
 		first, err := codec.Encode(sample)
 		must(t, err)
+		firstSnapshot := bytes.Clone(first)
 		second, err := codec.Encode(sample)
 		must(t, err)
 		decoded, err := codec.Decode(first)
 		must(t, err)
+		if !bytes.Equal(first, firstSnapshot) {
+			t.Fatal("codec mutated encoded/decode input buffer")
+		}
+		secondSnapshot := bytes.Clone(second)
 		again, err := codec.Encode(decoded)
 		must(t, err)
 		// Assert: round trips preserve host values and deterministic byte identity.
+		if !bytes.Equal(second, secondSnapshot) {
+			t.Fatal("codec reused an earlier encoded buffer")
+		}
 		if len(first) == 0 || !bytes.Equal(first, second) || !bytes.Equal(first, again) || !equal(sample, decoded) {
 			t.Fatal("codec round trip or determinism failed")
+		}
+		for _, mutate := range mutations {
+			codecOwnership(t, codec, firstSnapshot, mutate)
 		}
 	}
 	for _, raw := range malformed {
 		if _, err := codec.Decode(raw); err == nil {
 			t.Fatalf("malformed input accepted: %q", raw)
 		}
+	}
+}
+
+func codecOwnership[T any](t *testing.T, codec memy.Codec[T], raw []byte, mutate func(T)) {
+	t.Helper()
+	// Arrange: independent decode trees and retained encode bytes.
+	input := bytes.Clone(raw)
+	first, err := codec.Decode(input)
+	must(t, err)
+	second, err := codec.Decode(input)
+	must(t, err)
+	retained, err := codec.Encode(second)
+	must(t, err)
+	// Act: mutate caller bytes and one host-owned decoded value.
+	input[0] ^= 1
+	mutate(first)
+	changed, err := codec.Encode(first)
+	must(t, err)
+	unchanged, err := codec.Encode(second)
+	must(t, err)
+	// Assert: mutation is real and isolated; Encode never reuses retained buffers.
+	if bytes.Equal(changed, raw) {
+		t.Fatal("ownership fixture must change encoded value")
+	}
+	if !bytes.Equal(retained, raw) || !bytes.Equal(unchanged, raw) {
+		t.Fatal("codec mutable ownership failed")
 	}
 }
 
