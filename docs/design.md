@@ -173,7 +173,7 @@ Proposal expiry remains a canonical evidence deadline after acceptance. Reads,
 lineage checks and Sweep use the earlier nonzero proposal/retention deadline;
 Record.ExpiresAt and projection report this effective expiry; Retention retains
 the original host decision separately. Consolidation carries the effective
-deadline of its inputs into its proposal, including finite evidence lifetime
+deadline of its actual lineage inputs into its proposal, including finite evidence lifetime
 under otherwise unlimited host retention. Retention is a record-level boundary:
 expiry of any retained revision revokes
 that record ID and dependent artifacts. A corrected record needing an
@@ -1024,3 +1024,13 @@ explicitly not applicable, while a configured grader error is unknown execution.
 Types and helper names may be adjusted coherently during implementation, but the
 stage separation, bounded public-API execution, safe report, typed fixture boundary
 and final-verdict semantics above are mandatory.
+
+### Exact deduplication deadline groups
+
+ExactDedup retains originals and emits one proposal per equal payload/Interval/scope
+group, with exact revision lineage for that group. Its expiry cap is the earliest
+nonzero effective expiry among only those lineage inputs; an unrelated singleton
+or another duplicate group cannot shorten it. An earlier explicit output deadline
+is preserved. DomainMerge and SemanticMerge retain all-request-input lineage and
+cap output expiry against every input. These rules do not extend ancestor evidence
+or bypass current lineage/retention checks when accepting or reading a derived record.

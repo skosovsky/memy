@@ -497,6 +497,10 @@ func (s extractionMerge[P, R, A]) stampSuggestion(p *Suggestion[P, R]) {
 		}
 	}
 	for _, record := range s.inputs {
+		if s.request.Mode == ExactDedup &&
+			!slices.Contains(p.Lineage, RevisionRef{RecordID: record.ID, Revision: record.Revision}) {
+			continue
+		}
 		if !record.ExpiresAt.IsZero() &&
 			(p.ExpiresAt.IsZero() || record.ExpiresAt.Before(p.ExpiresAt)) {
 			p.ExpiresAt = record.ExpiresAt
