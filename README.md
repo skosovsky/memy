@@ -242,6 +242,8 @@ python3 scripts/consumer_checks.py local --siblings ..
 python3 scripts/consumer_checks.py published --memy-ref <published-tag>
 ```
 
-Первый режим использует локальные consumer checkout либо клонирует их; второй
+Первый режим использует текущие локальные consumer checkout либо клонирует
+проверенные ревизии из `testdata/consumer/revisions.json` с проверкой commit;
+default branch не заменяет выбранный совместимый checkout. Второй режим
 разрешает опубликованные modules при `GOWORK=off` и проверяет отсутствие replace.
 Manifest фиксирует выбранные consumer revisions; CI хранит его как artifact.

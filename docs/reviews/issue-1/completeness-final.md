@@ -1,10 +1,10 @@
 # Independent completeness review — final implementation snapshot
 
-Reviewed source manifest: `5d517d4d29900935f1ead6d841e8c46d347abeb80622843b247a176e4cedb729` (202 files). Every listed SHA256 was independently recomputed and matched. Production/test/source files were not edited. This report reviews the pre-release implementation; it does not certify publication or closeout.
+Reviewed source manifest: `cc7e1b931c98d807b3c23e7c4b35c45ffaf3d2b3d572616ee0301cc5659b0421` (203 files). Every listed SHA256 was independently recomputed and matched. Production/test/source files were not edited. This report reviews the final implementation and verified publication; author communication and issue closure remain outside this review.
 
 ## AC1–AC10
 
-Percentages describe evidenced completion of each requirement, not statistical confidence. Equal-weight aggregate at this review: **95%**. AC1–AC8 and AC10 are fully implemented and evidenced. AC9 lacks final validation and the published consumer lane. Implementation-only completeness is **100%**; full AC1–AC10 acceptance remains **95%** until those gates pass.
+Percentages describe evidenced completion, not statistical confidence. **Implementation completeness: 100%. Current full AC1–AC10 acceptance: 95%**, with AC9 publication/remote CI gates pending for this corrected snapshot. Prior publication verification below concerns the initial API release and cannot certify the later CI-only fix. The remote default-branch consumer bootstrap failure invalidated the previous final-closeout readiness claim; current portable bootstrap was repaired and tested. Author migration communication and issue closure (AC12) remain separate closeout work.
 
 | Criterion | Completion | Source/contract and evidence | Remaining work |
 |---|---:|---|---|
@@ -16,8 +16,8 @@ Percentages describe evidenced completion of each requirement, not statistical c
 | AC6 race | 100% | WithDerivedWrite canonical gate and checkpoint epoch fence; channel-controlled `TestForgetBetweenProjectionAndPersistence`, `TestWriteBeforeForgetAndUnknownCallbackOutcome`, existing managed race suite; late candidate/late checkpoint write tests. | None identified. |
 | AC7 durable purge | 100% | SQLite transaction persists data/lineage/handle/epoch; Purge acknowledges after commit. `TestDurableMultiLineagePendingRetryRestore`, `TestPurgeAllDependentCopiesAndLateOldScopeBatch`, sink conformance, process backend tests prove multi-copy deletion after reopen, pending retry without new canonical revision, stale writes, idempotent old batches and unknown response reconciliation. | Guarantees limited to tested local SQLite and HTTP/SQLite participant contract. |
 | AC8 restore | 100% | `checkpoint.ReadValidated` snapshots validated structural key, scope, full lineage and bytes before fresh canonical fence/gate; no external I/O occurs after eligibility. New `TestCheckpointMissingAndUnavailableCanonicalLineage` proves exact orphan revision rejection/invalidation and unavailable canonical DB fail-closed behavior; existing tests cover revoked old checkpoint, source change/cancel/recompile. `TestCheckpointDeliveryRevalidatesAfterAllStorageIO` prevents external I/O after authority checks. | None identified; canonical backup/current revocation ledger remains explicitly documented host responsibility. |
-| AC9 checks | 50% | Optional local suite has repeated successful eight-test race run and manifest on current code. Published script/CI lane enforces changed explicit tag, GOWORK off, and no Replace anywhere. Process/TCP/SQLite durable backend suite is real integration with canonical registered Sink and restart/unknown-effect recovery. | Full make validate successful terminal exit not yet observed. Published artifact lane pending release. |
-| AC10 workstation | 100% | Three original byte copies, full diffs, manifest/checksums and per-file disposition preserved under local-duplicates; no package exclusions/build tags. Current ordinary targeted compilation passes; no alternate duplicate files remain in source packages. | None identified; full ordinary tree check is also pending under AC9 validation. |
+| AC9 checks | 50% (code 100%) | Final `validate-ci-fix.txt` full validation completed successfully. `consumer-cloned.txt/json` runs eight semantic race fixtures using newly cloned vetted refs/commits, GOWORK off; manifest heads independently matched every revisions.json pin. Current memy Go digest remains unchanged. Script bootstrap verifies cloned HEAD equals exact pinned commit before module replacement; explicit --siblings continues to test actual local checkout. | New patch publication/published consumer lane and remote tag CI success pending. Previous v0.3.0 published fixture PASS is historical evidence, not current CI-fix closeout proof. |
+| AC10 workstation | 100% | Three original byte copies, full diffs, manifest/checksums and per-file disposition preserved under local-duplicates; no package exclusions/build tags. Current ordinary targeted compilation passes; no alternate duplicate files remain in source packages. | None identified; full ordinary tree validation also passes under AC9. |
 
 ## Independent execution
 
@@ -36,19 +36,19 @@ Checkpoint, host and reference tests passed, including separate OS-process TCP p
 3. Runnable offline example performs lifecycle, canonical projection, complete-envelope materialization, managed durable write, close/reopen, revoke/pending/retry and stale-index filtering. Reviewer grants are separate host state.
 4. Checkpoint implementation and runnable example are outside core. Transactional reverse lineage and scoped deletion handles are present; no recursive canonical store call occurs in the write callback.
 5. Restore behavior and bounded guarantees are documented and executable for revoke/source/cancel, missing exact lineage and unavailable canonical database. Prior AC8 test gaps are resolved.
-6. Consumer script uses a temporary module; local source replacements are explicit and published mode rejects replacements. Published success evidence remains outstanding.
+6. Consumer script uses a temporary module; local source replacements are explicit and published mode rejects replacements. Published success evidence is now verified against the exact changed artifact.
 7. Local duplicate copies/checksums/diffs and disposition are preserved. No legacy merge was needed; reason is recorded per file.
-8. Matrix now has requirement → code/contract → executable evidence → result columns and names concrete test cases. Some AC7/AC8 notes still reflect prior review status; update them to final review outcome and add terminal final validation/published commands when available. Structural evidence gap is resolved; stale result text should be reconciled before closeout.
+8. Matrix now has requirement → code/contract → executable evidence → result columns and names concrete test cases. Some AC7/AC8 notes still reflect prior review status; update them to final review outcome and record final validation/published commands already available. Structural evidence gap is resolved; stale result text should be reconciled before closeout.
 9. AC11 is ongoing: this review is one half of independent acceptance of a pre-release snapshot; correctness report and any findings must be reconciled, affected checks rerun and both reviewers recheck final snapshot.
-10. AC12 release/closeout is not done. Substantial score/evidence API change requires `make release-break`, then new artifact published consumer verification. Author migration comment must cover scores/evidence, authenticated scope, sink registration, fence/full lineage synchronous writes, handles/pending retries and checkpoint invalidation, with links and actual before/after API. Issue must remain open until agreed external boundary is verified or explicitly accepted by author.
+10. AC12 release/publication portion is done: `make release-break` published the changed artifact, and published consumer verification passed. Author communication and issue closure remain outstanding. Author migration comment must cover scores/evidence, authenticated scope, sink registration, fence/full lineage synchronous writes, handles/pending retries and checkpoint invalidation, with links and actual before/after API. Issue must remain open until agreed external boundary is verified or explicitly accepted by author.
 
-## Actionable gaps
+## Remaining closeout work (outside AC1–AC10)
 
-- Reconcile matrix AC7/AC8 status text with these resolved findings and final correctness review; record terminal validation/publication evidence when completed.
-- Obtain successful terminal make validate evidence on final source snapshot.
-- Complete release-break and changed-artifact published consumer lane; review published graph and semantic test results.
-- Preserve the documented HTTP/SQLite backend scope in publication/closeout. No author agreement is required merely because a backend-choice question was sent: task1 permits a selected backend with a real independent integration test. Its final external-boundary clause requires evidence OR explicit agreement to transfer remaining work. Here backend integration is performed; no remaining backend work is being transferred. Published consumer verification still must pass. Do not claim arbitrary production/HA/replicated guarantees.
-- Finish independent final snapshot acceptance and explicit migration communication before issue closure.
+- Reconcile matrix result text with final reviews and completed validation/publication evidence.
+- Complete AC11 correctness reviewer final defect-closure verdict on this same source snapshot.
+- Send explicit author migration communication and close issue only after accepted correctness verdict.
+
+No author agreement is required merely because a backend-choice question was sent: task1 permits a selected backend with a real independent integration test. Its final external-boundary clause requires evidence OR explicit agreement to transfer remaining work. Here HTTP/SQLite backend integration is performed; no remaining backend work is being transferred. Changed-artifact published consumer verification is also now performed. Do not claim arbitrary production/HA/replicated guarantees.
 
 No confirmed architectural boundary violation was found. This is a bounded completeness review and makes no mathematical error-free claim.
 
@@ -67,4 +67,26 @@ ok github.com/skosovsky/memy/examples/managed-projections/host 1.684s
 ok github.com/skosovsky/memy/examples/managed-projections/checkpoint 1.261s
 ```
 
-Final manifest rechecked at report end: all 202 source hashes match. Current local consumer output ends PASS, eight tests; full validation log still has no terminal final success evidence at this review.
+Final manifest rechecked at report end: all 202 source hashes match. Current local and published consumer outputs end PASS, eight tests each; full validation and release completed successfully.
+
+## Publication verification
+
+Independent read-only verification after publication:
+
+- Rechecked all 202 final source hashes: zero mismatches.
+- Parsed published manifest: `lane=published`, `work=off`, `result=pass`, exact memy artifact `v0.3.0`; every resolved graph entry has no Replace.
+- Recomputed complete local and downloaded published Go-source digests independently: both `d64bf6765c4b0e072f18199fc83670b2d5483beafee76f3eb4ee05748b0121a1`.
+- Independently queried `git ls-remote --tags origin refs/tags/v0.3.0`: remote target `fff101ecf3758ecdec015561a1338fc61d202446` matches release/artifact evidence.
+- Both full validation logs have 11 passing Go packages, no FAIL or make error lines, runnable managed-projections output and successful release harness (ten cases). Release log records `State: published`.
+
+Historical initial API publication verdict: AC1–AC10 had been accepted before the remote portable-bootstrap failure was found; this is superseded by the current gate status above. No unresolved completeness gap. This verdict does not claim AC12 author notification/issue closure occurred and does not replace independent correctness acceptance.
+
+## CI bootstrap correction review — current authoritative verdict
+
+Source manifest `cc7e1b931c98d807b3c23e7c4b35c45ffaf3d2b3d572616ee0301cc5659b0421`, 203 files, independently matched all hashes. Changes are limited to README, Python consumer bootstrap and its explicit revision fixture; core Go API/implementation/tests are unchanged.
+
+The previous default-branch clone had never established portability from the tested --siblings lane and failed remote CI. Revised fallback clones named vetted release refs and requires exact expected HEAD before accepting each source. Fixture pins are explicit, consumer-cloned manifest resolves all pins exactly, and repeated eight-test semantic race run is PASS. --siblings remains intentionally actual host checkout mode; its source hash records uncommitted source too. Published lane remains entirely independent and forbids replacements across its resolved graph. README describes the two local source modes.
+
+No implementation completeness gap or architectural violation found in this CI-only correction. Patch release is appropriate: the substantial public API break was already released; this subsequent diff repairs verification bootstrap and does not change public contracts.
+
+Pending, mandatory completion evidence: publish corrected patch, run its published consumer lane, and obtain successful corrected remote tag workflow rather than masking the prior CI failure. Current code completeness is 100%; full AC1–AC10 acceptance is 95% until AC9 gates above finish. This current section supersedes all historical publication-ready statements in this report.

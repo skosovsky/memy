@@ -1,0 +1,75 @@
+Cloning into '/var/folders/46/5ywmz5gj26n7mnky51gd60g00000gn/T/memy-consumer-kbuv6f9z/ragy'...
+Note: switching to '3a06cb47a91463badb5ec1e240bb72cca6f82a83'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Cloning into '/var/folders/46/5ywmz5gj26n7mnky51gd60g00000gn/T/memy-consumer-kbuv6f9z/contexty'...
+Note: switching to '66fdc56342818d67a1d3d7d96fa71073d6b9e463'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Cloning into '/var/folders/46/5ywmz5gj26n7mnky51gd60g00000gn/T/memy-consumer-kbuv6f9z/toolsy'...
+Note: switching to '6ed0a8a6a4e664c25f32397fa63dd6f0a46cba09'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+=== RUN   TestCanonicalRecallProjectedRagyContextyForget
+    canonical_test.go:85: stale source: projections=0 err=memy: source unavailable
+        memy: stale input
+--- PASS: TestCanonicalRecallProjectedRagyContextyForget (0.08s)
+=== RUN   TestPersistentCompiledContextManagedForget
+--- PASS: TestPersistentCompiledContextManagedForget (0.13s)
+=== RUN   TestRagyToMemyScopedBoundedCancellation
+--- PASS: TestRagyToMemyScopedBoundedCancellation (0.00s)
+=== RUN   TestRagyArtifactToContexty
+--- PASS: TestRagyArtifactToContexty (0.00s)
+=== RUN   TestMemyProjectionEnvelopeToContexty
+--- PASS: TestMemyProjectionEnvelopeToContexty (0.00s)
+=== RUN   TestToolkitsCompileSameGraph
+--- PASS: TestToolkitsCompileSameGraph (0.00s)
+=== RUN   TestContextyCompileHostMaterialization
+--- PASS: TestContextyCompileHostMaterialization (0.00s)
+=== RUN   TestContextyRemoveHostMappedMemoryArtifact
+--- PASS: TestContextyRemoveHostMappedMemoryArtifact (0.00s)
+PASS
+ok  	consumer.local/managed	1.830s
+{"lane": "local", "modules": [{"module": "github.com/skosovsky/memy", "source_head": "fff101ecf3758ecdec015561a1338fc61d202446", "go_source_sha256": "d64bf6765c4b0e072f18199fc83670b2d5483beafee76f3eb4ee05748b0121a1", "local": true}, {"module": "github.com/skosovsky/ragy", "source_head": "3a06cb47a91463badb5ec1e240bb72cca6f82a83", "go_source_sha256": "91c3c9e59b3ff60287e3af3a0e7cd43918cb62c8a6f168fb01ea823793293503", "local": true}, {"module": "github.com/skosovsky/contexty", "source_head": "66fdc56342818d67a1d3d7d96fa71073d6b9e463", "go_source_sha256": "3f721e58b6826d7c30b4187c7a98884a8058683215926c5fd019ba38f3e76faa", "local": true}, {"module": "github.com/skosovsky/toolsy", "source_head": "6ed0a8a6a4e664c25f32397fa63dd6f0a46cba09", "go_source_sha256": "232c70cee2e1559421568f767f90cf2288b7290055b5b2f3abc5d1047134f93f", "local": true}, {"module": "github.com/skosovsky/toolsy/toolkits/memory", "source_head": "6ed0a8a6a4e664c25f32397fa63dd6f0a46cba09", "go_source_sha256": "1990b9271fbe355420c0d411cbcfe39a2c028be2eea2dd3333e1f558478f34b7", "local": true}, {"module": "github.com/skosovsky/toolsy/toolkits/rag", "source_head": "6ed0a8a6a4e664c25f32397fa63dd6f0a46cba09", "go_source_sha256": "2dc447a9cd97621474e9275ccdf81e57a00162cfe5c86dc89528090356b6db61", "local": true}], "work": "off", "result": "pass"}

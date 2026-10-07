@@ -34,6 +34,7 @@ def main():
     if args.lane == 'published' and (not args.memy_ref or not args.memy_ref.startswith('v')):
         parser.error('published lane requires an exact --memy-ref tag')
     root = Path(__file__).resolve().parent.parent
+    revisions = json.loads((root / 'testdata' / 'consumer' / 'revisions.json').read_text())
     env = dict(os.environ, GOWORK='off')
     # A dedicated cache can be supplied by CI or the caller; no checkout mutation.
     env.setdefault('GOCACHE', '/tmp/memy-go-build')
@@ -58,7 +59,12 @@ def main():
                         checkouts[repo] = existing.resolve()
                     else:
                         destination = workspace / repo
-                        run(['git', 'clone', '--depth=1', 'https://github.com/skosovsky/' + repo + '.git', str(destination)], workspace, env)
+                        revision = revisions[repo]
+                        run(['git', 'clone', '--depth=1', '--branch', revision['ref'],
+                             'https://github.com/skosovsky/' + repo + '.git', str(destination)], workspace, env)
+                        head = run(['git', 'rev-parse', 'HEAD'], destination, env, True).strip()
+                        if head != revision['commit']:
+                            raise RuntimeError('Consumer revision changed for ' + repo)
                         checkouts[repo] = destination
                 source = checkouts[repo].joinpath(*rel.split('/')[1:])
                 run(['go', 'mod', 'edit', '-require=' + name + '@v0.0.0', '-replace=' + name + '=' + str(source)], module, env)

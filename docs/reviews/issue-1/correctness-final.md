@@ -1,5 +1,7 @@
 # Final independent correctness review
 
+Current review snapshot: `cc7e1b931c98d807b3c23e7c4b35c45ffaf3d2b3d572616ee0301cc5659b0421` (203 files). Implementation/CI fix accepted with no open confirmed defects; final patch publication and remote CI are still pending. Earlier publication acceptance below records the preceding snapshot and is superseded for final closeout by the CI correction addendum.
+
 Reviewed frozen source snapshot: `5d517d4d29900935f1ead6d841e8c46d347abeb80622843b247a176e4cedb729` (202 files). All recorded hashes matched at the beginning and end of review. Production and test sources were not changed by this reviewer.
 
 Verdict: **no open confirmed actionable defects found in the inspected implementation**. Both findings from `correctness-pre-release.md` are resolved. This is the result of a bounded code review and executed checks, not a mathematical guarantee of absence of errors.
@@ -38,4 +40,32 @@ Added regressions were inspected, including after-storage-I/O validation, missin
 
 ## Limits
 
-This verdict covers the inspected source snapshot and tests above. Full `make validate` is an independent release gate being executed by the coordinating agent; this reviewer did not certify its unfinished parallel run. Published-artifact consumer verification, release publication and issue closeout remain external gates and are not claimed complete here. The selected network backend test covers the HTTP/SQLite example; it does not certify unrelated production backends, replication, HA, backup restoration of stale canonical authority, or forensic erasure.
+This verdict covers the inspected source snapshot and tests above. At the initial source review, full validation and publication gates were pending. The addendum below records their subsequent verification. Migration communication and issue closure still require the coordinating agent to execute and verify closeout. The selected network backend test covers the HTTP/SQLite example; it does not certify unrelated production backends, replication, HA, backup restoration of stale canonical authority, or forensic erasure.
+
+
+## Final external gate acceptance
+
+The reviewer inspected `validate.txt`, `release-break.txt`, `consumer-published.txt`, `consumer-published.json`, and `artifact-verification.json` after publication. Both validation logs contain successful test results for all 11 test packages, all five runnable examples, lint reporting zero issues, and release-script contract tests completing successfully. No failed test or make failure appears. The release log proceeds through the prerequisite validation and records successful publication by the standard `make release-break` path.
+
+Published artifact: `v0.3.0`, commit `fff101ecf3758ecdec015561a1338fc61d202446`. This reviewer independently executed `git ls-remote --tags origin refs/tags/v0.3.0`; the remote tag points to that exact commit.
+
+This reviewer independently recomputed the aggregate SHA256 of all 161 `.go` files in the current reviewed source and in the downloaded published module directory. Both match `d64bf6765c4b0e072f18199fc83670b2d5483beafee76f3eb4ee05748b0121a1`. The final 202-file source snapshot continues to match `5d517d4d29900935f1ead6d841e8c46d347abeb80622843b247a176e4cedb729` without mismatches.
+
+The published consumer manifest resolves memy to the new published tag, sets `GOWORK=off`, and contains no Replace entries anywhere in the resolved graph. The source-reviewed script executes the temporary consumer suite with `-mod=readonly -race -count=1`; all eight semantic tests pass in the publication log, including canonical recall/materialization/Forget, stale-source filtering, durable compiled context purge, isolation/bounds/cancellation and consumer toolkit composition. The record is a semantic integration result, not only a successful dependency resolution.
+
+Terminal implementation acceptance: **accepted; no open confirmed actionable defects and no remaining implementation, validation, publication or published-consumer gate blocker found**. Proceed with the required explicit migration comment to the issue author and then close the issue. This reviewer does not claim that those final communication/closure actions have already occurred. Previously stated backend/HA/backup/forensic-erasure limits continue to apply.
+
+
+## CI correction review
+
+After the preceding implementation review, the actual GitHub consumer-local job revealed a portability failure: cloning a consumer default branch did not select the compatible API exercised by the local sibling and published lanes. The failure is real and was not dismissed as a core defect or hidden by the earlier passing local-sibling result.
+
+Final corrected snapshot: `cc7e1b931c98d807b3c23e7c4b35c45ffaf3d2b3d572616ee0301cc5659b0421` (203 files). All hashes match at review start and end. Only README guidance, the portable consumer script, and the new `testdata/consumer/revisions.json` change from the accepted implementation snapshot. No Go source changed: independently recomputed 161-file Go SHA remains `d64bf6765c4b0e072f18199fc83670b2d5483beafee76f3eb4ee05748b0121a1`.
+
+The portable local lane now clones each selected compatible consumer tag and checks `git rev-parse HEAD` against its recorded exact commit before using that checkout. This prevents default-branch API drift or silently moved tags from passing as the reviewed consumer revision. Explicit `--siblings` continues to use the actual supplied checkout and records both its HEAD and source digest. Core receives no consumer imports or new mandatory dependencies.
+
+Inspected `consumer-cloned.txt`: all three actual clone messages resolve to the exact manifest commits; eight race semantic tests pass in the portable clone path, and the emitted manifest records `work=off`, the matching clone commits and result `pass`. Inspected `validate-ci-fix.txt`: full validation and release-script tests complete without failures.
+
+An independent isolated Python probe imported the script and supplied a mismatched clone commit through a mocked command runner. The script selected `--branch v0.8.0`, rejected the mismatch with `Consumer revision changed for ragy`, and never started semantic tests. Probe-created bytecode was removed; no source was changed.
+
+Verdict for corrected source: **accepted; no open confirmed actionable implementation/CI-script defects**. The previously published substantial API release remains immutable. The CI-only correction is eligible for the planned patch release after this review. This review does not yet certify publication or remote GitHub CI for that patch; those final gates must pass before migration comment and issue closure.

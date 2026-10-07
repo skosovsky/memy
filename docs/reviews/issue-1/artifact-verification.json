@@ -1,0 +1,10 @@
+{
+  "tag": "v0.3.0",
+  "remote_tag": "fff101ecf3758ecdec015561a1338fc61d202446\trefs/tags/v0.3.0",
+  "published_go_sha256": "d64bf6765c4b0e072f18199fc83670b2d5483beafee76f3eb4ee05748b0121a1",
+  "reviewed_local_go_sha256": "d64bf6765c4b0e072f18199fc83670b2d5483beafee76f3eb4ee05748b0121a1",
+  "same_go_source": true,
+  "published_result": "pass",
+  "replace_count": 0,
+  "work": "off"
+}

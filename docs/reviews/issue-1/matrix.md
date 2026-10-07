@@ -13,10 +13,10 @@ The source manifest binds the independent reviews; historical reviews do not cou
 | AC6 write/revoke order | synchronous WithDerivedWrite; backend epoch admission | TestForgetBetweenProjectionAndPersistence; TestWriteBeforeForgetAndUnknownCallbackOutcome; remote stale-retry rejection | backend-final race PASS |
 | AC7 durable deletion/retry | checkpoint transactional rows/lineage/epoch; registered remote Sink | TestDurableMultiLineagePendingRetryRestore; TestPurgeAllDependentCopiesAndLateOldScopeBatch; TestRemoteCanonicalForgetReceiptLossRecovery | review-fixes race PASS; both read/remote findings fixed |
 | AC8 restore fail closed | checkpoint.ReadValidated; docs managed-projections restore ownership | old-checkpoint restore, stale source/cancellation, TestCheckpointMissingAndUnavailableCanonicalLineage, TestCheckpointDeliveryRevalidatesAfterAllStorageIO | review-fixes race PASS; explicit gaps covered |
-| AC9 final validation/local + published consumer/backend | make validate; scripts/consumer_checks.py; optional CI lanes | validate.txt completed exit 0; consumer-local.txt/json eight semantic fixtures; backend-final.txt separate process/TCP/SQLite | full validate/local/backend PASS; published lane pending release |
+| AC9 final validation/local + published consumer/backend | make validate; scripts/consumer_checks.py; optional CI lanes | validate.txt completed exit 0; consumer-local.txt/json eight semantic fixtures; backend-final.txt separate process/TCP/SQLite | full validate/local/published/backend PASS |
 | AC10 local duplicates | local-duplicates/manifest.json, full copies/diffs, decision.md | byte-for-byte archival checks; normal compilation; no exclusion workaround | archived safely; compilation succeeds |
 | AC11 independent reviews | source-snapshot.json | completeness-final.md and correctness-final.md on 5d517d4… (202 hashes) | implementation 100%; no open confirmed defects; full acceptance 95% pending AC9 |
-| AC12 release/migration/issue close | docs/migration.md; release-break; author comment; closed issue state | exact remote tag and published consumer run required | pending |
+| AC12 release/migration/issue close | docs/migration.md; release-break; author comment; closed issue state | release-break.txt + artifact-verification.json + consumer-published.json | publication verified; migration/closure pending |
 
 ## Work items and boundaries
 
@@ -67,3 +67,24 @@ Final `make validate TEST_FLAGS='-v -race -timeout=30m'` completed with exit 0.
 Formatting, vet, lint (zero findings), every package race test, runnable examples
 and ten release-script tests passed. Manifest recheck after examples: 202/202
 source hashes unchanged. Local consumer lane also passed on that source snapshot.
+
+## Published artifact
+
+`make release-break TEST_FLAGS='-v -race -timeout=30m'` exited 0 and
+published v0.3.0 at fff101ecf3758ecdec015561a1338fc61d202446. Remote tag was
+independently queried. The exact new published module passed eight consumer race
+fixtures with GOWORK=off and zero Replace directives across its entire graph.
+Its Go source fingerprint equals the reviewed local fingerprint:
+`d64bf6765c4b0e072f18199fc83670b2d5483beafee76f3eb4ee05748b0121a1`.
+See consumer-published.json/txt, release-break.txt and artifact-verification.json.
+
+## CI checkout correction after API publication
+
+The first tag CI local consumer lane cloned default branches, whose context
+API lagged the independently verified local and published sources. The failure
+is preserved in consumer-ci-local-initial.txt. Portable local clones now select
+explicit reviewed refs/commit hashes from consumer/revisions.json and reject
+retargeted refs; --siblings still tests actual current host checkouts. This is
+a CI bootstrap correction with unchanged Go/public API, requiring release-patch
+after repeated validation and independent review of the new source manifest.
+Final CI success and new published consumer evidence are still required.

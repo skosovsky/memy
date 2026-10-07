@@ -1,0 +1,14 @@
+{
+  "ragy": {
+    "ref": "v0.8.0",
+    "commit": "3a06cb47a91463badb5ec1e240bb72cca6f82a83"
+  },
+  "contexty": {
+    "ref": "v0.13.2",
+    "commit": "66fdc56342818d67a1d3d7d96fa71073d6b9e463"
+  },
+  "toolsy": {
+    "ref": "v0.18.0",
+    "commit": "6ed0a8a6a4e664c25f32397fa63dd6f0a46cba09"
+  }
+}

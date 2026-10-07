@@ -18,7 +18,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "2eeaf57f08c5c1f1a9215c2f00934fb7d3107ba9ff40969670caada275d6e9ff"
+      "sha256": "1dcf2b4873c90443bf61c72d96cf3bd8cfcc48bac4a4826f73223e9f95d2ff67"
     },
     {
       "path": "acceptance_regression_test.go",
@@ -233,16 +233,16 @@
       "sha256": "6ade3a720708aeb0ed1da02fcf5010a4aff5c4c0cc6157022b0724d0e794ba1d"
     },
     {
-      "path": "examples/quality-integration/main.go",
-      "sha256": "5b06892d9d9cd83b6b8d69af3f96d4279630124a4ebcb4287ea8e3d7828d13a5"
-    },
-    {
       "path": "examples/quality/main.go",
       "sha256": "3ba48e3bf674c83e1c7d5e06b6671b9008b58f0261f3d27331f133d986fba47d"
     },
     {
       "path": "examples/quality/main_test.go",
       "sha256": "ceeac7bc263bada58a62b8af6fd9d4a79c11dac09d36ad25461ebdf254e2e798"
+    },
+    {
+      "path": "examples/quality-integration/main.go",
+      "sha256": "5b06892d9d9cd83b6b8d69af3f96d4279630124a4ebcb4287ea8e3d7828d13a5"
     },
     {
       "path": "examples/retrieval/main.go",
@@ -686,7 +686,7 @@
     },
     {
       "path": "scripts/consumer_checks.py",
-      "sha256": "4afe9e1e9a535c264d9c6fbac21d5882cf0e3d66df98a0e33ea4fc38f92da9f2"
+      "sha256": "8d914e1dc0a8bb4efc23be9a6085797f41eb66beb7ba03c14b519decdd8535a5"
     },
     {
       "path": "scripts/release.sh",
@@ -715,10 +715,6 @@
     {
       "path": "storage_private_cost_test.go",
       "sha256": "5ed6d2e273936e902eccaefa946f498c60ef157dbf85df01b42239e954af4dd3"
-    },
-    {
-      "path": "store.go",
-      "sha256": "cf79afcc879e3401c590e0e10e57396661d83c0303a697a3c468015bab844999"
     },
     {
       "path": "store/memory/isolation_test.go",
@@ -761,6 +757,10 @@
       "sha256": "d53b522c6058c8f7681b0024503a6bb6163e87cdfa386cc9f1b7f5c51cbe2ca0"
     },
     {
+      "path": "store.go",
+      "sha256": "cf79afcc879e3401c590e0e10e57396661d83c0303a697a3c468015bab844999"
+    },
+    {
       "path": "sweep.go",
       "sha256": "3eadd112bdf8602314f9ceffbc59507434df4772de698cddeff77ac076328074"
     },
@@ -789,10 +789,6 @@
       "sha256": "b676d613f81fd0006bb23c37f2cc3ed36a6dd7577344f99f129070132334c169"
     },
     {
-      "path": "testdata/consumer/revisions.json",
-      "sha256": "7241c3bdb612ef2da0a36fe85fbec05fdc6a2ad5bcf62912175f9c196c71cb9b"
-    },
-    {
       "path": "testdata/quality-v2.json",
       "sha256": "46c45b0e073bc4e21e5ba05088a07077b456c54527e30d09fff68837cd850809"
     },
@@ -813,5 +809,5 @@
       "sha256": "a9889769d22f6d422f0c4bd20cf2eb899dbef9b1a6c7838bfc7a2dfc09eb978f"
     }
   ],
-  "manifest_sha256": "cc7e1b931c98d807b3c23e7c4b35c45ffaf3d2b3d572616ee0301cc5659b0421"
+  "manifest_sha256": "5d517d4d29900935f1ead6d841e8c46d347abeb80622843b247a176e4cedb729"
 }
