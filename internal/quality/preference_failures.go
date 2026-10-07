@@ -148,9 +148,9 @@ func (search preferenceConflictSearch) Search(
 			memy.Candidate{
 				RecordID: preferenceConflictID,
 				Revision: revision,
-				Score:    1,
+				Score:    memy.ScoreOf(1),
 				Signals: []memy.SearchSignal{
-					{Backend: "preference-conflict-metadata/v2", Rank: int(revision), Score: 1},
+					{Backend: "preference-conflict-metadata/v2", Rank: int(revision), Score: memy.ScoreOf(1)},
 				},
 			},
 		)

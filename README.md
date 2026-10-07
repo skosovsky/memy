@@ -94,11 +94,13 @@ projection scripts, RRF composition и JSON packing. Это reference adapters,
 token. `RecallProgress` отдельно считает candidates, canonical filtering,
 ranking omissions и truncation. Поле `RecallResult.Complete` удалено.
 
-Candidate содержит typed `SearchSignal`: backend identity, rank и конечный raw
-score. `reference.Composite[Q]` принимает именованные `Backend[Q]` и явный
+Candidate содержит отдельный optional ranking `Score` и typed `SearchSignal`:
+backend identity, native rank и optional native score. `Score{}` означает отсутствие;
+`ScoreOf(0)` — наблюдавшийся ноль. `reference.Composite[Q]` принимает именованные `Backend[Q]` и явный
 `RRFConfig{K: 60}`; положительные weights привязаны к identity. RRF использует
 rank, удаляет дубликаты внутри backend и сохраняет каждый независимый сигнал.
-Порядок backend не влияет на fusion; ties разрешаются по ID и revision.
+Отсутствующий native score не выводится из ranking score. Native ranks сохраняются,
+RRF использует отдельные ordinal positions. Порядок backend не влияет на fusion; ties разрешаются по ID и revision.
 Каждый child возвращает одну coverage identity, совпадающую с его именем;
 nested composites этот reference adapter не поддерживает. `AllowDegraded`
 разрешает partial failure, но не ослабляет minimum visibility. Если все backend
@@ -221,3 +223,25 @@ Single-module script рассчитывает версию по опублико
 detached HEAD. Для major 0 break увеличивает minor; major-переходы требуют
 отдельного semantic import-version изменения и отклоняются. Неизвестный исход
 push сохраняет recovery clone. См. [release contract](docs/release.md).
+
+## Managed projections
+
+`Projection.Retrieval` сохраняет score presence, native signals и ranking explanation
+при `RecallProjected`; обычный `Project` оставляет его nil. Evidence включается в
+точный JSON budget. См. [контракт и host ownership](docs/managed-projections.md).
+
+`go run ./examples/managed-projections` демонстрирует два отдельных durable store,
+явный host acceptance, checkpoint reopen, pending cleanup и retry. Checkpoints
+обслуживаются только через повторную canonical lineage validation. Пример не
+предоставляет универсальный production storage backend.
+
+Optional external consumer suite не добавляет зависимости в core:
+
+```sh
+python3 scripts/consumer_checks.py local --siblings ..
+python3 scripts/consumer_checks.py published --memy-ref <published-tag>
+```
+
+Первый режим использует локальные consumer checkout либо клонирует их; второй
+разрешает опубликованные modules при `GOWORK=off` и проверяет отсутствие replace.
+Manifest фиксирует выбранные consumer revisions; CI хранит его как artifact.

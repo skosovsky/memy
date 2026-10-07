@@ -290,7 +290,7 @@ func (f *preferenceFixture) apply(
 			return f.index.Stage(
 				ctx,
 				f.scope,
-				memy.Candidate{RecordID: r.ID, Revision: r.Revision, Score: 1, Signals: nil},
+				memy.Candidate{RecordID: r.ID, Revision: r.Revision, Score: memy.ScoreOf(1), Signals: nil},
 			)
 		},
 	)

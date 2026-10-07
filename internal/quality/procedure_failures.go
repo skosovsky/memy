@@ -33,7 +33,7 @@ func (f *procedureFixture) failures(ctx context.Context, r *ScenarioReport) erro
 	f.authority.Fail(nil)
 	search := f.ports.Search(
 		f.scope,
-		[]memy.Candidate{{RecordID: procedureRelevantA, Revision: 1, Score: 1, Signals: nil}},
+		[]memy.Candidate{{RecordID: procedureRelevantA, Revision: 1, Score: memy.ScoreOf(1), Signals: nil}},
 	)
 	body, err := f.project(ctx, search, nil)
 	if err != nil {

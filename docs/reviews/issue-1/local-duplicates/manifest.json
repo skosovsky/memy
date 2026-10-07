@@ -1,0 +1,46 @@
+[
+  {
+    "original": "internal/quality/corpus 2.go",
+    "canonical": "internal/quality/corpus.go",
+    "backup": "docs/reviews/issue-1/local-duplicates/internal__quality__corpus 2.go.txt",
+    "sha256": "0c2687d0ffd63a22e78c7d79a6949aa65066196344b557d71b9bd63aa4457068",
+    "duplicate_only_function_names": [
+      "validateExpected"
+    ],
+    "decision": "Archived obsolete alternative in full before removing from source package. Current implementation retains newer split quality harness/release safety contract; no blind merge."
+  },
+  {
+    "original": "internal/quality/quality 2.go",
+    "canonical": "internal/quality/quality.go",
+    "backup": "docs/reviews/issue-1/local-duplicates/internal__quality__quality 2.go.txt",
+    "sha256": "056f6a964fdc681725e698e6dc80e1b0e2c30c394ee7cd896670ee5eaa3d05d3",
+    "duplicate_only_function_names": [
+      "Load",
+      "accept",
+      "apply",
+      "consolidate",
+      "countOriginals",
+      "foreignSources",
+      "fullForget",
+      "fullSnapshot",
+      "measure",
+      "newSession",
+      "payloadBytes",
+      "preview",
+      "publish",
+      "recall",
+      "reviewTrial",
+      "runTrial",
+      "seed"
+    ],
+    "decision": "Archived obsolete alternative in full before removing from source package. Current implementation retains newer split quality harness/release safety contract; no blind merge."
+  },
+  {
+    "original": "scripts/release 2.sh",
+    "canonical": "scripts/release.sh",
+    "backup": "docs/reviews/issue-1/local-duplicates/scripts__release 2.sh.txt",
+    "sha256": "0cf423bb0cb2c969c67f1968e6b1cffa84df4c1775e5eed71768a1f82c97e2fc",
+    "duplicate_only_function_names": [],
+    "decision": "Archived obsolete alternative in full before removing from source package. Current implementation retains newer split quality harness/release safety contract; no blind merge."
+  }
+]

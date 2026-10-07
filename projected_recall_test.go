@@ -39,9 +39,9 @@ func (s projectedSearch) Search(
 			memy.Candidate{
 				RecordID: r.RecordID,
 				Revision: r.Revision,
-				Score:    float64(len(s.refs) - i),
+				Score:    memy.ScoreOf(float64(len(s.refs) - i)),
 				Signals: []memy.SearchSignal{
-					{Backend: "test", Rank: i + 1, Score: float64(len(s.refs) - i)},
+					{Backend: "test", Rank: i + 1, Score: memy.ScoreOf(float64(len(s.refs) - i))},
 				},
 			},
 		)

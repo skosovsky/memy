@@ -173,8 +173,8 @@ func (f *procedureFixture) abstention(
 		"procedure-conflict/v1",
 		f.scope,
 		[]memy.Candidate{
-			{RecordID: procedureRelevantA, Revision: 1, Score: 1, Signals: nil},
-			{RecordID: procedureConflictID, Revision: 1, Score: procedureMissingScore, Signals: nil},
+			{RecordID: procedureRelevantA, Revision: 1, Score: memy.ScoreOf(1), Signals: nil},
+			{RecordID: procedureConflictID, Revision: 1, Score: memy.ScoreOf(procedureMissingScore), Signals: nil},
 		},
 		false,
 	}

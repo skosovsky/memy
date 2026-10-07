@@ -166,6 +166,11 @@ func cloneProjectedBody[P, R, A, O any](
 		if err != nil {
 			return ProjectedRecallResult[O, R]{}, err
 		}
+		if p.Retrieval != nil {
+			evidence := *p.Retrieval
+			evidence.Signals = slices.Clone(evidence.Signals)
+			p.Retrieval = &evidence
+		}
 		p.Reconciliation = cloneReconciliation(p.Reconciliation)
 		p.Provenance.Lineage = slices.Clone(p.Provenance.Lineage)
 		p.Provenance.Losses = slices.Clone(p.Provenance.Losses)
@@ -241,6 +246,11 @@ func projectRecalled[P, R, A, O any](
 		projection, err := finishProjection(ctx, e, authority, scope, decision, initial, read, projector)
 		if err != nil {
 			return body, nil, nil, err
+		}
+		projection.Retrieval = &RetrievalEvidence{
+			Score:       item.Score,
+			Explanation: item.Explanation,
+			Signals:     slices.Clone(item.Signals),
 		}
 		body.Projections = append(body.Projections, projection)
 		projectedRefs = append(projectedRefs, ref)
@@ -333,7 +343,10 @@ func revalidateProjected[P, R, A any](
 			if err := e.validateCurrentRead(ctx, b, scope, disk); err != nil {
 				return err
 			}
-			ranked = append(ranked, Ranked[P, R]{Record: record, Score: 0, Explanation: "", Signals: nil})
+			ranked = append(
+				ranked,
+				Ranked[P, R]{Record: record, Score: Score{Present: false, Value: 0}, Explanation: "", Signals: nil},
+			)
 		}
 		return e.completeRecall(ctx, b, authority, scope, read.Purpose, decision, ranked)
 	})

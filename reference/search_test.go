@@ -43,6 +43,11 @@ func (f *fixtureSearch) Search(
 	return f.result, f.err
 }
 func backend(id string, candidates ...memy.Candidate) reference.Backend[int] {
+	for n := range candidates {
+		if len(candidates[n].Signals) == 0 {
+			candidates[n].Signals = []memy.SearchSignal{{Backend: id, Rank: n + 1, Score: candidates[n].Score}}
+		}
+	}
 	return reference.Backend[int]{
 		ID: id,
 		Search: &fixtureSearch{
@@ -55,7 +60,7 @@ func backend(id string, candidates ...memy.Candidate) reference.Backend[int] {
 	}
 }
 func candidate(id string, score float64) memy.Candidate {
-	return memy.Candidate{RecordID: id, Revision: 1, Score: score}
+	return memy.Candidate{RecordID: id, Revision: 1, Score: memy.ScoreOf(score)}
 }
 
 func TestCompositeRRFPermutationDuplicatesAndScales(t *testing.T) {
@@ -83,11 +88,11 @@ func TestCompositeRRFPermutationDuplicatesAndScales(t *testing.T) {
 	}
 	expected := 1.0/61 + 1.0/62
 	for _, value := range first.Candidates {
-		if math.Abs(value.Score-expected) > 1e-15 || len(value.Signals) != 2 {
+		if math.Abs(value.Score.Value-expected) > 1e-15 || len(value.Signals) != 2 {
 			t.Fatalf("fusion %+v", value)
 		}
 	}
-	if first.Candidates[1].Signals[1].Rank != 2 || first.Candidates[0].Signals[1].Score != 10000 {
+	if first.Candidates[1].Signals[1].Rank != 3 || first.Candidates[0].Signals[1].Score.Value != 10000 {
 		t.Fatalf("raw signals %+v", first.Candidates)
 	}
 	for _, b := range c.Backends {
@@ -155,24 +160,24 @@ func TestCompositeRejectsMalformedBeforeFusion(t *testing.T) {
 			c.Backends[0].Search.(*fixtureSearch).result.Candidates[0].RecordID = "bad\x00id"
 		}, memy.ErrInvalid},
 		{"nan score", func(c *reference.Composite[int]) {
-			c.Backends[0].Search.(*fixtureSearch).result.Candidates[0].Score = math.NaN()
+			c.Backends[0].Search.(*fixtureSearch).result.Candidates[0].Score = memy.ScoreOf(math.NaN())
 		}, memy.ErrInvalid},
 		{"foreign coverage", func(c *reference.Composite[int]) {
 			c.Backends[0].Search.(*fixtureSearch).result.Coverage[0].Backend = "foreign"
 		}, memy.ErrInvalid},
 		{"foreign signal", func(c *reference.Composite[int]) {
 			c.Backends[0].Search.(*fixtureSearch).result.Candidates[0].Signals = []memy.SearchSignal{
-				{Backend: "foreign", Rank: 1, Score: 1},
+				{Backend: "foreign", Rank: 1, Score: memy.ScoreOf(1)},
 			}
 		}, memy.ErrInvalid},
 		{"invalid signal rank", func(c *reference.Composite[int]) {
 			c.Backends[0].Search.(*fixtureSearch).result.Candidates[0].Signals = []memy.SearchSignal{
-				{Backend: "a", Rank: 0, Score: 1},
+				{Backend: "a", Rank: 0, Score: memy.ScoreOf(1)},
 			}
 		}, memy.ErrInvalid},
 		{"infinite signal", func(c *reference.Composite[int]) {
 			c.Backends[0].Search.(*fixtureSearch).result.Candidates[0].Signals = []memy.SearchSignal{
-				{Backend: "a", Rank: 1, Score: math.Inf(-1)},
+				{Backend: "a", Rank: 1, Score: memy.ScoreOf(math.Inf(-1))},
 			}
 		}, memy.ErrInvalid},
 		{
@@ -246,7 +251,7 @@ func TestIndexBoundAndDetachedSignals(t *testing.T) {
 	// Arrange.
 	index := reference.NewIndex[int]("index", nil)
 	ctx := context.Background()
-	signal := []memy.SearchSignal{{Backend: "fake", Rank: 99, Score: 100}}
+	signal := []memy.SearchSignal{{Backend: "fake", Rank: 99, Score: memy.ScoreOf(100)}}
 	for _, value := range []memy.Candidate{candidate("b", 10), candidate("a", 10), candidate("c", 20)} {
 		value.Signals = signal
 		if err := index.Stage(ctx, portScope(), value); err != nil {
@@ -259,16 +264,16 @@ func TestIndexBoundAndDetachedSignals(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	signal[0].Score = math.NaN()
+	signal[0].Score = memy.ScoreOf(math.NaN())
 	// Act.
 	first, err := index.Search(ctx, portScope(), 0, memy.SearchOptions{MaxCandidates: 2})
-	first.Candidates[0].Signals[0].Score = -1
+	first.Candidates[0].Signals[0].Score = memy.ScoreOf(-1)
 	second, secondErr := index.Search(ctx, portScope(), 0, memy.SearchOptions{MaxCandidates: 2})
 	// Assert.
 	if err != nil || secondErr != nil || !second.CandidatesTruncated || len(second.Candidates) != 2 ||
 		second.Candidates[0].RecordID != "c" ||
 		second.Candidates[1].RecordID != "a" ||
-		second.Candidates[0].Signals[0].Score != 20 ||
+		second.Candidates[0].Signals[0].Score.Value != 20 ||
 		second.Candidates[1].Signals[0].Rank != 2 {
 		t.Fatalf("%+v %v %v", second, err, secondErr)
 	}
@@ -398,7 +403,9 @@ func TestCompositeCancellationPrecedesChildMetadataValidation(t *testing.T) {
 				child.err = context.DeadlineExceeded
 				want = context.DeadlineExceeded
 			case "canceled context malformed success":
-				child.result = memy.SearchResult{Candidates: []memy.Candidate{{RecordID: "\x00", Score: math.NaN()}}}
+				child.result = memy.SearchResult{
+					Candidates: []memy.Candidate{{RecordID: "\x00", Score: memy.ScoreOf(math.NaN())}},
+				}
 				child.beforeReturn = cancel
 			case "joined visibility deadline":
 				child.result.Coverage[0].Status = "pending"
@@ -429,11 +436,11 @@ func TestCompositePreservesProvidedRawScoreWithDistinctRanks(t *testing.T) {
 	// Arrange: policy scores and raw evidence differ; supplied ranks do not define
 	// list positions after exact-revision duplicates are removed.
 	aFirst := candidate("x", 1)
-	aFirst.Signals = []memy.SearchSignal{{Backend: "a", Rank: 99, Score: 99}}
+	aFirst.Signals = []memy.SearchSignal{{Backend: "a", Rank: 99, Score: memy.ScoreOf(99)}}
 	aDuplicate := candidate("x", 1000)
-	aDuplicate.Signals = []memy.SearchSignal{{Backend: "a", Rank: 100, Score: 999}}
+	aDuplicate.Signals = []memy.SearchSignal{{Backend: "a", Rank: 100, Score: memy.ScoreOf(999)}}
 	aSecond := candidate("y", 2)
-	aSecond.Signals = []memy.SearchSignal{{Backend: "a", Rank: 200, Score: -99}}
+	aSecond.Signals = []memy.SearchSignal{{Backend: "a", Rank: 200, Score: memy.ScoreOf(-99)}}
 	a := backend("a", aFirst, aDuplicate, aSecond)
 	b := backend("b", candidate("y", .01), candidate("x", .001))
 	c := reference.Composite[int]{Backends: []reference.Backend[int]{a, b}, RRF: reference.RRFConfig{K: 60}}
@@ -451,18 +458,37 @@ func TestCompositePreservesProvidedRawScoreWithDistinctRanks(t *testing.T) {
 	}
 	expected := 1.0/61 + 1.0/62
 	for n, value := range first.Candidates {
-		if math.Abs(value.Score-expected) > 1e-15 || len(value.Signals) != 2 {
+		if math.Abs(value.Score.Value-expected) > 1e-15 || len(value.Signals) != 2 {
 			t.Fatalf("fusion %+v", value)
 		}
 		raw := 99.0
 		if n == 1 {
 			raw = -99
 		}
-		if value.Signals[0].Backend != "a" || value.Signals[0].Score != raw || value.Signals[0].Rank != n+1 {
+		if value.Signals[0].Backend != "a" || value.Signals[0].Score.Value != raw ||
+			value.Signals[0].Rank != map[int]int{0: 99, 1: 200}[n] {
 			t.Fatalf("provided evidence %+v", value.Signals)
 		}
 	}
-	if first.Candidates[0].Signals[1].Score != .001 || first.Candidates[1].Signals[1].Score != .01 {
+	if first.Candidates[0].Signals[1].Score.Value != .001 || first.Candidates[1].Signals[1].Score.Value != .01 {
 		t.Fatalf("fallback evidence %+v", first.Candidates)
+	}
+}
+
+func TestCompositeNeverInventsNativeScore(t *testing.T) {
+	// Arrange: a child gives only a host ranking score, with no native signal.
+	child := backend("rank-only", candidate("record", 100))
+	child.Search.(*fixtureSearch).result.Candidates[0].Signals = nil
+	c := reference.Composite[int]{Backends: []reference.Backend[int]{child}, RRF: reference.RRFConfig{K: 60}}
+	// Act.
+	result, err := c.Search(t.Context(), portScope(), 0, memy.SearchOptions{MaxCandidates: 1})
+	// Assert: RRF has a computed score; native score remains absent.
+	if err != nil || len(result.Candidates) != 1 {
+		t.Fatalf("result=%+v err=%v", result, err)
+	}
+	got := result.Candidates[0]
+	if !got.Score.Present || got.Signals[0].Score.Present || got.Signals[0].Score.Value != 0 ||
+		got.Signals[0].Rank != 1 {
+		t.Fatal(got)
 	}
 }

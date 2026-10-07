@@ -560,7 +560,12 @@ func (e *Engine[P, R, A]) canonicalConsolidationInputs(
 			ctx,
 			b,
 			scope,
-			Candidate{RecordID: ref.RecordID, Revision: ref.Revision, Score: 0, Signals: nil},
+			Candidate{
+				RecordID: ref.RecordID,
+				Revision: ref.Revision,
+				Score:    Score{Present: false, Value: 0},
+				Signals:  nil,
+			},
 			ReadOptions{
 				Purpose:          request.Purpose,
 				ValidAsOf:        time.Time{},

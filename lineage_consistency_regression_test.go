@@ -39,7 +39,7 @@ func reviewedLineageCase(t *testing.T, backend, fault string) {
 	receipt := f.commit(t, f.acceptedRequest(t, "commit-derived", "derived", 0, proposal, memy.Append))
 	index := reference.NewIndex[string]("index", nil)
 	if stageErr := index.Stage(context.Background(), f.scope, memy.Candidate{
-		RecordID: receipt.RecordID, Revision: receipt.Revision, Score: 1,
+		RecordID: receipt.RecordID, Revision: receipt.Revision, Score: memy.ScoreOf(1),
 	}); stageErr != nil {
 		t.Fatal(stageErr)
 	}

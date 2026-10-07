@@ -1,0 +1,21 @@
+examples/managed-projections/checkpoint/remote.go:50:29: checkpoint.request is missing fields Batch, Scope, Key (exhaustruct_v5)
+	result, err := r.call(ctx, request{Operation: opPut, Fence: fence, Artifact: a})
+	                           ^
+examples/managed-projections/checkpoint/remote.go:56:29: checkpoint.request is missing fields Fence, Artifact, Batch (exhaustruct_v5)
+	result, err := r.call(ctx, request{Operation: opLoad, Scope: scope, Key: key})
+	                           ^
+examples/managed-projections/checkpoint/remote.go:62:24: checkpoint.request is missing fields Fence, Artifact, Batch (exhaustruct_v5)
+	_, err := r.call(ctx, request{Operation: opInvalidate, Scope: scope, Key: key})
+	                      ^
+examples/managed-projections/checkpoint/remote.go:68:29: checkpoint.request is missing fields Fence, Artifact, Scope, Key (exhaustruct_v5)
+	result, err := r.call(ctx, request{Operation: opPurge, Batch: batch})
+	                           ^
+examples/managed-projections/checkpoint/remote.go:76:27: the given struct should be annotated with the `json` tag (musttag)
+	raw, err := json.Marshal(input)
+	                         ^
+examples/managed-projections/checkpoint/remote.go:124:28: the given struct should be annotated with the `json` tag (musttag)
+		if err := decoder.Decode(&input); err != nil {
+		                         ^
+6 issues:
+* exhaustruct_v5: 4
+* musttag: 2

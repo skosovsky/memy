@@ -1,0 +1,5 @@
+conformance/search.go:307:44: memy.Score is missing fields Present, Value (exhaustruct_v5)
+	scores := map[string]memy.Score{"absent": {}, "zero": memy.ScoreOf(0), "negative": memy.ScoreOf(-1)}
+	                                          ^
+1 issues:
+* exhaustruct_v5: 1

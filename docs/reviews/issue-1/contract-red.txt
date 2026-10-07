@@ -1,0 +1,14 @@
+# github.com/skosovsky/memy_test [github.com/skosovsky/memy.test]
+./score_evidence_contract_test.go:17:46: undefined: memy.Score
+./score_evidence_contract_test.go:18:19: undefined: memy.Score
+./score_evidence_contract_test.go:19:17: undefined: memy.ScoreOf
+./score_evidence_contract_test.go:20:21: undefined: memy.ScoreOf
+./score_evidence_contract_test.go:21:22: undefined: memy.Score
+./score_evidence_contract_test.go:22:16: undefined: memy.ScoreOf
+./score_evidence_contract_test.go:23:21: undefined: memy.ScoreOf
+./score_evidence_contract_test.go:32:20: undefined: memy.Score
+./score_evidence_contract_test.go:40:57: undefined: memy.ScoreOf
+./score_evidence_contract_test.go:41:57: undefined: memy.ScoreOf
+./score_evidence_contract_test.go:41:57: too many errors
+FAIL	github.com/skosovsky/memy [build failed]
+FAIL

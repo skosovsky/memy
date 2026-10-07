@@ -191,7 +191,7 @@ func TestRankerCannotRewriteConsumerMapsOrProvenance(t *testing.T) {
 	if err := index.Stage(
 		context.Background(),
 		f.scope,
-		memy.Candidate{RecordID: "map", Revision: 1, Score: 1},
+		memy.Candidate{RecordID: "map", Revision: 1, Score: memy.ScoreOf(1)},
 	); err != nil {
 		t.Fatal(err)
 	}

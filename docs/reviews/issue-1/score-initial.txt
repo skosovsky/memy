@@ -1,0 +1,19 @@
+ok  	github.com/skosovsky/memy	0.469s
+?   	github.com/skosovsky/memy/conformance	[no test files]
+ok  	github.com/skosovsky/memy/examples/lifecycle	0.454s [no tests to run]
+ok  	github.com/skosovsky/memy/examples/quality	0.453s [no tests to run]
+?   	github.com/skosovsky/memy/examples/quality-integration	[no test files]
+?   	github.com/skosovsky/memy/examples/retrieval	[no test files]
+ok  	github.com/skosovsky/memy/internal/kv	0.404s [no tests to run]
+ok  	github.com/skosovsky/memy/internal/membershipproof	(cached) [no tests to run]
+ok  	github.com/skosovsky/memy/internal/quality	0.458s [no tests to run]
+?   	github.com/skosovsky/memy/internal/workcost	[no test files]
+--- FAIL: TestCompositeRRFPermutationDuplicatesAndScales (0.00s)
+    search_test.go:91: raw signals [{RecordID:a Revision:1 Score:{Present:true Value:0.03252247488101534} Signals:[{Backend:dense Rank:2 Score:{Present:false Value:0}} {Backend:sparse Rank:1 Score:{Present:false Value:0}}]} {RecordID:b Revision:1 Score:{Present:true Value:0.03252247488101534} Signals:[{Backend:dense Rank:1 Score:{Present:false Value:0}} {Backend:sparse Rank:2 Score:{Present:false Value:0}}]}]
+--- FAIL: TestCompositePreservesProvidedRawScoreWithDistinctRanks (0.00s)
+    search_test.go:462: provided evidence [{Backend:a Rank:99 Score:{Present:true Value:99}} {Backend:b Rank:2 Score:{Present:false Value:0}}]
+FAIL
+FAIL	github.com/skosovsky/memy/reference	0.398s
+ok  	github.com/skosovsky/memy/store/memory	0.400s [no tests to run]
+ok  	github.com/skosovsky/memy/store/sqlite	0.453s [no tests to run]
+FAIL

@@ -1,0 +1,67 @@
+consolidation.go:563:69: memy.Score is missing fields Present, Value (exhaustruct_v5)
+			Candidate{RecordID: ref.RecordID, Revision: ref.Revision, Score: Score{}, Signals: nil},
+			                                                                 ^
+examples/managed-projections/checkpoint/store.go:162:32: sql.TxOptions is missing field Isolation (exhaustruct_v5)
+	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
+	                              ^
+examples/managed-projections/host/session.go:47:137: reference.Retain is missing field ExpiresAt (exhaustruct_v5)
+	e, err := memy.New(memy.Config[string, string, string]{Store: canonical, Authority: policy, Sources: sources, Clock: clock, Retention: reference.Retain[string]{Version: "retain"}, PayloadCodec: memy.JSONCodec[string]{}, ReferenceCodec: memy.JSONCodec[string]{}, Sinks: []memy.Sink{checkpoints}, Reintroduction: nil})
+	                                                                                                                                       ^
+examples/managed-projections/host/session.go:69:84: memy.Suggestion is missing fields ObservedAt, Valid, ExpiresAt, Lineage, Losses, Uncertainties (exhaustruct_v5)
+	proposal, err := s.Engine.Remember(ctx, "writer", scope, "remember-"+id, Purpose, memy.Suggestion[string, string]{Payload: value, Sources: []memy.Source[string]{{ID: "source", Revision: "current", Reference: "host://source"}}, Evidence: "explicit host input", Extractor: "host"})
+	                                                                                  ^
+examples/managed-projections/host/session.go:100:119: memy.Score is missing fields Present, Value (exhaustruct_v5)
+		result.Candidates = append(result.Candidates, memy.Candidate{RecordID: ref.RecordID, Revision: ref.Revision, Score: memy.Score{}, Signals: []memy.SearchSignal{{Backend: "host-search", Rank: i + 1, Score: memy.Score{}}}})
+		                                                                                                                    ^
+examples/managed-projections/host/session.go:111:160: memy.ReadOptions is missing fields ValidAsOf, RecordedAsOf, IncludeUnknown, IncludeConflicts (exhaustruct_v5)
+	result, err := memy.RecallProjected(ctx, s.Engine, "reader", scope, Query{Refs: refs}, Search{}, memy.ScoreRanker[string, string]{}, memy.RecallOptions{Read: memy.ReadOptions{Purpose: Purpose}, Search: memy.SearchOptions{MaxCandidates: memy.MaxSearchCandidates}, Limit: memy.MaxSearchCandidates}, reference.ProjectorFunc[string, string, string]{PolicyVersion: "host-projection", Apply: func(ctx context.Context, r memy.Record[string, string]) (string, error) { return r.Payload, ctx.Err() }}, nil)
+	                                                                                                                                                              ^
+projected_recall.go:342:64: memy.Score is missing fields Present, Value (exhaustruct_v5)
+			ranked = append(ranked, Ranked[P, R]{Record: record, Score: Score{}, Explanation: "", Signals: nil})
+			                                                            ^
+recall.go:343:12: memy.Projection is missing field Retrieval (exhaustruct_v5)
+		result = Projection[O, R]{
+		         ^
+recall.go:392:63: memy.Score is missing fields Present, Value (exhaustruct_v5)
+			Candidate{RecordID: ref.ID, Revision: ref.Revision, Score: Score{}, Signals: nil},
+			                                                           ^
+reference/search.go:321:70: memy.Score is missing fields Present, Value (exhaustruct_v5)
+		signal := memy.SearchSignal{Backend: backendID, Rank: rank, Score: memy.Score{}}
+		                                                                   ^
+conformance/search.go:61:1: File is not properly formatted (golines)
+	must(t, f.Seed(t.Context(), b, memy.Candidate{RecordID: "private", Revision: 1, Score: memy.ScoreOf(1), Signals: nil}))
+^
+examples/managed-projections/checkpoint/delivery.go:13:1: File is not properly formatted (golines)
+func ReadValidated[P, R, A any](ctx context.Context, s *Store, e *memy.Engine[P, R, A], authority A, scope memy.Scope, purpose, key string) ([]byte, error) {
+^
+examples/managed-projections/checkpoint/store.go:136:1: File is not properly formatted (golines)
+	err = tx.QueryRowContext(ctx, "SELECT data FROM artifacts WHERE scope=? AND key=?", a.Scope.Key(), key).Scan(&existing)
+^
+examples/managed-projections/host/session.go:53:1: File is not properly formatted (golines)
+	return &Session{Engine: e, Canonical: canonical, Checkpoints: checkpoints, Policy: policy, Sources: sources, Clock: clock}, nil
+^
+examples/managed-projections/main.go:59:1: File is not properly formatted (golines)
+	if _, err = checkpoint.ReadValidated(ctx, session.Checkpoints, session.Engine, "reader", scope, host.Purpose, key); err != nil {
+^
+internal/quality/procedure.go:430:1: File is not properly formatted (golines)
+		{RecordID: procedureRelevantA, Revision: procedureStaleRevision, Score: memy.ScoreOf(procedureStaleScore), Signals: nil},
+^
+projected_recall.go:250:1: File is not properly formatted (golines)
+		projection.Retrieval = &RetrievalEvidence{Score: item.Score, Explanation: item.Explanation, Signals: slices.Clone(item.Signals)}
+^
+reference/search_test.go:406:1: File is not properly formatted (golines)
+				child.result = memy.SearchResult{Candidates: []memy.Candidate{{RecordID: "\x00", Score: memy.ScoreOf(math.NaN())}}}
+^
+retrieval_budget_test.go:309:1: File is not properly formatted (golines)
+					input[0].Signals[0] = memy.SearchSignal{Backend: "forged", Rank: 100, Score: memy.ScoreOf(math.Inf(1))}
+^
+score_evidence_contract_test.go:87:1: File is not properly formatted (golines)
+	p := &projectedPolicy{selectFn: func(_ context.Context, b memy.ProjectedRecallResult[projectedOutput, sourceRef]) (memy.OutputSelection, error) {
+^
+examples/managed-projections/checkpoint/store.go:181:18: Close should use defer (sqlclosecheck)
+			_ = rows.Close()
+			              ^
+21 issues:
+* exhaustruct_v5: 10
+* golines: 10
+* sqlclosecheck: 1

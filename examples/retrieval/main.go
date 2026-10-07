@@ -141,22 +141,22 @@ func run() error {
 		ID: "sparse", Fail: false,
 		Scope: scope,
 		Candidates: []memy.Candidate{
-			{RecordID: "a", Revision: 1, Score: sparsePrimaryScore, Signals: nil},
-			{RecordID: "b", Revision: 1, Score: sparseSecondaryScore, Signals: nil},
-			{RecordID: "a", Revision: staleRevision, Score: sparseStaleScore, Signals: nil},
-			{RecordID: "c", Revision: 1, Score: sparseOversizedScore, Signals: nil},
-			{RecordID: "unseen", Revision: 1, Score: sparseMissingScore, Signals: nil},
+			{RecordID: "a", Revision: 1, Score: memy.ScoreOf(sparsePrimaryScore), Signals: nil},
+			{RecordID: "b", Revision: 1, Score: memy.ScoreOf(sparseSecondaryScore), Signals: nil},
+			{RecordID: "a", Revision: staleRevision, Score: memy.ScoreOf(sparseStaleScore), Signals: nil},
+			{RecordID: "c", Revision: 1, Score: memy.ScoreOf(sparseOversizedScore), Signals: nil},
+			{RecordID: "unseen", Revision: 1, Score: memy.ScoreOf(sparseMissingScore), Signals: nil},
 		},
 	}
 	dense := scriptedSearch{
 		ID: "dense", Fail: false,
 		Scope: scope,
 		Candidates: []memy.Candidate{
-			{RecordID: "b", Revision: 1, Score: densePrimaryScore, Signals: nil},
-			{RecordID: "a", Revision: 1, Score: denseSecondaryScore, Signals: nil},
-			{RecordID: "a", Revision: staleRevision, Score: denseStaleScore, Signals: nil},
-			{RecordID: "c", Revision: 1, Score: denseOversizedScore, Signals: nil},
-			{RecordID: "unseen", Revision: 1, Score: denseMissingScore, Signals: nil},
+			{RecordID: "b", Revision: 1, Score: memy.ScoreOf(densePrimaryScore), Signals: nil},
+			{RecordID: "a", Revision: 1, Score: memy.ScoreOf(denseSecondaryScore), Signals: nil},
+			{RecordID: "a", Revision: staleRevision, Score: memy.ScoreOf(denseStaleScore), Signals: nil},
+			{RecordID: "c", Revision: 1, Score: memy.ScoreOf(denseOversizedScore), Signals: nil},
+			{RecordID: "unseen", Revision: 1, Score: memy.ScoreOf(denseMissingScore), Signals: nil},
 		},
 	}
 	search := reference.Composite[Query]{
@@ -360,7 +360,7 @@ func demonstrateRetrieval(
 		return err
 	}
 	for _, record := range ranked.Records {
-		fmt.Printf("RRF %s score=%.6f signals=%+v\n", record.Record.ID, record.Score, record.Signals)
+		fmt.Printf("RRF %s score=%.6f signals=%+v\n", record.Record.ID, record.Score.Value, record.Signals)
 	}
 	projector := reference.ProjectorFunc[Incident, SourceRef, Incident]{
 		PolicyVersion: "projection/v1",

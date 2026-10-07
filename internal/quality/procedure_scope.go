@@ -156,8 +156,8 @@ func (f *procedureFixture) crossScope(ctx context.Context, r *ScenarioReport) er
 	search := f.ports.Search(
 		f.scope,
 		[]memy.Candidate{
-			{RecordID: "foreign-observation", Revision: 1, Score: procedureSecondaryScore, Signals: nil},
-			{RecordID: procedureRelevantA, Revision: 1, Score: 1, Signals: nil},
+			{RecordID: "foreign-observation", Revision: 1, Score: memy.ScoreOf(procedureSecondaryScore), Signals: nil},
+			{RecordID: procedureRelevantA, Revision: 1, Score: memy.ScoreOf(1), Signals: nil},
 		},
 	)
 	actual, err := f.recall(

@@ -157,12 +157,12 @@ func validateBackendResult(result memy.SearchResult, id string, maximum int) err
 	}
 	for _, candidate := range result.Candidates {
 		if (memy.RevisionRef{RecordID: candidate.RecordID, Revision: candidate.Revision}).Validate() != nil ||
-			!finite(candidate.Score) ||
+			candidate.Score.Validate() != nil ||
 			len(candidate.Signals) > 1 {
 			return memy.ErrInvalid
 		}
 		for _, signal := range candidate.Signals {
-			if signal.Backend != id || signal.Rank < 1 || !finite(signal.Score) {
+			if signal.Backend != id || signal.Rank < 1 || signal.Score.Validate() != nil {
 				return memy.ErrInvalid
 			}
 		}
@@ -170,11 +170,8 @@ func validateBackendResult(result memy.SearchResult, id string, maximum int) err
 	return nil
 }
 func candidateOrder(a, b memy.Candidate) int {
-	if a.Score > b.Score {
-		return -1
-	}
-	if a.Score < b.Score {
-		return 1
+	if order := a.Score.Compare(b.Score); order != 0 {
+		return order
 	}
 	if a.RecordID < b.RecordID {
 		return -1
@@ -317,15 +314,15 @@ func (c Composite[Q]) fuseBackend(
 		value := fused[ref]
 		value.RecordID = ref.RecordID
 		value.Revision = ref.Revision
-		value.Score += weight / (c.RRF.K + float64(rank))
-		if !finite(value.Score) {
+		value.Score = memy.ScoreOf(value.Score.Value + weight/(c.RRF.K+float64(rank)))
+		if value.Score.Validate() != nil {
 			return memy.ErrInvalid
 		}
-		rawScore := candidate.Score
+		signal := memy.SearchSignal{Backend: backendID, Rank: rank, Score: memy.Score{Present: false, Value: 0}}
 		if len(candidate.Signals) == 1 {
-			rawScore = candidate.Signals[0].Score
+			signal = candidate.Signals[0]
 		}
-		value.Signals = append(value.Signals, memy.SearchSignal{Backend: backendID, Rank: rank, Score: rawScore})
+		value.Signals = append(value.Signals, signal)
 		fused[ref] = value
 	}
 	return nil

@@ -418,18 +418,23 @@ func (f *procedureFixture) candidates() []memy.Candidate {
 		{
 			RecordID: procedureRelevantA,
 			Revision: f.receipts[procedureRelevantA].Revision,
-			Score:    procedureRelevantScore,
+			Score:    memy.ScoreOf(procedureRelevantScore),
 			Signals:  nil,
 		},
 		{
 			RecordID: "relevant-b",
 			Revision: f.receipts["relevant-b"].Revision,
-			Score:    procedureSecondaryScore,
+			Score:    memy.ScoreOf(procedureSecondaryScore),
 			Signals:  nil,
 		},
-		{RecordID: procedureRelevantA, Revision: procedureStaleRevision, Score: procedureStaleScore, Signals: nil},
-		{RecordID: procedureDistractor, Revision: 1, Score: 1, Signals: nil},
-		{RecordID: "unseen", Revision: 1, Score: procedureMissingScore, Signals: nil},
+		{
+			RecordID: procedureRelevantA,
+			Revision: procedureStaleRevision,
+			Score:    memy.ScoreOf(procedureStaleScore),
+			Signals:  nil,
+		},
+		{RecordID: procedureDistractor, Revision: 1, Score: memy.ScoreOf(1), Signals: nil},
+		{RecordID: "unseen", Revision: 1, Score: memy.ScoreOf(procedureMissingScore), Signals: nil},
 	}
 }
 

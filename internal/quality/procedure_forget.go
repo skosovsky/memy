@@ -24,7 +24,7 @@ func (f *procedureFixture) forget(ctx context.Context, r *ScenarioReport) error 
 			if stageErr := f.index.Stage(
 				ctx,
 				f.scope,
-				memy.Candidate{RecordID: ref.RecordID, Revision: ref.Revision, Score: 1, Signals: nil},
+				memy.Candidate{RecordID: ref.RecordID, Revision: ref.Revision, Score: memy.ScoreOf(1), Signals: nil},
 			); stageErr != nil {
 				return stageErr
 			}
@@ -55,7 +55,7 @@ func (f *procedureFixture) forget(ctx context.Context, r *ScenarioReport) error 
 	staleSearch := procedureSearch{
 		"procedure-stale/v1",
 		f.scope,
-		[]memy.Candidate{{RecordID: ref.RecordID, Revision: ref.Revision, Score: 1, Signals: nil}},
+		[]memy.Candidate{{RecordID: ref.RecordID, Revision: ref.Revision, Score: memy.ScoreOf(1), Signals: nil}},
 		false,
 	}
 	body, pendingReadErr := f.project(ctx, staleSearch, nil)

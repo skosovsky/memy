@@ -1049,3 +1049,10 @@ or another duplicate group cannot shorten it. An earlier explicit output deadlin
 is preserved. DomainMerge and SemanticMerge retain all-request-input lineage and
 cap output expiry against every input. These rules do not extend ancestor evidence
 or bypass current lineage/retention checks when accepting or reading a derived record.
+
+## Managed projections and retrieval evidence
+
+The public score-presence, native evidence and host checkpoint contract is defined
+in [managed projections](managed-projections.md). It extends retrieval only;
+canonical persisted envelopes are unchanged. Implementations must preserve that
+contract through ranking, projection, packing, managed writes and purge.

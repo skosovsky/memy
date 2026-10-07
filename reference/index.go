@@ -59,7 +59,7 @@ func (i *Index[Q]) Stage(ctx context.Context, scope memy.Scope, candidate memy.C
 		return err
 	}
 	if i == nil || (memy.RevisionRef{RecordID: candidate.RecordID, Revision: candidate.Revision}).Validate() != nil ||
-		!finite(candidate.Score) {
+		candidate.Score.Validate() != nil {
 		return memy.ErrInvalid
 	}
 	i.mu.Lock()

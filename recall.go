@@ -17,15 +17,15 @@ type SearchCapabilities struct {
 type Candidate struct {
 	RecordID string
 	Revision Version
-	Score    float64
+	Score    Score
 	Signals  []SearchSignal
 }
 
 // SearchSignal retains the typed evidence used by a composition policy.
 type SearchSignal struct {
-	Backend string  `json:"backend"`
-	Rank    int     `json:"rank"`
-	Score   float64 `json:"score"`
+	Backend string `json:"backend"`
+	Rank    int    `json:"rank"`
+	Score   Score  `json:"score"`
 }
 
 // Coverage separates backend availability/index visibility from relevance.
@@ -61,7 +61,7 @@ type Search[Q any] interface {
 // Ranked holds a selected typed record and its ranking explanation.
 type Ranked[P, R any] struct {
 	Record      Record[P, R]   `json:"record"`
-	Score       float64        `json:"score"`
+	Score       Score          `json:"score"`
 	Explanation string         `json:"explanation"`
 	Signals     []SearchSignal `json:"signals"`
 }
@@ -192,13 +192,15 @@ func (ScoreRanker[P, R]) Rank(ctx context.Context, records []Ranked[P, R]) ([]Ra
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
+	for _, record := range records {
+		if err := record.Score.Validate(); err != nil {
+			return nil, err
+		}
+	}
 	ordered := slices.Clone(records)
 	slices.SortStableFunc(ordered, func(a, b Ranked[P, R]) int {
-		if a.Score > b.Score {
-			return -1
-		}
-		if a.Score < b.Score {
-			return 1
+		if order := a.Score.Compare(b.Score); order != 0 {
+			return order
 		}
 		if a.Record.ID < b.Record.ID {
 			return -1
@@ -215,24 +217,25 @@ func (ScoreRanker[P, R]) Rank(ctx context.Context, records []Ranked[P, R]) ([]Ra
 		return 0
 	})
 	for i := range ordered {
-		ordered[i].Explanation = "descending search score; stable record/revision tie break"
+		ordered[i].Explanation = "present ranking scores descending, absent last; stable record/revision tie break"
 	}
 	return ordered, nil
 }
 
 // Projection carries consumer output plus access/provenance annotations as data.
 type Projection[O, R any] struct {
-	Output                 O               `json:"output"`
-	Provenance             Provenance[R]   `json:"provenance"`
-	Scope                  Scope           `json:"scope"`
-	RecordID               string          `json:"record_id"`
-	Revision               Version         `json:"revision"`
-	State                  RecordState     `json:"state"`
-	ExpiresAt              time.Time       `json:"expires_at"`
-	Trust                  string          `json:"trust"`
-	CacheKey               string          `json:"cache_key"`
-	Reconciliation         *Reconciliation `json:"reconciliation"`
-	AuthorityPolicyVersion string          `json:"authority_policy_version"`
+	Output                 O                  `json:"output"`
+	Provenance             Provenance[R]      `json:"provenance"`
+	Scope                  Scope              `json:"scope"`
+	RecordID               string             `json:"record_id"`
+	Revision               Version            `json:"revision"`
+	State                  RecordState        `json:"state"`
+	ExpiresAt              time.Time          `json:"expires_at"`
+	Trust                  string             `json:"trust"`
+	CacheKey               string             `json:"cache_key"`
+	Reconciliation         *Reconciliation    `json:"reconciliation"`
+	AuthorityPolicyVersion string             `json:"authority_policy_version"`
+	Retrieval              *RetrievalEvidence `json:"retrieval,omitempty"`
 }
 
 // Projector turns an authorized typed record into a consumer context/export type.
@@ -349,6 +352,7 @@ func finishProjection[P, R, A, O any](
 			CacheKey:               cacheKey,
 			Reconciliation:         cloneReconciliation(record.Reconciliation),
 			AuthorityPolicyVersion: record.AuthorityPolicyVersion,
+			Retrieval:              nil,
 		}
 		return nil
 	})
@@ -386,7 +390,7 @@ func (e *Engine[P, R, A]) refreshRecalled(
 			ctx,
 			b,
 			scope,
-			Candidate{RecordID: ref.ID, Revision: ref.Revision, Score: 0, Signals: nil},
+			Candidate{RecordID: ref.ID, Revision: ref.Revision, Score: Score{Present: false, Value: 0}, Signals: nil},
 			read,
 		)
 		if err != nil {

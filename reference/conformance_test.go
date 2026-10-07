@@ -50,7 +50,7 @@ func TestSinkConformance(t *testing.T) {
 					if err := index.Stage(
 						ctx,
 						sc,
-						memy.Candidate{RecordID: ref.RecordID, Revision: ref.Revision, Score: 1},
+						memy.Candidate{RecordID: ref.RecordID, Revision: ref.Revision, Score: memy.ScoreOf(1)},
 					); err != nil {
 						return err
 					}
@@ -242,8 +242,8 @@ func callbackInvocation(
 			result, err := adapter.Rank(
 				ctx,
 				[]memy.Ranked[string, string]{
-					{Record: memy.Record[string, string]{ID: "low"}, Score: 1},
-					{Record: memy.Record[string, string]{ID: "high"}, Score: 2},
+					{Record: memy.Record[string, string]{ID: "low"}, Score: memy.ScoreOf(1)},
+					{Record: memy.Record[string, string]{ID: "high"}, Score: memy.ScoreOf(2)},
 				},
 			)
 			verify(len(result) == 2 && result[0].Record.ID == "high" && result[0].Explanation != "")

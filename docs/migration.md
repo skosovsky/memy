@@ -186,3 +186,37 @@ schema row and cursor secret. Missing state is ErrSchema and needs reviewed rest
 not silent bootstrap. Only a genuinely empty file bootstraps; secondary indexes
 can be repaired after table validation. Close prevents future callback entry; hosts
 must drain their operations before shutdown rather than assume forced cancellation.
+
+## Explicit score presence and projected evidence
+
+Replace numeric scores with `ScoreOf(value)` for a finite observed/computed score.
+Use `Score{}` for absence; a present numeric zero is `ScoreOf(0)`. `Value` with
+`Present=false` must be zero. JSON now contains `{present,value}`; update decoders
+and fixtures. Candidate/Ranked scores describe host ranking; only SearchSignal
+carries native evidence. Rank-only search must not populate native score from a
+rank or fusion value. A native rank may exceed the returned candidate count.
+
+```go
+// Before: a numeric zero ambiguously meant absence or an observed zero.
+// Candidate{Score: 0, Signals: []SearchSignal{{Backend: "search", Rank: 1, Score: 0}}}
+// After: explicit observed ranking zero with absent native score.
+candidate := Candidate{
+    RecordID: "record", Revision: 1, Score: ScoreOf(0),
+    Signals: []SearchSignal{{Backend: "search", Rank: 1, Score: Score{}}},
+}
+_ = candidate
+```
+
+Read `projection.Retrieval` for ranking score/explanation/native signals returned
+by RecallProjected. It is nil for Project. Include it in your serialized body and
+budgets; payload-only context materialization must explicitly retain the complete
+canonical envelope/evidence in a typed sidecar or host serialization.
+
+Persistent copies require a registered Sink, structural scoped deletion handles,
+full exact lineage, and synchronous writes inside WithDerivedWrite with a fence
+captured before projection. Use the [host checkpoint example](../examples/managed-projections)
+and [contract](managed-projections.md); do not mistake temporary memory for durable
+acceptance or call the canonical store recursively from a gate callback. Revalidate
+restored checkpoints before serving, invalidate stale dependencies, and schedule
+pending purge retries until every registered sink acknowledges durable deletion.
+The canonical persisted envelopes do not change in this migration.

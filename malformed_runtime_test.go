@@ -196,7 +196,7 @@ func TestMalformedLineageDoesNotBecomeEmptyRecall(t *testing.T) {
 	if err := index.Stage(
 		context.Background(),
 		f.scope,
-		memy.Candidate{RecordID: receipt.RecordID, Revision: receipt.Revision, Score: 1},
+		memy.Candidate{RecordID: receipt.RecordID, Revision: receipt.Revision, Score: memy.ScoreOf(1)},
 	); err != nil {
 		t.Fatal(err)
 	}

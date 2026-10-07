@@ -1,0 +1,20 @@
+ok  	github.com/skosovsky/memy	0.519s
+?   	github.com/skosovsky/memy/conformance	[no test files]
+ok  	github.com/skosovsky/memy/examples/lifecycle	0.166s [no tests to run]
+?   	github.com/skosovsky/memy/examples/managed-projections	[no test files]
+?   	github.com/skosovsky/memy/examples/managed-projections/checkpoint	[no test files]
+?   	github.com/skosovsky/memy/examples/managed-projections/host	[no test files]
+ok  	github.com/skosovsky/memy/examples/quality	0.173s [no tests to run]
+?   	github.com/skosovsky/memy/examples/quality-integration	[no test files]
+?   	github.com/skosovsky/memy/examples/retrieval	[no test files]
+ok  	github.com/skosovsky/memy/internal/kv	0.156s [no tests to run]
+ok  	github.com/skosovsky/memy/internal/membershipproof	0.146s [no tests to run]
+ok  	github.com/skosovsky/memy/internal/quality	0.182s [no tests to run]
+?   	github.com/skosovsky/memy/internal/workcost	[no test files]
+--- FAIL: TestCompositeRRFPermutationDuplicatesAndScales (0.00s)
+    search_test.go:96: raw signals [{RecordID:a Revision:1 Score:{Present:true Value:0.03252247488101534} Signals:[{Backend:dense Rank:2 Score:{Present:true Value:0.001}} {Backend:sparse Rank:1 Score:{Present:true Value:10000}}]} {RecordID:b Revision:1 Score:{Present:true Value:0.03252247488101534} Signals:[{Backend:dense Rank:1 Score:{Present:true Value:0.01}} {Backend:sparse Rank:3 Score:{Present:true Value:9000}}]}]
+FAIL
+FAIL	github.com/skosovsky/memy/reference	0.466s
+ok  	github.com/skosovsky/memy/store/memory	0.149s [no tests to run]
+ok  	github.com/skosovsky/memy/store/sqlite	0.165s [no tests to run]
+FAIL

@@ -1,0 +1,4 @@
+?   	github.com/skosovsky/memy/examples/managed-projections	[no test files]
+?   	github.com/skosovsky/memy/examples/managed-projections/checkpoint	[no test files]
+ok  	github.com/skosovsky/memy/examples/managed-projections/host	5.495s
+ok  	github.com/skosovsky/memy/reference	1.556s

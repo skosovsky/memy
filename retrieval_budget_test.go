@@ -35,8 +35,8 @@ func retrievalBudgetCandidate(id string, revision memy.Version, rank int) memy.C
 	return memy.Candidate{
 		RecordID: id,
 		Revision: revision,
-		Score:    10,
-		Signals:  []memy.SearchSignal{{Backend: "search/v1", Rank: rank, Score: 100}},
+		Score:    memy.ScoreOf(10),
+		Signals:  []memy.SearchSignal{{Backend: "search/v1", Rank: rank, Score: memy.ScoreOf(100)}},
 	}
 }
 
@@ -92,14 +92,26 @@ func TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode(t *testing.T) {
 			memy.ErrInvalid,
 		},
 		{
+			"nonzero absent candidate",
+			func(s *retrievalBudgetSearch) { s.result.Candidates[0].Score = memy.Score{Value: 1} },
+			2,
+			memy.ErrInvalid,
+		},
+		{
+			"nonzero absent signal",
+			func(s *retrievalBudgetSearch) { s.result.Candidates[0].Signals[0].Score = memy.Score{Value: 1} },
+			2,
+			memy.ErrInvalid,
+		},
+		{
 			"nan candidate score",
-			func(s *retrievalBudgetSearch) { s.result.Candidates[0].Score = math.NaN() },
+			func(s *retrievalBudgetSearch) { s.result.Candidates[0].Score = memy.ScoreOf(math.NaN()) },
 			2,
 			memy.ErrInvalid,
 		},
 		{
 			"infinite candidate score",
-			func(s *retrievalBudgetSearch) { s.result.Candidates[0].Score = math.Inf(1) },
+			func(s *retrievalBudgetSearch) { s.result.Candidates[0].Score = memy.ScoreOf(math.Inf(1)) },
 			2,
 			memy.ErrInvalid,
 		},
@@ -131,20 +143,20 @@ func TestRetrievalBudgetRejectsMetadataBeforeCanonicalDecode(t *testing.T) {
 			memy.ErrInvalid,
 		},
 		{
-			"rank exceeds bound",
-			func(s *retrievalBudgetSearch) { s.result.Candidates[0].Signals[0].Rank = 3 },
+			"negative native rank",
+			func(s *retrievalBudgetSearch) { s.result.Candidates[0].Signals[0].Rank = -1 },
 			2,
 			memy.ErrInvalid,
 		},
 		{
 			"nan signal score",
-			func(s *retrievalBudgetSearch) { s.result.Candidates[0].Signals[0].Score = math.NaN() },
+			func(s *retrievalBudgetSearch) { s.result.Candidates[0].Signals[0].Score = memy.ScoreOf(math.NaN()) },
 			2,
 			memy.ErrInvalid,
 		},
 		{
 			"infinite signal score",
-			func(s *retrievalBudgetSearch) { s.result.Candidates[0].Signals[0].Score = math.Inf(-1) },
+			func(s *retrievalBudgetSearch) { s.result.Candidates[0].Signals[0].Score = memy.ScoreOf(math.Inf(-1)) },
 			2,
 			memy.ErrInvalid,
 		},
@@ -306,7 +318,11 @@ func TestRetrievalBudgetRankerCannotReplaceSignalsOrAuthorizedReferences(t *test
 			original := search.result.Candidates[0].Signals[0]
 			ranker := rankerFunc[preference, sourceRef](
 				func(_ context.Context, input []memy.Ranked[preference, sourceRef]) ([]memy.Ranked[preference, sourceRef], error) {
-					input[0].Signals[0] = memy.SearchSignal{Backend: "forged", Rank: 100, Score: math.Inf(1)}
+					input[0].Signals[0] = memy.SearchSignal{
+						Backend: "forged",
+						Rank:    100,
+						Score:   memy.ScoreOf(math.Inf(1)),
+					}
 					input[0].Record.Payload.Value = "forged payload"
 					if foreign {
 						input[0].Record.ID = "not-authorized-candidate"

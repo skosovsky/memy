@@ -62,7 +62,7 @@ func (e *Engine[P, R, A]) recallCandidates(
 	records := make([]Ranked[P, R], 0, len(candidates))
 	for _, candidate := range candidates {
 		if !validIdentifier(candidate.RecordID) || candidate.Revision == 0 || candidate.Revision > MaxVersion ||
-			!finiteScore(candidate.Score) {
+			candidate.Score.Validate() != nil {
 			return nil, ErrInvalid
 		}
 		record, eligible, candidateErr := e.recallCandidate(ctx, b, scope, candidate, options)
@@ -136,7 +136,7 @@ func (e *Engine[P, R, A]) rankRecall(
 	}
 	selected := make([]Ranked[P, R], 0, min(limit, len(ranked)))
 	for _, item := range ranked {
-		if !finiteScore(item.Score) {
+		if item.Score.Validate() != nil {
 			return nil, ErrInvalid
 		}
 		ref := RevisionRef{item.Record.ID, item.Record.Revision}
@@ -222,7 +222,7 @@ func boundedCoverage(coverage []Coverage) []Coverage {
 }
 
 // Validate rejects malformed metadata before canonical reads, without fusion.
-func validateSearchResult(found SearchResult, limit int) error {
+func validateSearchResult(found SearchResult, _ int) error {
 	if len(found.Coverage) < 1 || len(found.Coverage) > MaxSearchBackends {
 		return ErrInvalid
 	}
@@ -241,7 +241,7 @@ func validateSearchResult(found SearchResult, limit int) error {
 	refs := make(map[RevisionRef]bool, len(found.Candidates))
 	for _, c := range found.Candidates {
 		ref := RevisionRef{c.RecordID, c.Revision}
-		if !validRef(ref) || !finiteScore(c.Score) || refs[ref] || len(c.Signals) < 1 ||
+		if !validRef(ref) || c.Score.Validate() != nil || refs[ref] || len(c.Signals) < 1 ||
 			len(c.Signals) > MaxSearchBackends {
 			return ErrInvalid
 		}
@@ -251,8 +251,7 @@ func validateSearchResult(found SearchResult, limit int) error {
 			if backends[signal.Backend] == "" || backends[signal.Backend] == coverageUnavailable ||
 				signals[signal.Backend] ||
 				signal.Rank < 1 ||
-				signal.Rank > limit ||
-				!finiteScore(signal.Score) {
+				signal.Score.Validate() != nil {
 				return ErrInvalid
 			}
 			signals[signal.Backend] = true

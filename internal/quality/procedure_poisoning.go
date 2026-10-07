@@ -61,8 +61,8 @@ func (f *procedureFixture) poisoning(ctx context.Context, r *ScenarioReport, gua
 		},
 		Status: Unknown}
 	candidates := []memy.Candidate{
-		{RecordID: procedureRelevantA, Revision: 1, Score: 2, Signals: nil},
-		{RecordID: "poison", Revision: 1, Score: 1, Signals: nil},
+		{RecordID: procedureRelevantA, Revision: 1, Score: memy.ScoreOf(2), Signals: nil},
+		{RecordID: "poison", Revision: 1, Score: memy.ScoreOf(1), Signals: nil},
 	}
 	search := f.ports.Search(f.scope, candidates)
 	recall, err := f.recall(

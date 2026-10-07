@@ -462,7 +462,7 @@ func stageDerivedRecord(
 		if err := index.Stage(
 			ctx,
 			scope,
-			memy.Candidate{RecordID: record.ID, Revision: record.Revision, Score: 1, Signals: nil},
+			memy.Candidate{RecordID: record.ID, Revision: record.Revision, Score: memy.ScoreOf(1), Signals: nil},
 		); err != nil {
 			return err
 		}

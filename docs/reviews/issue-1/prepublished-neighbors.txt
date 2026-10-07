@@ -1,0 +1,26 @@
+go: downloading github.com/skosovsky/ragy v0.8.0
+go: downloading github.com/skosovsky/contexty v0.13.2
+go: downloading github.com/skosovsky/toolsy/toolkits/memory v0.18.0
+go: downloading github.com/skosovsky/toolsy/toolkits/rag v0.18.0
+go: downloading github.com/skosovsky/toolsy v0.18.0
+=== RUN   TestCanonicalRecallProjectedRagyContextyForget
+    canonical_test.go:85: stale source: projections=0 err=memy: source unavailable
+        memy: stale input
+--- PASS: TestCanonicalRecallProjectedRagyContextyForget (0.09s)
+=== RUN   TestPersistentCompiledContextManagedForget
+--- PASS: TestPersistentCompiledContextManagedForget (0.18s)
+=== RUN   TestRagyToMemyScopedBoundedCancellation
+--- PASS: TestRagyToMemyScopedBoundedCancellation (0.00s)
+=== RUN   TestRagyArtifactToContexty
+--- PASS: TestRagyArtifactToContexty (0.00s)
+=== RUN   TestMemyProjectionEnvelopeToContexty
+--- PASS: TestMemyProjectionEnvelopeToContexty (0.00s)
+=== RUN   TestToolkitsCompileSameGraph
+--- PASS: TestToolkitsCompileSameGraph (0.01s)
+=== RUN   TestContextyCompileHostMaterialization
+--- PASS: TestContextyCompileHostMaterialization (0.00s)
+=== RUN   TestContextyRemoveHostMappedMemoryArtifact
+--- PASS: TestContextyRemoveHostMappedMemoryArtifact (0.00s)
+PASS
+ok  	consumer.local/prepublish	1.836s
+PREPUBLICATION ONLY: memy local replacement; neighboring modules published. Not published-artifact acceptance.

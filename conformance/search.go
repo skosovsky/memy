@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math"
 	"testing"
 	"time"
 
@@ -12,7 +11,8 @@ import (
 )
 
 // SearchFixture provisions isolated adapters and query-matching metadata.
-// Seed must stage a revision; Publish makes its visibility token observable.
+// Seed must stage a revision and its native producer score; composition may
+// compute a different ranking score. Publish makes its visibility token observable.
 type SearchFixture[Q any] struct {
 	Adapter memy.Search[Q]
 	Query   Q
@@ -30,6 +30,7 @@ func SearchSuite[Q any](t *testing.T, factory func(*testing.T) SearchFixture[Q])
 	t.Run("exact_visibility_bindings", func(t *testing.T) { searchExactVisibility(t, factory) })
 	t.Run("minimum_and_cancel", func(t *testing.T) { searchMinimumAndCancel(t, factory) })
 	t.Run("candidate_bound", func(t *testing.T) { searchCandidateBound(t, factory) })
+	t.Run("score_presence", func(t *testing.T) { searchScorePresence(t, factory) })
 	t.Run("failure", func(t *testing.T) { searchFailure(t, factory) })
 }
 
@@ -57,9 +58,12 @@ func searchScopeCoverage[Q any](t *testing.T, factory func(*testing.T) SearchFix
 	// Arrange: matching metadata in two scopes; B is already published.
 	f := factory(t)
 	a := scope()
-	candidate := memy.Candidate{RecordID: "record", Revision: 1, Score: 1, Signals: nil}
+	candidate := memy.Candidate{RecordID: "record", Revision: 1, Score: memy.ScoreOf(1), Signals: nil}
 	must(t, f.Seed(t.Context(), a, candidate))
-	must(t, f.Seed(t.Context(), b, memy.Candidate{RecordID: "private", Revision: 1, Score: 1, Signals: nil}))
+	must(
+		t,
+		f.Seed(t.Context(), b, memy.Candidate{RecordID: "private", Revision: 1, Score: memy.ScoreOf(1), Signals: nil}),
+	)
 	must(t, f.Publish(t.Context(), memy.VisibilityToken{Scope: b, RecordID: "private", Revision: 1}))
 	if !f.Adapter.Capabilities().Scoped {
 		t.Fatal("fixture requires scoped search")
@@ -98,7 +102,7 @@ func searchMinimumAndCancel[Q any](t *testing.T, factory func(*testing.T) Search
 	// Arrange.
 	f := factory(t)
 	a := scope()
-	candidate := memy.Candidate{RecordID: "record", Revision: 1, Score: 1, Signals: nil}
+	candidate := memy.Candidate{RecordID: "record", Revision: 1, Score: memy.ScoreOf(1), Signals: nil}
 	must(t, f.Seed(t.Context(), a, candidate))
 	token := memy.VisibilityToken{Scope: a, RecordID: candidate.RecordID, Revision: 1}
 	ctx, cancel := context.WithTimeout(t.Context(), lockWaitDeadline)
@@ -149,7 +153,7 @@ func searchCandidateBound[Q any](t *testing.T, factory func(*testing.T) SearchFi
 	f := factory(t)
 	a := scope()
 	for _, id := range []string{"bound-a", "bound-b", "bound-c"} {
-		must(t, f.Seed(t.Context(), a, memy.Candidate{RecordID: id, Revision: 1, Score: 1, Signals: nil}))
+		must(t, f.Seed(t.Context(), a, memy.Candidate{RecordID: id, Revision: 1, Score: memy.ScoreOf(1), Signals: nil}))
 		must(t, f.Publish(t.Context(), memy.VisibilityToken{Scope: a, RecordID: id, Revision: 1}))
 	}
 	// Act: request one candidate independently of index availability.
@@ -196,7 +200,7 @@ func checkCandidateEvidence(t *testing.T, candidate memy.Candidate, coverage []m
 		for _, backend := range coverage {
 			present = present || backend.Backend == signal.Backend
 		}
-		if !present || signal.Rank < 1 || math.IsNaN(signal.Score) || math.IsInf(signal.Score, 0) {
+		if !present || signal.Rank < 1 || signal.Score.Validate() != nil {
 			t.Fatalf("invalid search evidence: %+v", signal)
 		}
 	}
@@ -215,7 +219,12 @@ func searchExactVisibility[Q any](t *testing.T, factory func(*testing.T) SearchF
 			f.Seed(
 				t.Context(),
 				a,
-				memy.Candidate{RecordID: visibilityUpgradeRecord, Revision: revision, Score: 1, Signals: nil},
+				memy.Candidate{
+					RecordID: visibilityUpgradeRecord,
+					Revision: revision,
+					Score:    memy.ScoreOf(1),
+					Signals:  nil,
+				},
 			),
 		)
 		must(
@@ -290,4 +299,42 @@ func requireExactVisibleCandidate(t *testing.T, result memy.SearchResult, token 
 		}
 	}
 	t.Fatalf("exact visible revision missing: %+v", result)
+}
+
+func searchScorePresence[Q any](t *testing.T, factory func(*testing.T) SearchFixture[Q]) {
+	// Arrange: observed zero and absent scores must remain distinguishable.
+	f := factory(t)
+	a := scope()
+	scores := map[string]memy.Score{
+		"absent":   {Present: false, Value: 0},
+		"zero":     memy.ScoreOf(0),
+		"negative": memy.ScoreOf(-1),
+	}
+	for id, score := range scores {
+		must(t, f.Seed(t.Context(), a, memy.Candidate{RecordID: id, Revision: 1, Score: score, Signals: nil}))
+		must(t, f.Publish(t.Context(), memy.VisibilityToken{Scope: a, RecordID: id, Revision: 1}))
+	}
+	// Act.
+	result, err := f.Adapter.Search(
+		t.Context(),
+		a,
+		f.Query,
+		memy.SearchOptions{Minimum: nil, MaxCandidates: memy.MaxSearchCandidates},
+	)
+	// Assert.
+	must(t, err)
+	checkCoverage(t, result, false)
+	if len(result.Candidates) != len(scores) {
+		t.Fatalf("score-presence candidates=%+v", result.Candidates)
+	}
+	for _, candidate := range result.Candidates {
+		expected, ok := scores[candidate.RecordID]
+		nativePreserved := false
+		for _, signal := range candidate.Signals {
+			nativePreserved = nativePreserved || signal.Score == expected
+		}
+		if !ok || candidate.Score.Validate() != nil || !nativePreserved {
+			t.Fatalf("score changed: %+v", candidate)
+		}
+	}
 }

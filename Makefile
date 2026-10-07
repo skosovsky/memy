@@ -10,7 +10,7 @@ FUZZPARALLEL ?= 2
 MODULES := $(shell find . -type d \( -name ".*" -not -name "." -o -name "vendor" \) -prune -o -type f -name "go.mod" -exec dirname {} \;)
 export GOCACHE GOLANGCI_LINT_CACHE
 
-.PHONY: format vet lint fix test race validate examples bench fuzz cover release release-patch release-break release-test
+.PHONY: format vet lint fix test race validate examples bench fuzz cover release release-patch release-break release-test consumer-local consumer-published
 
 format:
 	@test -z "$$(gofmt -l .)"
@@ -49,6 +49,7 @@ examples:
 	$(GO) run ./examples/quality
 	$(GO) run ./examples/retrieval
 	$(GO) run ./examples/quality-integration
+	$(GO) run ./examples/managed-projections
 
 bench:
 	@for dir in $(MODULES); do \
@@ -90,3 +91,10 @@ release-patch: validate
 
 release-break: validate
 	./scripts/release.sh break "$(MODULES)"
+
+# Optional external composition; not a dependency of offline core validation.
+consumer-local:
+	python3 scripts/consumer_checks.py local
+
+consumer-published:
+	python3 scripts/consumer_checks.py published --memy-ref "$(MEMY_REF)"

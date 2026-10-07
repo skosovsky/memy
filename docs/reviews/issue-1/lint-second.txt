@@ -1,0 +1,19 @@
+examples/managed-projections/host/session_test.go:61:1: cognitive complexity 23 of func `TestDurableMultiLineagePendingRetryRestore` is high (> 20) (gocognit)
+func TestDurableMultiLineagePendingRetryRestore(t *testing.T) {
+^
+examples/managed-projections/host/session_test.go:212:6: shadow: declaration of "err" shadows declaration at line 202 (govet)
+		_, err := s.Persist(context.Background(), fence, "late", result)
+		   ^
+examples/managed-projections/host/session_test.go:248:8: shadow: declaration of "err" shadows declaration at line 231 (govet)
+			var err error
+			    ^
+examples/managed-projections/host/session_test.go:259:17: shadow: declaration of "err" shadows declaration at line 231 (govet)
+	go func() { _, err := s.Forget(context.Background(), sc, ref); purgeDone <- err }()
+	               ^
+examples/managed-projections/host/session.go:257:18: Magic number: 256, in <assign> detected (mnd)
+		Limit:         256,
+		               ^
+5 issues:
+* gocognit: 1
+* govet: 3
+* mnd: 1

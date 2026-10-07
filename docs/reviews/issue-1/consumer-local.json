@@ -1,0 +1,43 @@
+{
+  "lane": "local",
+  "modules": [
+    {
+      "module": "github.com/skosovsky/memy",
+      "source_head": "452128d5d9d75898c54f63cfba86be0be1a38681",
+      "go_source_sha256": "d64bf6765c4b0e072f18199fc83670b2d5483beafee76f3eb4ee05748b0121a1",
+      "local": true
+    },
+    {
+      "module": "github.com/skosovsky/ragy",
+      "source_head": "be98dba21faceb900c8afa4611238ae86fa6ea9a",
+      "go_source_sha256": "cc03ec516205d5758cb11ba8abe7ef7b21e727c364748496c2d64125fd7f1708",
+      "local": true
+    },
+    {
+      "module": "github.com/skosovsky/contexty",
+      "source_head": "448a0c32f101f511868f49ee3da323ed50510093",
+      "go_source_sha256": "60289498c451565da6503f5f26ba09147ea498cad2a01337dfedcc19872e2cde",
+      "local": true
+    },
+    {
+      "module": "github.com/skosovsky/toolsy",
+      "source_head": "82e51316c272de6241cae429d70a33ecbfad5220",
+      "go_source_sha256": "a00d72fc9bff0c127ebe5b93cb37a7230badea459b4a51c66441185a054dea67",
+      "local": true
+    },
+    {
+      "module": "github.com/skosovsky/toolsy/toolkits/memory",
+      "source_head": "82e51316c272de6241cae429d70a33ecbfad5220",
+      "go_source_sha256": "1990b9271fbe355420c0d411cbcfe39a2c028be2eea2dd3333e1f558478f34b7",
+      "local": true
+    },
+    {
+      "module": "github.com/skosovsky/toolsy/toolkits/rag",
+      "source_head": "82e51316c272de6241cae429d70a33ecbfad5220",
+      "go_source_sha256": "2dc447a9cd97621474e9275ccdf81e57a00162cfe5c86dc89528090356b6db61",
+      "local": true
+    }
+  ],
+  "work": "off",
+  "result": "pass"
+}

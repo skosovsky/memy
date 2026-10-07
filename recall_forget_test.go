@@ -56,7 +56,7 @@ func staged(
 			if err := index.Stage(
 				ctx,
 				f.scope,
-				memy.Candidate{RecordID: receipt.RecordID, Revision: receipt.Revision, Score: 1},
+				memy.Candidate{RecordID: receipt.RecordID, Revision: receipt.Revision, Score: memy.ScoreOf(1)},
 			); err != nil {
 				return err
 			}
