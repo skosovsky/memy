@@ -1,0 +1,290 @@
+﻿2026-10-07T09:42:31.4961467Z Current runner version: '2.337.0'
+2026-10-07T09:42:31.4987167Z ##[group]Runner Image Provisioner
+2026-10-07T09:42:31.4988035Z Hosted Compute Agent
+2026-10-07T09:42:31.4988775Z Version: 20260901.588
+2026-10-07T09:42:31.4989437Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-07T09:42:31.4990218Z Build Date: 2026-09-01T19:56:44Z
+2026-10-07T09:42:31.4991268Z Worker ID: {af224e0f-7bec-4c69-9741-025940613033}
+2026-10-07T09:42:31.4992024Z Azure Region: westus
+2026-10-07T09:42:31.4992669Z ##[endgroup]
+2026-10-07T09:42:31.4994255Z ##[group]Operating System
+2026-10-07T09:42:31.4995142Z Ubuntu
+2026-10-07T09:42:31.4995732Z 24.04.5
+2026-10-07T09:42:31.4996260Z LTS
+2026-10-07T09:42:31.4996826Z ##[endgroup]
+2026-10-07T09:42:31.4997399Z ##[group]Runner Image
+2026-10-07T09:42:31.4998001Z Image: ubuntu-24.04
+2026-10-07T09:42:31.4998675Z Version: 20260927.320.1
+2026-10-07T09:42:31.4999940Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-07T09:42:31.5001871Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-07T09:42:31.5002854Z ##[endgroup]
+2026-10-07T09:42:31.5004098Z ##[group]GITHUB_TOKEN Permissions
+2026-10-07T09:42:31.5006055Z Contents: read
+2026-10-07T09:42:31.5006795Z Metadata: read
+2026-10-07T09:42:31.5007375Z ##[endgroup]
+2026-10-07T09:42:31.5009977Z Secret source: Actions
+2026-10-07T09:42:31.5011418Z Cache mode: write
+2026-10-07T09:42:31.5012241Z Prepare workflow directory
+2026-10-07T09:42:31.5354732Z Prepare all required actions
+2026-10-07T09:42:31.5406961Z Getting action download info
+2026-10-07T09:42:31.9038703Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-07T09:42:32.0057855Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+2026-10-07T09:42:32.4594001Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-07T09:42:32.6772673Z Complete job name: consumer-published
+2026-10-07T09:42:32.7741089Z ##[group]Run actions/checkout@v4
+2026-10-07T09:42:32.7742677Z with:
+2026-10-07T09:42:32.7743602Z   repository: skosovsky/memy
+2026-10-07T09:42:32.7748810Z   token: ***
+2026-10-07T09:42:32.7749322Z   ssh-strict: true
+2026-10-07T09:42:32.7749824Z   ssh-user: git
+2026-10-07T09:42:32.7750371Z   persist-credentials: true
+2026-10-07T09:42:32.7751132Z   clean: true
+2026-10-07T09:42:32.7751635Z   sparse-checkout-cone-mode: true
+2026-10-07T09:42:32.7752228Z   fetch-depth: 1
+2026-10-07T09:42:32.7752714Z   fetch-tags: false
+2026-10-07T09:42:32.7753211Z   show-progress: true
+2026-10-07T09:42:32.7753721Z   lfs: false
+2026-10-07T09:42:32.7754198Z   submodules: false
+2026-10-07T09:42:32.7754695Z   set-safe-directory: true
+2026-10-07T09:42:32.7755247Z   allow-unsafe-pr-checkout: false
+2026-10-07T09:42:32.7756241Z ##[endgroup]
+2026-10-07T09:42:32.8826269Z Syncing repository: skosovsky/memy
+2026-10-07T09:42:32.8828339Z ##[group]Getting Git version info
+2026-10-07T09:42:32.8829236Z Working directory is '/home/runner/work/memy/memy'
+2026-10-07T09:42:32.8830433Z [command]/usr/bin/git version
+2026-10-07T09:42:32.8927118Z git version 2.55.0
+2026-10-07T09:42:32.8951847Z ##[endgroup]
+2026-10-07T09:42:32.8969057Z Temporarily overriding HOME='/home/runner/work/_temp/51f61fc3-4718-42f3-ab57-6c896421d0a3' before making global git config changes
+2026-10-07T09:42:32.8971972Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-07T09:42:32.8975896Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/memy/memy
+2026-10-07T09:42:32.9036874Z Deleting the contents of '/home/runner/work/memy/memy'
+2026-10-07T09:42:32.9046051Z ##[group]Initializing the repository
+2026-10-07T09:42:32.9048116Z [command]/usr/bin/git init /home/runner/work/memy/memy
+2026-10-07T09:42:32.9187655Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-07T09:42:32.9189827Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-07T09:42:32.9192174Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-07T09:42:32.9193544Z hint: call:
+2026-10-07T09:42:32.9194298Z hint:
+2026-10-07T09:42:32.9195288Z hint: 	git config --global init.defaultBranch <name>
+2026-10-07T09:42:32.9196421Z hint:
+2026-10-07T09:42:32.9197479Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-07T09:42:32.9199176Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-07T09:42:32.9200835Z hint:
+2026-10-07T09:42:32.9201608Z hint: 	git branch -m <name>
+2026-10-07T09:42:32.9202448Z hint:
+2026-10-07T09:42:32.9203581Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-07T09:42:32.9205502Z Initialized empty Git repository in /home/runner/work/memy/memy/.git/
+2026-10-07T09:42:32.9208309Z [command]/usr/bin/git remote add origin https://github.com/skosovsky/memy
+2026-10-07T09:42:32.9263377Z ##[endgroup]
+2026-10-07T09:42:32.9264940Z ##[group]Disabling automatic garbage collection
+2026-10-07T09:42:32.9268146Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-07T09:42:32.9307431Z ##[endgroup]
+2026-10-07T09:42:32.9308822Z ##[group]Setting up auth
+2026-10-07T09:42:32.9316405Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T09:42:32.9354813Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-07T09:42:32.9771991Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T09:42:32.9808619Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-07T09:42:33.0039985Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T09:42:33.0077595Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-07T09:42:33.0305445Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-07T09:42:33.0347402Z ##[endgroup]
+2026-10-07T09:42:33.0348319Z ##[group]Fetching the repository
+2026-10-07T09:42:33.0357818Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +27b788e8d56ee33ccb3dd5a8fc99d5dee75fedff:refs/tags/v0.3.1
+2026-10-07T09:42:33.6825186Z From https://github.com/skosovsky/memy
+2026-10-07T09:42:33.6827627Z  * [new ref]         27b788e8d56ee33ccb3dd5a8fc99d5dee75fedff -> v0.3.1
+2026-10-07T09:42:33.6832818Z ##[endgroup]
+2026-10-07T09:42:33.6835166Z ##[group]Determining the checkout info
+2026-10-07T09:42:33.6837800Z ##[endgroup]
+2026-10-07T09:42:33.6841753Z [command]/usr/bin/git sparse-checkout disable
+2026-10-07T09:42:33.6899484Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-07T09:42:33.6931537Z ##[group]Checking out the ref
+2026-10-07T09:42:33.6944151Z [command]/usr/bin/git checkout --progress --force refs/tags/v0.3.1
+2026-10-07T09:42:33.7302396Z Note: switching to 'refs/tags/v0.3.1'.
+2026-10-07T09:42:33.7303506Z 
+2026-10-07T09:42:33.7304470Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-07T09:42:33.7306818Z changes and commit them, and you can discard any commits you make in this
+2026-10-07T09:42:33.7309506Z state without impacting any branches by switching back to a branch.
+2026-10-07T09:42:33.7311870Z 
+2026-10-07T09:42:33.7313256Z If you want to create a new branch to retain commits you create, you may
+2026-10-07T09:42:33.7316591Z do so (now or later) by using -c with the switch command. Example:
+2026-10-07T09:42:33.7318550Z 
+2026-10-07T09:42:33.7319402Z   git switch -c <new-branch-name>
+2026-10-07T09:42:33.7321104Z 
+2026-10-07T09:42:33.7322404Z Or undo this operation with:
+2026-10-07T09:42:33.7323671Z 
+2026-10-07T09:42:33.7324399Z   git switch -
+2026-10-07T09:42:33.7325391Z 
+2026-10-07T09:42:33.7326974Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-07T09:42:33.7329206Z 
+2026-10-07T09:42:33.7331220Z HEAD is now at 27b788e Pin verified consumer checkouts for portable integration CI
+2026-10-07T09:42:33.7335694Z ##[endgroup]
+2026-10-07T09:42:33.7365985Z [command]/usr/bin/git log -1 --format=%H
+2026-10-07T09:42:33.7394311Z 27b788e8d56ee33ccb3dd5a8fc99d5dee75fedff
+2026-10-07T09:42:33.7876657Z ##[group]Run actions/setup-go@v5
+2026-10-07T09:42:33.7877901Z with:
+2026-10-07T09:42:33.7878792Z   go-version-file: go.mod
+2026-10-07T09:42:33.7879852Z   check-latest: false
+2026-10-07T09:42:33.7891015Z   token: ***
+2026-10-07T09:42:33.7891920Z   cache: true
+2026-10-07T09:42:33.7892837Z ##[endgroup]
+2026-10-07T09:42:33.9269689Z Setup go version spec 1.27.1
+2026-10-07T09:42:33.9281514Z Attempting to download 1.27.1...
+2026-10-07T09:42:33.9394168Z (node:2331) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-07T09:42:33.9397519Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-07T09:42:34.5812647Z matching 1.27.1...
+2026-10-07T09:42:34.5838939Z Acquiring 1.27.1 from https://github.com/actions/go-versions/releases/download/1.27.1-33583469715/go-1.27.1-linux-x64.tar.gz
+2026-10-07T09:42:35.1471976Z Extracting Go...
+2026-10-07T09:42:35.1589109Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/7344631c-d9ad-4920-9b5e-24b1f0242d4b -f /home/runner/work/_temp/f6265a83-32b5-4012-8d7d-ea5c60a720fe
+2026-10-07T09:42:36.9272067Z Successfully extracted go to /home/runner/work/_temp/7344631c-d9ad-4920-9b5e-24b1f0242d4b
+2026-10-07T09:42:36.9272731Z Adding to the cache ...
+2026-10-07T09:42:42.7994057Z Successfully cached go to /opt/hostedtoolcache/go/1.27.1/x64
+2026-10-07T09:42:42.7994643Z Added go to the path
+2026-10-07T09:42:42.7996744Z Successfully set up Go version 1.27.1
+2026-10-07T09:42:42.8239237Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+2026-10-07T09:42:42.8281916Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+2026-10-07T09:42:42.8328951Z /home/runner/go/pkg/mod
+2026-10-07T09:42:42.8348522Z /home/runner/.cache/go-build
+2026-10-07T09:42:43.1073296Z Cache is not found
+2026-10-07T09:42:43.1098560Z go version go1.27.1 linux/amd64
+2026-10-07T09:42:43.1098974Z 
+2026-10-07T09:42:43.2623607Z ##[group]go env
+2026-10-07T09:42:43.2624205Z AR='ar'
+2026-10-07T09:42:43.2624570Z CC='gcc'
+2026-10-07T09:42:43.2624953Z CGO_CFLAGS='-O2 -g'
+2026-10-07T09:42:43.2625343Z CGO_CPPFLAGS=''
+2026-10-07T09:42:43.2625739Z CGO_CXXFLAGS='-O2 -g'
+2026-10-07T09:42:43.2626142Z CGO_ENABLED='1'
+2026-10-07T09:42:43.2626522Z CGO_FFLAGS='-O2 -g'
+2026-10-07T09:42:43.2626894Z CGO_LDFLAGS='-O2 -g'
+2026-10-07T09:42:43.2627252Z CXX='g++'
+2026-10-07T09:42:43.2627598Z GCCGO='gccgo'
+2026-10-07T09:42:43.2627956Z GO111MODULE=''
+2026-10-07T09:42:43.2628298Z GOAMD64='v1'
+2026-10-07T09:42:43.2628639Z GOARCH='amd64'
+2026-10-07T09:42:43.2628973Z GOAUTH='netrc'
+2026-10-07T09:42:43.2629361Z GOBIN='/home/runner/go/bin'
+2026-10-07T09:42:43.2629797Z GOCACHE='/home/runner/.cache/go-build'
+2026-10-07T09:42:43.2630131Z GOCACHEPROG=''
+2026-10-07T09:42:43.2630350Z GODEBUG=''
+2026-10-07T09:42:43.2630867Z GOENV='/home/runner/.config/go/env'
+2026-10-07T09:42:43.2631148Z GOEXE=''
+2026-10-07T09:42:43.2631351Z GOEXPERIMENT=''
+2026-10-07T09:42:43.2631561Z GOFIPS140='off'
+2026-10-07T09:42:43.2631769Z GOFLAGS=''
+2026-10-07T09:42:43.2632501Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build269734172=/tmp/go-build -gno-record-gcc-switches'
+2026-10-07T09:42:43.2633239Z GOHOSTARCH='amd64'
+2026-10-07T09:42:43.2633465Z GOHOSTOS='linux'
+2026-10-07T09:42:43.2633675Z GOINSECURE=''
+2026-10-07T09:42:43.2633925Z GOMOD='/home/runner/work/memy/memy/go.mod'
+2026-10-07T09:42:43.2634511Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-10-07T09:42:43.2634795Z GONOPROXY=''
+2026-10-07T09:42:43.2634988Z GONOSUMDB=''
+2026-10-07T09:42:43.2635176Z GOOS='linux'
+2026-10-07T09:42:43.2635404Z GOPACKAGESDRIVER=''
+2026-10-07T09:42:43.2635634Z GOPATH='/home/runner/go'
+2026-10-07T09:42:43.2635876Z GOPRIVATE=''
+2026-10-07T09:42:43.2636153Z GOPROXY='https://proxy.golang.org,direct'
+2026-10-07T09:42:43.2636485Z GOROOT='/opt/hostedtoolcache/go/1.27.1/x64'
+2026-10-07T09:42:43.2636785Z GOSUMDB='sum.golang.org'
+2026-10-07T09:42:43.2637019Z GOTELEMETRY='local'
+2026-10-07T09:42:43.2637463Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-10-07T09:42:43.2637795Z GOTMPDIR=''
+2026-10-07T09:42:43.2637999Z GOTOOLCHAIN='auto'
+2026-10-07T09:42:43.2638324Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.1/x64/pkg/tool/linux_amd64'
+2026-10-07T09:42:43.2638684Z GOVCS=''
+2026-10-07T09:42:43.2638878Z GOVERSION='go1.27.1'
+2026-10-07T09:42:43.2639092Z GOWORK=''
+2026-10-07T09:42:43.2639298Z PKG_CONFIG='pkg-config'
+2026-10-07T09:42:43.2639454Z 
+2026-10-07T09:42:43.2639744Z ##[endgroup]
+2026-10-07T09:42:43.2864859Z ##[group]Run python3 scripts/consumer_checks.py published --memy-ref "$MEMY_REF" --manifest consumer-published.json
+2026-10-07T09:42:43.2865798Z [36;1mpython3 scripts/consumer_checks.py published --memy-ref "$MEMY_REF" --manifest consumer-published.json[0m
+2026-10-07T09:42:43.3176819Z shell: /usr/bin/bash -e {0}
+2026-10-07T09:42:43.3177196Z env:
+2026-10-07T09:42:43.3177438Z   MEMY_REF: v0.3.1
+2026-10-07T09:42:43.3177697Z ##[endgroup]
+2026-10-07T09:43:00.0797612Z go: downloading github.com/skosovsky/contexty v0.13.2
+2026-10-07T09:43:00.0914011Z go: downloading github.com/skosovsky/memy v0.3.1
+2026-10-07T09:43:00.4156590Z go: downloading github.com/skosovsky/ragy v0.8.0
+2026-10-07T09:43:00.4161835Z go: downloading github.com/skosovsky/toolsy/toolkits/memory v0.18.0
+2026-10-07T09:43:00.4162751Z go: downloading github.com/skosovsky/toolsy/toolkits/rag v0.18.0
+2026-10-07T09:43:00.4965685Z go: downloading github.com/mattn/go-sqlite3 v1.14.52
+2026-10-07T09:43:00.5371392Z go: downloading github.com/skosovsky/toolsy v0.18.0
+2026-10-07T09:43:00.7097474Z go: downloading github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
+2026-10-07T09:43:00.7462102Z go: downloading github.com/stretchr/testify v1.12.1
+2026-10-07T09:43:00.9203547Z go: downloading golang.org/x/text v0.42.0
+2026-10-07T09:43:01.2183480Z go: downloading go.yaml.in/yaml/v3 v3.0.5
+2026-10-07T09:43:01.2331698Z go: downloading github.com/google/jsonschema-go v0.4.3
+2026-10-07T09:43:01.2451471Z go: downloading go.uber.org/goleak v1.3.0
+2026-10-07T09:43:01.4018660Z go: downloading github.com/dlclark/regexp2 v1.11.0
+2026-10-07T09:43:01.5462131Z go: downloading github.com/google/go-cmp v0.7.0
+2026-10-07T09:43:55.8911796Z === RUN   TestCanonicalRecallProjectedRagyContextyForget
+2026-10-07T09:43:55.9582574Z     canonical_test.go:85: stale source: projections=0 err=memy: source unavailable
+2026-10-07T09:43:55.9583454Z         memy: stale input
+2026-10-07T09:43:55.9886335Z --- PASS: TestCanonicalRecallProjectedRagyContextyForget (0.10s)
+2026-10-07T09:43:55.9887246Z === RUN   TestPersistentCompiledContextManagedForget
+2026-10-07T09:43:56.1485640Z --- PASS: TestPersistentCompiledContextManagedForget (0.16s)
+2026-10-07T09:43:56.1486364Z === RUN   TestRagyToMemyScopedBoundedCancellation
+2026-10-07T09:43:56.1487190Z --- PASS: TestRagyToMemyScopedBoundedCancellation (0.00s)
+2026-10-07T09:43:56.1487713Z === RUN   TestRagyArtifactToContexty
+2026-10-07T09:43:56.1488138Z --- PASS: TestRagyArtifactToContexty (0.00s)
+2026-10-07T09:43:56.1488591Z === RUN   TestMemyProjectionEnvelopeToContexty
+2026-10-07T09:43:56.1489735Z --- PASS: TestMemyProjectionEnvelopeToContexty (0.00s)
+2026-10-07T09:43:56.1490362Z === RUN   TestToolkitsCompileSameGraph
+2026-10-07T09:43:56.1548953Z --- PASS: TestToolkitsCompileSameGraph (0.01s)
+2026-10-07T09:43:56.1550086Z === RUN   TestContextyCompileHostMaterialization
+2026-10-07T09:43:56.1569435Z --- PASS: TestContextyCompileHostMaterialization (0.00s)
+2026-10-07T09:43:56.1570831Z === RUN   TestContextyRemoveHostMappedMemoryArtifact
+2026-10-07T09:43:56.1571553Z --- PASS: TestContextyRemoveHostMappedMemoryArtifact (0.00s)
+2026-10-07T09:43:56.1571913Z PASS
+2026-10-07T09:43:57.1599725Z ok  	consumer.local/managed	1.299s
+2026-10-07T09:43:57.3033026Z {"lane": "published", "modules": [{"module": "github.com/skosovsky/memy", "version": "v0.3.1", "local": false}, {"module": "github.com/skosovsky/ragy", "version": "v0.8.0", "local": false}, {"module": "github.com/skosovsky/contexty", "version": "v0.13.2", "local": false}, {"module": "github.com/skosovsky/toolsy", "version": "v0.18.0", "local": false}, {"module": "github.com/skosovsky/toolsy/toolkits/memory", "version": "v0.18.0", "local": false}, {"module": "github.com/skosovsky/toolsy/toolkits/rag", "version": "v0.18.0", "local": false}], "work": "off", "resolved_graph": [{"Path": "consumer.local/managed", "Main": true, "Dir": "/tmp/memy-consumer-lece4ygb/consumer", "GoMod": "/tmp/memy-consumer-lece4ygb/consumer/go.mod", "GoVersion": "1.27.1"}, {"Path": "github.com/dlclark/regexp2", "Version": "v1.11.0", "Time": "2024-02-24T02:28:33Z", "Indirect": true, "Dir": "/tmp/memy-consumer-mod/github.com/dlclark/regexp2@v1.11.0", "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/dlclark/regexp2/@v/v1.11.0.mod", "GoVersion": "1.13", "Sum": "h1:G/nrcoOa7ZXlpoa/91N3X7mM3r8eIlMBBJZvsz/mxKI=", "GoModSum": "h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8="}, {"Path": "github.com/google/go-cmp", "Version": "v0.7.0", "Time": "2025-01-14T18:15:44Z", "Indirect": true, "Dir": "/tmp/memy-consumer-mod/github.com/google/go-cmp@v0.7.0", "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/google/go-cmp/@v/v0.7.0.mod", "GoVersion": "1.21", "Sum": "h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=", "GoModSum": "h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU="}, {"Path": "github.com/google/jsonschema-go", "Version": "v0.4.3", "Time": "2026-04-17T16:08:09Z", "Indirect": true, "Dir": "/tmp/memy-consumer-mod/github.com/google/jsonschema-go@v0.4.3", "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/google/jsonschema-go/@v/v0.4.3.mod", "GoVersion": "1.23.0", "Sum": "h1:/DBOLZTfDow7pe2GmaJNhltueGTtDKICi8V8p+DQPd0=", "GoModSum": "h1:r5quNTdLOYEz95Ru18zA0ydNbBuYoo9tgaYcxEYhJVE="}, {"Path": "github.com/kr/pretty", "Version": "v0.3.1", "Time": "2022-08-29T23:03:05Z", "Indirect": true}, {"Path": "github.com/mattn/go-sqlite3", "Version": "v1.14.52", "Time": "2026-09-05T04:18:43Z", "Indirect": true, "Dir": "/tmp/memy-consumer-mod/github.com/mattn/go-sqlite3@v1.14.52", "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/mattn/go-sqlite3/@v/v1.14.52.mod", "GoVersion": "1.21", "Sum": "h1:wVbm2Qnf4OXkqhBTSPuCRZDRnxfbVrrmiCEroVdog8U=", "GoModSum": "h1:6JTjA44L93a0QCyJef5YvlPoKXntQPjzWv5gtm9sB6w="}, {"Path": "github.com/rogpeppe/go-internal", "Version": "v1.16.0", "Time": "2026-07-01T15:11:24Z", "Indirect": true}, {"Path": "github.com/santhosh-tekuri/jsonschema/v6", "Version": "v6.0.3", "Time": "2026-06-28T17:38:00Z", "Indirect": true, "Dir": "/tmp/memy-consumer-mod/github.com/santhosh-tekuri/jsonschema/v6@v6.0.3", "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/santhosh-tekuri/jsonschema/v6/@v/v6.0.3.mod", "GoVersion": "1.21", "Sum": "h1:1EYB5IzjZawrrnELUi78f9fPu57HuXjmddZPjrls/28=", "GoModSum": "h1:JXeL+ps8p7/KNMjDQk3TCwPpBy0wYklyWTfbkIzdIFU="}, {"Path": "github.com/skosovsky/contexty", "Version": "v0.13.2", "Time": "2026-10-07T09:29:12Z", "Dir": "/tmp/memy-consumer-mod/github.com/skosovsky/contexty@v0.13.2", "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/skosovsky/contexty/@v/v0.13.2.mod", "GoVersion": "1.27.1", "Sum": "h1:6b7BpT82FWjmlNFSaiucDyEzlmIHsWbLlMz8Fy0nGzg=", "GoModSum": "h1:nI2K3X+F42fSRfM1aZ0Sy09Rla5OsPgM3tXY9e+Kd6w="}, {"Path": "github.com/skosovsky/memy", "Version": "v0.3.1", "Time": "2026-10-07T09:40:40Z", "Dir": "/tmp/memy-consumer-mod/github.com/skosovsky/memy@v0.3.1", "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/skosovsky/memy/@v/v0.3.1.mod", "GoVersion": "1.27.1", "Sum": "h1:Fw8vN082CsSGJtF4b+mMZW+lpKGeR1/cFQFg4RapSsw=", "GoModSum": "h1:LpA3oi0n8yYWbUPUlX2AWAGZgLbRyvVinwXBlEoYMlk="}, {"Path": "github.com/skosovsky/ragy", "Version": "v0.8.0", "Time": "2026-10-07T06:59:22Z", "Dir": "/tmp/memy-consumer-mod/github.com/skosovsky/ragy@v0.8.0", "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/skosovsky/ragy/@v/v0.8.0.mod", "GoVersion": "1.27.1", "Sum": "h1:U6+ItzoIbw9rChX4e4/mfwml/hUB8ZmgC/ftHNtz5pg=", "GoModSum": "h1:czJrWaKvukDTD9TbQJgz5oGPlgAnSQ4tUlCdoqwXlMg="}, {"Path": "github.com/skosovsky/toolsy", "Version": "v0.18.0", "Time": "2026-10-07T05:13:32Z", "Indirect": true, "Dir": "/tmp/memy-consumer-mod/github.com/skosovsky/toolsy@v0.18.0", "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/skosovsky/toolsy/@v/v0.18.0.mod", "GoVersion": "1.27.1", "Sum": "h1:rACKNjeam9FcsHamimEXHcnRXgTHGYDUTNdUsEBTFQY=", "GoModSum": "h1:yulTCBBI4vdEzyjJA/LUqhpIWMdHlRrsJ9kd/KuWeKY="}, {"Path": "github.com/skosovsky/toolsy/toolkits/memory", "Version": "v0.18.0", "Time": "2026-10-07T05:13:32Z", "Dir": "/tmp/memy-consumer-mod/github.com/skosovsky/toolsy/toolkits/memory@v0.18.0", "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/skosovsky/toolsy/toolkits/memory/@v/v0.18.0.mod", "GoVersion": "1.27.1", "Sum": "h1:1JWVruidCGrcMeowqU1XaO126w17ILdxESJAp4Oewt8=", "GoModSum": "h1:+SxdO3wK9mWINtMmqWK9eNZwMM4q1wGlEgJLHZw3kjk="}, {"Path": "github.com/skosovsky/toolsy/toolkits/rag", "Version": "v0.18.0", "Time": "2026-10-07T05:13:32Z", "Dir": "/tmp/memy-consumer-mod/github.com/skosovsky/toolsy/toolkits/rag@v0.18.0", "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/skosovsky/toolsy/toolkits/rag/@v/v0.18.0.mod", "GoVersion": "1.27.1", "Sum": "h1:PeHMoa6vFFLH/3HjgxIWdRlbbx35qJ5G6jVt0DXgcIM=", "GoModSum": "h1:LwrUwh+7U4rs6J7j0wAabgSvD1XJLfZENv1aItQungE="}, {"Path": "github.com/stretchr/testify", "Version": "v1.12.1", "Time": "2026-08-17T08:24:05Z", "Indirect": true, "Dir": "/tmp/memy-consumer-mod/github.com/stretchr/testify@v1.12.1", "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/stretchr/testify/@v/v1.12.1.mod", "GoVersion": "1.17", "Sum": "h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=", "GoModSum": "h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg="}, {"Path": "go.uber.org/goleak", "Version": "v1.3.0", "Time": "2023-10-24T16:28:03Z", "Indirect": true, "Dir": "/tmp/memy-consumer-mod/go.uber.org/goleak@v1.3.0", "GoMod": "/tmp/memy-consumer-mod/cache/download/go.uber.org/goleak/@v/v1.3.0.mod", "GoVersion": "1.20", "Sum": "h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=", "GoModSum": "h1:CoHD4mav9JJNrW/WLlf7HGZPjdw8EucARQHekz1X6bE="}, {"Path": "go.yaml.in/yaml/v3", "Version": "v3.0.5", "Time": "2026-07-26T14:51:55Z", "Indirect": true, "Dir": "/tmp/memy-consumer-mod/go.yaml.in/yaml/v3@v3.0.5", "GoMod": "/tmp/memy-consumer-mod/cache/download/go.yaml.in/yaml/v3/@v/v3.0.5.mod", "GoVersion": "1.16", "Sum": "h1:N6y/pJk8buWs9NY5ERU2HSMfm+IuD/OtfdAnq6kESPw=", "GoModSum": "h1:HVTZu1O7/Vkt2N+BFy8Zza+lnLsABggaTM2ZpNIGuKg="}, {"Path": "golang.org/x/mod", "Version": "v0.41.0", "Time": "2026-08-24T20:56:42Z", "Indirect": true}, {"Path": "golang.org/x/sync", "Version": "v0.23.0", "Time": "2026-08-31T03:04:41Z", "Indirect": true}, {"Path": "golang.org/x/text", "Version": "v0.42.0", "Time": "2026-09-08T16:29:55Z", "Indirect": true, "Dir": "/tmp/memy-consumer-mod/golang.org/x/text@v0.42.0", "GoMod": "/tmp/memy-consumer-mod/cache/download/golang.org/x/text/@v/v0.42.0.mod", "GoVersion": "1.26.0", "Sum": "h1:JbOZXgfeCPU9gacVtYliJqOhD+zhrEqK4LfdpmlUZqI=", "GoModSum": "h1:ojzP1Z+2QtioaF8DTtO8K5q7JWVVYwZKenzujK0Zd0E="}, {"Path": "golang.org/x/tools", "Version": "v0.49.0", "Time": "2026-08-13T14:53:26Z", "Indirect": true}, {"Path": "gopkg.in/check.v1", "Version": "v1.0.0-20201130134442-10cb98267c6c", "Time": "2020-11-30T13:44:42Z", "Indirect": true}, {"Path": "gopkg.in/yaml.v3", "Version": "v3.0.1", "Time": "2022-05-27T08:35:30Z", "Indirect": true}], "result": "pass"}
+2026-10-07T09:43:57.3137863Z ##[group]Run actions/upload-artifact@v4
+2026-10-07T09:43:57.3138165Z with:
+2026-10-07T09:43:57.3138384Z   name: consumer-published-manifest
+2026-10-07T09:43:57.3138837Z   path: consumer-published.json
+2026-10-07T09:43:57.3139101Z   if-no-files-found: warn
+2026-10-07T09:43:57.3139337Z   compression-level: 6
+2026-10-07T09:43:57.3139561Z   overwrite: false
+2026-10-07T09:43:57.3139777Z   include-hidden-files: false
+2026-10-07T09:43:57.3140012Z ##[endgroup]
+2026-10-07T09:43:57.4811600Z (node:6262) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-07T09:43:57.4812499Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-07T09:43:57.4860053Z With the provided path, there will be 1 file uploaded
+2026-10-07T09:43:57.4866466Z Artifact name is valid!
+2026-10-07T09:43:57.4867941Z Root directory input is valid!
+2026-10-07T09:43:57.8599589Z Beginning upload of artifact content to blob storage
+2026-10-07T09:43:57.8825184Z (node:6262) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-07T09:43:58.1501387Z Uploaded bytes 2478
+2026-10-07T09:43:58.2269333Z Finished uploading artifact content to blob storage!
+2026-10-07T09:43:58.2270312Z SHA256 digest of uploaded artifact zip is 09dbe34eadc6e8bd46d6ff3f7d3ce5c2091a5d063d2116f092bd6b68e10616de
+2026-10-07T09:43:58.2272533Z Finalizing artifact upload
+2026-10-07T09:43:58.7053167Z Artifact consumer-published-manifest.zip successfully finalized. Artifact ID 11473875298
+2026-10-07T09:43:58.7055122Z Artifact consumer-published-manifest has been successfully uploaded! Final size is 2478 bytes. Artifact ID is 11473875298
+2026-10-07T09:43:58.7061675Z Artifact download URL: https://github.com/skosovsky/memy/actions/runs/37602453534/artifacts/11473875298
+2026-10-07T09:43:58.7235966Z Post job cleanup.
+2026-10-07T09:43:58.8477204Z (node:6274) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-07T09:43:58.8478203Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-07T09:43:58.8558710Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+2026-10-07T09:43:58.8613027Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+2026-10-07T09:43:58.8651228Z /home/runner/go/pkg/mod
+2026-10-07T09:43:58.8676001Z /home/runner/.cache/go-build
+2026-10-07T09:43:58.8681533Z [warning]Cache folder path is retrieved but doesn't exist on disk: /home/runner/go/pkg/mod
+2026-10-07T09:43:58.8905202Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/memy/memy --files-from manifest.txt --use-compress-program zstdmt
+2026-10-07T09:43:59.1467633Z Failed to save: Unable to reserve cache with key setup-go-Linux-x64-ubuntu24-go-1.27.1-6e0ba83924cac4a93c698150b48ec3faa76dfa86e8aa7e2544fc8a1d0925cb39, another job may be creating this cache.
+2026-10-07T09:43:59.1651136Z Post job cleanup.
+2026-10-07T09:43:59.2585258Z [command]/usr/bin/git version
+2026-10-07T09:43:59.2634313Z git version 2.55.0
+2026-10-07T09:43:59.2675697Z Temporarily overriding HOME='/home/runner/work/_temp/b5e428c3-be56-475a-bc39-247e8be72a76' before making global git config changes
+2026-10-07T09:43:59.2677276Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-07T09:43:59.2686739Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/memy/memy
+2026-10-07T09:43:59.2748296Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T09:43:59.2794420Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-07T09:43:59.3054890Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T09:43:59.3086826Z http.https://github.com/.extraheader
+2026-10-07T09:43:59.3099183Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-07T09:43:59.3140332Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-07T09:43:59.3417300Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T09:43:59.3459682Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-07T09:43:59.3868835Z Cleaning up orphan processes
+2026-10-07T09:43:59.4190394Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

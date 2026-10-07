@@ -1,0 +1,248 @@
+{
+  "lane": "published",
+  "modules": [
+    {
+      "module": "github.com/skosovsky/memy",
+      "version": "v0.3.1",
+      "local": false
+    },
+    {
+      "module": "github.com/skosovsky/ragy",
+      "version": "v0.8.0",
+      "local": false
+    },
+    {
+      "module": "github.com/skosovsky/contexty",
+      "version": "v0.13.2",
+      "local": false
+    },
+    {
+      "module": "github.com/skosovsky/toolsy",
+      "version": "v0.19.0",
+      "local": false
+    },
+    {
+      "module": "github.com/skosovsky/toolsy/toolkits/memory",
+      "version": "v0.19.0",
+      "local": false
+    },
+    {
+      "module": "github.com/skosovsky/toolsy/toolkits/rag",
+      "version": "v0.19.0",
+      "local": false
+    }
+  ],
+  "work": "off",
+  "resolved_graph": [
+    {
+      "Path": "consumer.local/managed",
+      "Main": true,
+      "Dir": "/private/var/folders/46/5ywmz5gj26n7mnky51gd60g00000gn/T/memy-consumer-6cmfgakf/consumer",
+      "GoMod": "/private/var/folders/46/5ywmz5gj26n7mnky51gd60g00000gn/T/memy-consumer-6cmfgakf/consumer/go.mod",
+      "GoVersion": "1.27.1"
+    },
+    {
+      "Path": "github.com/dlclark/regexp2",
+      "Version": "v1.11.0",
+      "Time": "2024-02-24T02:28:33Z",
+      "Indirect": true,
+      "Dir": "/tmp/memy-consumer-mod/github.com/dlclark/regexp2@v1.11.0",
+      "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/dlclark/regexp2/@v/v1.11.0.mod",
+      "GoVersion": "1.13",
+      "Sum": "h1:G/nrcoOa7ZXlpoa/91N3X7mM3r8eIlMBBJZvsz/mxKI=",
+      "GoModSum": "h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8="
+    },
+    {
+      "Path": "github.com/google/go-cmp",
+      "Version": "v0.7.0",
+      "Time": "2025-01-14T18:15:44Z",
+      "Indirect": true,
+      "Dir": "/tmp/memy-consumer-mod/github.com/google/go-cmp@v0.7.0",
+      "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/google/go-cmp/@v/v0.7.0.mod",
+      "GoVersion": "1.21",
+      "Sum": "h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=",
+      "GoModSum": "h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU="
+    },
+    {
+      "Path": "github.com/google/jsonschema-go",
+      "Version": "v0.4.3",
+      "Time": "2026-04-17T16:08:09Z",
+      "Indirect": true,
+      "Dir": "/tmp/memy-consumer-mod/github.com/google/jsonschema-go@v0.4.3",
+      "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/google/jsonschema-go/@v/v0.4.3.mod",
+      "GoVersion": "1.23.0",
+      "Sum": "h1:/DBOLZTfDow7pe2GmaJNhltueGTtDKICi8V8p+DQPd0=",
+      "GoModSum": "h1:r5quNTdLOYEz95Ru18zA0ydNbBuYoo9tgaYcxEYhJVE="
+    },
+    {
+      "Path": "github.com/kr/pretty",
+      "Version": "v0.3.1",
+      "Time": "2022-08-29T23:03:05Z",
+      "Indirect": true
+    },
+    {
+      "Path": "github.com/mattn/go-sqlite3",
+      "Version": "v1.14.52",
+      "Time": "2026-09-05T04:18:43Z",
+      "Indirect": true,
+      "Dir": "/tmp/memy-consumer-mod/github.com/mattn/go-sqlite3@v1.14.52",
+      "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/mattn/go-sqlite3/@v/v1.14.52.mod",
+      "GoVersion": "1.21",
+      "Sum": "h1:wVbm2Qnf4OXkqhBTSPuCRZDRnxfbVrrmiCEroVdog8U=",
+      "GoModSum": "h1:6JTjA44L93a0QCyJef5YvlPoKXntQPjzWv5gtm9sB6w="
+    },
+    {
+      "Path": "github.com/rogpeppe/go-internal",
+      "Version": "v1.16.0",
+      "Time": "2026-07-01T15:11:24Z",
+      "Indirect": true
+    },
+    {
+      "Path": "github.com/santhosh-tekuri/jsonschema/v6",
+      "Version": "v6.0.3",
+      "Time": "2026-06-28T17:38:00Z",
+      "Indirect": true,
+      "Dir": "/tmp/memy-consumer-mod/github.com/santhosh-tekuri/jsonschema/v6@v6.0.3",
+      "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/santhosh-tekuri/jsonschema/v6/@v/v6.0.3.mod",
+      "GoVersion": "1.21",
+      "Sum": "h1:1EYB5IzjZawrrnELUi78f9fPu57HuXjmddZPjrls/28=",
+      "GoModSum": "h1:JXeL+ps8p7/KNMjDQk3TCwPpBy0wYklyWTfbkIzdIFU="
+    },
+    {
+      "Path": "github.com/skosovsky/contexty",
+      "Version": "v0.13.2",
+      "Time": "2026-10-07T09:29:12Z",
+      "Dir": "/tmp/memy-consumer-mod/github.com/skosovsky/contexty@v0.13.2",
+      "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/skosovsky/contexty/@v/v0.13.2.mod",
+      "GoVersion": "1.27.1",
+      "Sum": "h1:6b7BpT82FWjmlNFSaiucDyEzlmIHsWbLlMz8Fy0nGzg=",
+      "GoModSum": "h1:nI2K3X+F42fSRfM1aZ0Sy09Rla5OsPgM3tXY9e+Kd6w="
+    },
+    {
+      "Path": "github.com/skosovsky/memy",
+      "Version": "v0.3.1",
+      "Time": "2026-10-07T09:40:40Z",
+      "Dir": "/tmp/memy-consumer-mod/github.com/skosovsky/memy@v0.3.1",
+      "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/skosovsky/memy/@v/v0.3.1.mod",
+      "GoVersion": "1.27.1",
+      "Sum": "h1:Fw8vN082CsSGJtF4b+mMZW+lpKGeR1/cFQFg4RapSsw=",
+      "GoModSum": "h1:LpA3oi0n8yYWbUPUlX2AWAGZgLbRyvVinwXBlEoYMlk="
+    },
+    {
+      "Path": "github.com/skosovsky/ragy",
+      "Version": "v0.8.0",
+      "Time": "2026-10-07T06:59:22Z",
+      "Dir": "/tmp/memy-consumer-mod/github.com/skosovsky/ragy@v0.8.0",
+      "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/skosovsky/ragy/@v/v0.8.0.mod",
+      "GoVersion": "1.27.1",
+      "Sum": "h1:U6+ItzoIbw9rChX4e4/mfwml/hUB8ZmgC/ftHNtz5pg=",
+      "GoModSum": "h1:czJrWaKvukDTD9TbQJgz5oGPlgAnSQ4tUlCdoqwXlMg="
+    },
+    {
+      "Path": "github.com/skosovsky/toolsy",
+      "Version": "v0.19.0",
+      "Time": "2026-10-07T09:29:31Z",
+      "Indirect": true,
+      "Dir": "/tmp/memy-consumer-mod/github.com/skosovsky/toolsy@v0.19.0",
+      "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/skosovsky/toolsy/@v/v0.19.0.mod",
+      "GoVersion": "1.27.1",
+      "Sum": "h1:fAD0SYLjXZ+CkOV5KclcbrdJi+YyYcIVMFC59jprmeo=",
+      "GoModSum": "h1:yulTCBBI4vdEzyjJA/LUqhpIWMdHlRrsJ9kd/KuWeKY="
+    },
+    {
+      "Path": "github.com/skosovsky/toolsy/toolkits/memory",
+      "Version": "v0.19.0",
+      "Time": "2026-10-07T09:29:31Z",
+      "Dir": "/tmp/memy-consumer-mod/github.com/skosovsky/toolsy/toolkits/memory@v0.19.0",
+      "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/skosovsky/toolsy/toolkits/memory/@v/v0.19.0.mod",
+      "GoVersion": "1.27.1",
+      "Sum": "h1:S/MeX4ESQeV97YZozS1vDkJ3RfK1MbkGAAfhdI6PIr0=",
+      "GoModSum": "h1:mazuMTq1HgsNyqutzF5mZmgjuHTbJYNlO4q5PEox5QM="
+    },
+    {
+      "Path": "github.com/skosovsky/toolsy/toolkits/rag",
+      "Version": "v0.19.0",
+      "Time": "2026-10-07T09:29:31Z",
+      "Dir": "/tmp/memy-consumer-mod/github.com/skosovsky/toolsy/toolkits/rag@v0.19.0",
+      "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/skosovsky/toolsy/toolkits/rag/@v/v0.19.0.mod",
+      "GoVersion": "1.27.1",
+      "Sum": "h1:0yH36RxD9rS1B329Rxwd7txdUET9augv3LR4dKzITFI=",
+      "GoModSum": "h1:wtPdORDLHf5W87TgjqUQCNc/3A9qBUkD7/j238VF3JE="
+    },
+    {
+      "Path": "github.com/stretchr/testify",
+      "Version": "v1.12.1",
+      "Time": "2026-08-17T08:24:05Z",
+      "Indirect": true,
+      "Dir": "/tmp/memy-consumer-mod/github.com/stretchr/testify@v1.12.1",
+      "GoMod": "/tmp/memy-consumer-mod/cache/download/github.com/stretchr/testify/@v/v1.12.1.mod",
+      "GoVersion": "1.17",
+      "Sum": "h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=",
+      "GoModSum": "h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg="
+    },
+    {
+      "Path": "go.uber.org/goleak",
+      "Version": "v1.3.0",
+      "Time": "2023-10-24T16:28:03Z",
+      "Indirect": true,
+      "Dir": "/tmp/memy-consumer-mod/go.uber.org/goleak@v1.3.0",
+      "GoMod": "/tmp/memy-consumer-mod/cache/download/go.uber.org/goleak/@v/v1.3.0.mod",
+      "GoVersion": "1.20",
+      "Sum": "h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=",
+      "GoModSum": "h1:CoHD4mav9JJNrW/WLlf7HGZPjdw8EucARQHekz1X6bE="
+    },
+    {
+      "Path": "go.yaml.in/yaml/v3",
+      "Version": "v3.0.5",
+      "Time": "2026-07-26T14:51:55Z",
+      "Indirect": true,
+      "Dir": "/tmp/memy-consumer-mod/go.yaml.in/yaml/v3@v3.0.5",
+      "GoMod": "/tmp/memy-consumer-mod/cache/download/go.yaml.in/yaml/v3/@v/v3.0.5.mod",
+      "GoVersion": "1.16",
+      "Sum": "h1:N6y/pJk8buWs9NY5ERU2HSMfm+IuD/OtfdAnq6kESPw=",
+      "GoModSum": "h1:HVTZu1O7/Vkt2N+BFy8Zza+lnLsABggaTM2ZpNIGuKg="
+    },
+    {
+      "Path": "golang.org/x/mod",
+      "Version": "v0.41.0",
+      "Time": "2026-08-24T20:56:42Z",
+      "Indirect": true
+    },
+    {
+      "Path": "golang.org/x/sync",
+      "Version": "v0.23.0",
+      "Time": "2026-08-31T03:04:41Z",
+      "Indirect": true
+    },
+    {
+      "Path": "golang.org/x/text",
+      "Version": "v0.42.0",
+      "Time": "2026-09-08T16:29:55Z",
+      "Indirect": true,
+      "Dir": "/tmp/memy-consumer-mod/golang.org/x/text@v0.42.0",
+      "GoMod": "/tmp/memy-consumer-mod/cache/download/golang.org/x/text/@v/v0.42.0.mod",
+      "GoVersion": "1.26.0",
+      "Sum": "h1:JbOZXgfeCPU9gacVtYliJqOhD+zhrEqK4LfdpmlUZqI=",
+      "GoModSum": "h1:ojzP1Z+2QtioaF8DTtO8K5q7JWVVYwZKenzujK0Zd0E="
+    },
+    {
+      "Path": "golang.org/x/tools",
+      "Version": "v0.49.0",
+      "Time": "2026-08-13T14:53:26Z",
+      "Indirect": true
+    },
+    {
+      "Path": "gopkg.in/check.v1",
+      "Version": "v1.0.0-20201130134442-10cb98267c6c",
+      "Time": "2020-11-30T13:44:42Z",
+      "Indirect": true
+    },
+    {
+      "Path": "gopkg.in/yaml.v3",
+      "Version": "v3.0.1",
+      "Time": "2022-05-27T08:35:30Z",
+      "Indirect": true
+    }
+  ],
+  "result": "pass"
+}

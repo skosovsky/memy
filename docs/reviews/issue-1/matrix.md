@@ -1,6 +1,6 @@
 # Issue 1 acceptance matrix
 
-Pre-release verification. Code review and published artifact checks are separate gates.
+Final verification of the implementation and published artifact. Historical failures below were corrected and rechecked.
 The source manifest binds the independent reviews; historical reviews do not count.
 
 | Requirement | Code/contract | Executable evidence | Current result |
@@ -13,10 +13,10 @@ The source manifest binds the independent reviews; historical reviews do not cou
 | AC6 write/revoke order | synchronous WithDerivedWrite; backend epoch admission | TestForgetBetweenProjectionAndPersistence; TestWriteBeforeForgetAndUnknownCallbackOutcome; remote stale-retry rejection | backend-final race PASS |
 | AC7 durable deletion/retry | checkpoint transactional rows/lineage/epoch; registered remote Sink | TestDurableMultiLineagePendingRetryRestore; TestPurgeAllDependentCopiesAndLateOldScopeBatch; TestRemoteCanonicalForgetReceiptLossRecovery | review-fixes race PASS; both read/remote findings fixed |
 | AC8 restore fail closed | checkpoint.ReadValidated; docs managed-projections restore ownership | old-checkpoint restore, stale source/cancellation, TestCheckpointMissingAndUnavailableCanonicalLineage, TestCheckpointDeliveryRevalidatesAfterAllStorageIO | review-fixes race PASS; explicit gaps covered |
-| AC9 final validation/local + published consumer/backend | make validate; scripts/consumer_checks.py; optional CI lanes | validate.txt completed exit 0; consumer-local.txt/json eight semantic fixtures; backend-final.txt separate process/TCP/SQLite | full validate/local/published/backend PASS |
+| AC9 final validation/local + published consumer/backend | make validate; scripts/consumer_checks.py; optional CI lanes | validate.txt completed exit 0; consumer-local.txt/json eight semantic fixtures; backend-final.txt separate process/TCP/SQLite | full validate/local/published/backend PASS; final remote CI all three jobs SUCCESS |
 | AC10 local duplicates | local-duplicates/manifest.json, full copies/diffs, decision.md | byte-for-byte archival checks; normal compilation; no exclusion workaround | archived safely; compilation succeeds |
-| AC11 independent reviews | source-snapshot.json | completeness-final.md and correctness-final.md on 5d517d4… (202 hashes) | implementation 100%; no open confirmed defects; full acceptance 95% pending AC9 |
-| AC12 release/migration/issue close | docs/migration.md; release-break; author comment; closed issue state | release-break.txt + artifact-verification.json + consumer-published.json | publication verified; migration/closure pending |
+| AC11 independent reviews | source-snapshot.json | completeness-final.md and correctness-final.md on cc7e1b9… (203 hashes) | implementation 100%; no open confirmed defects; terminal independent acceptance: 100% AC1–AC10, no open confirmed defects |
+| AC12 release/migration/issue close | docs/migration.md; release-break; author comment; closed issue state | release-break.txt + artifact-verification.json + consumer-published.json | published verified, author notified, issue CLOSED; issue-closeout.json |
 
 ## Work items and boundaries
 
@@ -88,3 +88,36 @@ retargeted refs; --siblings still tests actual current host checkouts. This is
 a CI bootstrap correction with unchanged Go/public API, requiring release-patch
 after repeated validation and independent review of the new source manifest.
 Final CI success and new published consumer evidence are still required.
+
+## CI correction publication and communication
+
+The CI-only patch was published as v0.3.1 at
+27b788e8d56ee33ccb3dd5a8fc99d5dee75fedff via make release-patch. The selected
+API/source contract is unchanged; its Go fingerprint remains d64bf676… .
+consumer-published-patch.json/txt executes eight race semantic tests on the exact
+new artifact, GOWORK=off and zero replacements. artifact-verification-patch.json
+independently confirms tag identity and matching reviewed/published Go source.
+Portable local clones passed all fixtures; the successful GitHub consumer-local
+and consumer-published jobs independently repeat those lanes. Current contracts
+job is the last outstanding gate. See ci-patch-jobs.json and run 37602453534.
+
+Author received explicit before/after API and host integration instructions:
+https://github.com/skosovsky/memy/issues/1#issuecomment-6035357157
+The message explicitly keeps the issue open until the final contracts job finishes.
+
+## Final CI result
+
+Run https://github.com/skosovsky/memy/actions/runs/37602453534 completed
+successfully for the exact v0.3.1 commit. Contracts, portable consumer-local and
+consumer-published jobs all succeeded. Their original GitHub logs and run/job
+metadata are preserved in ci-*.txt/json. No required verification remains pending.
+Final reviews accepted the snapshot; issue was closed after explicit author migration and final CI acknowledgement.
+
+## Final closeout
+
+AC1–AC12 complete. Both independent terminal verdicts accept the exact final
+snapshot: completeness 100%, no open confirmed actionable defects. Author
+received explicit migration instructions and final CI acknowledgement. Issue #1
+was closed as completed and the actual closed state was queried afterward.
+See closeout.md and issue-closeout.json. The stated bounded review/backend limits
+remain; this is not a mathematical guarantee or certification of other providers.

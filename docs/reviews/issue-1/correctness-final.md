@@ -1,6 +1,6 @@
 # Final independent correctness review
 
-Current review snapshot: `cc7e1b931c98d807b3c23e7c4b35c45ffaf3d2b3d572616ee0301cc5659b0421` (203 files). Implementation/CI fix accepted with no open confirmed defects; final patch publication and remote CI are still pending. Earlier publication acceptance below records the preceding snapshot and is superseded for final closeout by the CI correction addendum.
+Current review snapshot: `cc7e1b931c98d807b3c23e7c4b35c45ffaf3d2b3d572616ee0301cc5659b0421` (203 files). Implementation/CI fix, final patch publication and remote CI accepted with no open confirmed defects. Terminal gate evidence is recorded in the final addendum; issue closure itself remains the coordinating agent’s last action. Earlier publication acceptance below records the preceding snapshot and is superseded for final closeout by the CI correction addendum.
 
 Reviewed frozen source snapshot: `5d517d4d29900935f1ead6d841e8c46d347abeb80622843b247a176e4cedb729` (202 files). All recorded hashes matched at the beginning and end of review. Production and test sources were not changed by this reviewer.
 
@@ -69,3 +69,16 @@ Inspected `consumer-cloned.txt`: all three actual clone messages resolve to the 
 An independent isolated Python probe imported the script and supplied a mismatched clone commit through a mocked command runner. The script selected `--branch v0.8.0`, rejected the mismatch with `Consumer revision changed for ragy`, and never started semantic tests. Probe-created bytecode was removed; no source was changed.
 
 Verdict for corrected source: **accepted; no open confirmed actionable implementation/CI-script defects**. The previously published substantial API release remains immutable. The CI-only correction is eligible for the planned patch release after this review. This review does not yet certify publication or remote GitHub CI for that patch; those final gates must pass before migration comment and issue closure.
+
+
+## Terminal acceptance after CI patch publication
+
+Final patch: `v0.3.1`, commit `27b788e8d56ee33ccb3dd5a8fc99d5dee75fedff`. Inspected the standard `release-patch.txt` publication log. Independently reran `git ls-remote --tags origin refs/tags/v0.3.1`: the remote tag resolves to that commit.
+
+Independently compared the downloaded `v0.3.1` module directory against all entries of the final 203-file snapshot: 202 published files match their SHA256 exactly; the only absent file is the intentionally local ignored `.cursor/docs/task1.md`. No mismatch was found, including the consumer script, pinned revision manifest, docs and core sources. Local snapshot hashes still match `cc7e1b931c98d807b3c23e7c4b35c45ffaf3d2b3d572616ee0301cc5659b0421`.
+
+Inspected `consumer-published-patch.json` and its semantic test output: published result pass, `GOWORK=off`, no Replace entries, all eight semantic race tests pass. Inspected the actual downloaded remote CI logs: eight tests pass in each consumer lane and 838 test/subtest PASS entries occur in contracts with no test failures or job error annotations. Both consumer jobs and the contracts job completed successfully. Independently queried GitHub run `37602453534` using `gh api`: status completed, conclusion success, head SHA the final patch commit. This proves the portable clone correction runs successfully in its real GitHub CI environment.
+
+Independently read author migration comment `6035357157` from the issue API. It addresses the author explicitly and covers actual before/after score construction, evidence, full-envelope budget, authenticated scope, separate approval, sink registration, fence and full lineage, synchronous writes, durable handles and pending purge retries, unknown effects, restore invalidation and host revocation-ledger responsibility. The comment accurately stated CI was pending when posted; the coordinating agent can now record successful final CI and close the issue.
+
+**Terminal correctness acceptance: accepted. No open confirmed actionable defects or remaining implementation, publication, consumer or remote CI blockers were found.** Migration communication is verified; proceed with final closeout/state verification. This reviewer has not closed the issue and does not claim it is already closed. The review’s stated finite test/code-inspection and selected-backend limits remain in force.
