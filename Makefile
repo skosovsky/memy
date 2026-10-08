@@ -7,8 +7,8 @@ LINT_VERSION := 2.14.0
 DEVELOPMENT_MODULES := . tools integration/consumer
 PUBLISHABLE_MODULES := .
 TEST_TIMEOUT ?= 30m
-TEST_FLAGS ?= -race -count=1 -timeout=$(TEST_TIMEOUT)
-CHECK_TEST_FLAGS := -race -count=1 -timeout=$(TEST_TIMEOUT)
+TEST_FLAGS ?= -mod=readonly -race -count=1 -timeout=$(TEST_TIMEOUT)
+CHECK_TEST_FLAGS := -mod=readonly -race -count=1 -timeout=$(TEST_TIMEOUT)
 FUZZTIME ?= 30s
 FUZZPARALLEL ?= 2
 MEMY_REF ?= v0.3.1
@@ -45,7 +45,7 @@ lint:
 	$(Q)status=0; for dir in $(DEVELOPMENT_MODULES); do \
 		echo "lint - $$dir"; \
 		(cd "$$dir" && test -z "$$(gofmt -l .)") || status=1; \
-		(cd "$$dir" && $(GO) vet -tags=integration ./...) || status=1; \
+		(cd "$$dir" && $(GO) vet -mod=readonly -tags=integration ./...) || status=1; \
 		(cd "$$dir" && "$(GOLANGCI_LINT)" run --allow-serial-runners --build-tags integration ./...) || status=1; \
 	done; exit $$status
 
@@ -66,7 +66,7 @@ check:
 examples:
 	$(Q)build=$$(mktemp -d "$${TMPDIR:-/tmp}/memy-examples.XXXXXXXX"); trap 'rm -rf "$$build"' EXIT HUP INT TERM; \
 	status=0; for name in lifecycle quality retrieval quality-integration managed-projections; do \
-		echo "build example - $$name"; $(GO) build -o "$$build/$$name" "./examples/$$name" || status=1; \
+		echo "build example - $$name"; $(GO) build -mod=readonly -o "$$build/$$name" "./examples/$$name" || status=1; \
 	done; exit $$status
 
 test-integration:
@@ -75,27 +75,28 @@ test-integration:
 	done; exit $$status
 
 test-candidate:
-	$(Q)cd tools && $(GO) test -tags=integration -race -count=1 -timeout=$(TEST_TIMEOUT) -run '^TestCandidateArtifacts$$' ./...
+	$(Q)cd tools && $(GO) test -mod=readonly -tags=integration -race -count=1 -timeout=$(TEST_TIMEOUT) -run '^TestCandidateArtifacts$$' ./...
 
 release-candidate:
 	$(Q)MEMY_CANDIDATE_SOURCE="$(RELEASE_SOURCE)" MEMY_CANDIDATE_VERSION="$(RELEASE_VERSION)" $(MAKE) --no-print-directory test-candidate
 
 test-published:
-	$(Q)cd tools && $(GO) test -tags=integration -race -count=1 -timeout=$(TEST_TIMEOUT) -run '^TestPublishedConsumer$$' ./...
+	$(Q)cd tools && $(GO) test -mod=readonly -tags=integration -race -count=1 -timeout=$(TEST_TIMEOUT) -run '^TestPublishedConsumer$$' ./...
 
 bench:
-	$(Q)for dir in $(DEVELOPMENT_MODULES); do (cd "$$dir" && $(GO) test -bench=. -run='^$$' -benchmem ./...) || exit 1; done
+	$(Q)for dir in $(DEVELOPMENT_MODULES); do (cd "$$dir" && $(GO) test -mod=readonly -bench=. -run='^$$' -benchmem ./...) || exit 1; done
 
 fuzz:
 	$(Q)for dir in $(DEVELOPMENT_MODULES); do \
-		(cd "$$dir" && for pkg in $$($(GO) list ./...); do \
-			for target in $$($(GO) test -list '^Fuzz' "$$pkg"); do \
-				case "$$target" in Fuzz*) $(GO) test -run='^$$' -fuzz="^$$target$$" -fuzztime=$(FUZZTIME) -parallel=$(FUZZPARALLEL) "$$pkg" || exit 1 ;; esac; \
+		(cd "$$dir" && packages=$$($(GO) list -mod=readonly ./...) && for pkg in $$packages; do \
+			targets=$$($(GO) test -mod=readonly -list '^Fuzz' "$$pkg") || exit 1; \
+			for target in $$targets; do \
+				case "$$target" in Fuzz*) $(GO) test -mod=readonly -run='^$$' -fuzz="^$$target$$" -fuzztime=$(FUZZTIME) -parallel=$(FUZZPARALLEL) "$$pkg" || exit 1 ;; esac; \
 			done; done) || exit 1; \
 	done
 
 cover:
-	$(Q)for dir in $(DEVELOPMENT_MODULES); do (cd "$$dir" && $(GO) test -coverprofile=coverage.out ./... && $(GO) tool cover -func=coverage.out) || exit 1; done
+	$(Q)for dir in $(DEVELOPMENT_MODULES); do (cd "$$dir" && $(GO) test -mod=readonly -coverprofile=coverage.out ./... && $(GO) tool cover -func=coverage.out) || exit 1; done
 
 release-patch:
 	$(Q)bash scripts/release.sh patch

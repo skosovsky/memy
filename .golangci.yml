@@ -227,7 +227,7 @@ linters:
       forbid-mutex: true
 
     gomoddirectives:
-      # The module has no local replacements; adapters are packages in this module.
+      # The publishable root has no local replacements; the consumer exception is narrow.
       # Default: false
       replace-local: false
 

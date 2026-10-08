@@ -40,7 +40,7 @@ func newReleaseFixture(t *testing.T) releaseFixture {
 	writeFile(
 		t,
 		filepath.Join(f.repo, "Makefile"),
-		"print-publishable-modules:\n\t@echo .\ncheck:\n\t@test ! -f check-fails\nrelease-candidate:\n\t@test ! -f candidate-fails\ntest-published:\n\t@test ! -f proxy-fails\n",
+		"print-publishable-modules:\n\t@echo .\ncheck:\n\t@test ! -f check-fails\nrelease-candidate:\n\t@test ! -f candidate-fails\ntest-published:\n\t@test \"$${FIXTURE_PROXY_FAILURE:-0}\" != 1\n",
 		0o644,
 	)
 	f.git(t, "add", "go.mod", "Makefile")
@@ -55,7 +55,7 @@ func (f releaseFixture) git(t *testing.T, args ...string) string {
 }
 func (f releaseFixture) release(t *testing.T, args ...string) (string, error) {
 	t.Helper()
-	cmd := exec.CommandContext(t.Context(), "bash", append([]string{f.script}, args...)...)
+	cmd := exec.CommandContext(t.Context(), "/bin/bash", append([]string{f.script}, args...)...)
 	cmd.Dir = f.repo
 	cmd.Env = f.env
 	cmd.Stdin = strings.NewReader("y\n")
@@ -108,6 +108,7 @@ func (f releaseFixture) wrapper(t *testing.T, mode string) releaseFixture {
 for arg in "$@"; do
  if [[ "$arg" == tag && "$FIXTURE_MODE" == before-tag ]]; then exit 1; fi
  if [[ "$arg" == push ]]; then
+  [[ " $* " == *" --atomic "* ]] || exit 90
   touch "$FIXTURE_MARKER"
   if [[ "$FIXTURE_MODE" == unknown ]]; then exit 1; fi
   "$REAL_GIT" "$@"
@@ -138,6 +139,7 @@ func TestReleaseScenarios(t *testing.T) {
 		"unknown",
 		"dirty",
 		"major-path",
+		"version-overflow",
 		"unsupported",
 		"check-failure",
 		"candidate-failure",
@@ -146,6 +148,8 @@ func TestReleaseScenarios(t *testing.T) {
 		"conflict",
 		"legacy",
 		"lock",
+		"atomic-unavailable",
+		"unsupported-modules",
 	}
 	for _, scenario := range scenarios {
 		t.Run(scenario, func(t *testing.T) {
@@ -164,7 +168,7 @@ func TestReleaseScenarios(t *testing.T) {
 			// Act
 			out, err := f.release(t, kind, ".")
 			// Assert
-			failure := map[string]bool{"rejected-retry": true, "before-tag": true, "unknown": true, "dirty": true, "major-path": true, "unsupported": true, "check-failure": true, "candidate-failure": true, "proxy-recovery": true, "conflict": true, "lock": true}[scenario]
+			failure := map[string]bool{"rejected-retry": true, "before-tag": true, "unknown": true, "dirty": true, "major-path": true, "version-overflow": true, "unsupported": true, "check-failure": true, "candidate-failure": true, "proxy-recovery": true, "conflict": true, "lock": true, "atomic-unavailable": true}[scenario]
 			if failure != (err != nil) {
 				t.Fatalf("unexpected result %v\n%s", err, out)
 			}
@@ -193,9 +197,7 @@ func (f releaseFixture) checkRecovery(t *testing.T, scenario, out string) {
 		}
 	}
 	if scenario == "proxy-recovery" {
-		if _, err := f.release(t, "finish", state); err == nil {
-			t.Fatal("proxy failure reported success")
-		}
+		f.checkProxyRecovery(t, state)
 		return
 	}
 	if scenario == "conflict" {
@@ -248,15 +250,29 @@ func (f releaseFixture) prepareScenario(t *testing.T, scenario string) (releaseF
 	case "major-path":
 		f.git(t, "tag", "v2.0.0")
 		f.git(t, "push", "-q", "origin", "refs/tags/v2.0.0")
+	case "version-overflow":
+		f.git(t, "tag", "v0.0.999999999")
+		f.git(t, "push", "-q", "origin", "refs/tags/v0.0.999999999")
 	case "unsupported":
 		f.git(t, "tag", "v1.0.0")
 		f.git(t, "push", "-q", "origin", "refs/tags/v1.0.0")
-	case "check-failure", "candidate-failure", "proxy-recovery":
+	case "check-failure", "candidate-failure":
 		name := map[string]string{"check-failure": "check-fails", "candidate-failure": "candidate-fails", "proxy-recovery": "proxy-fails"}[scenario]
 		writeFile(t, filepath.Join(f.repo, name), "failure", 0o644)
 		f.git(t, "add", name)
 		f.git(t, "commit", "-qm", "failure")
+	case "proxy-recovery":
+		f = f.fastRetryTimers(t)
+		f.env = append(f.env, "FIXTURE_PROXY_FAILURE=1")
+	case "atomic-unavailable":
+		f.git(t, "--git-dir="+f.remote, "config", "receive.advertiseAtomic", "false")
+	case "unsupported-modules":
+		if _, err := f.release(t, "patch", ". ./other"); err == nil {
+			t.Fatal("unsupported modules accepted")
+		}
+		return f, true
 	case "source":
+
 		f.env = append(f.env, "RELEASE_SOURCE="+f.git(t, "rev-parse", "HEAD"))
 		writeFile(t, filepath.Join(f.repo, "later"), "new", 0o644)
 		f.git(t, "add", "later")
@@ -305,5 +321,92 @@ func (f releaseFixture) assertScenario(t *testing.T, scenario string) {
 		if _, err := f.release(t, "patch", "."); err == nil {
 			t.Fatal("staged changes accepted")
 		}
+	}
+}
+
+func (f releaseFixture) checkProxyRecovery(t *testing.T, state string) {
+	t.Helper()
+	failed, err := f.release(t, "finish", state)
+	if err == nil {
+		t.Fatal("proxy failure reported success")
+	}
+	if strings.Count(failed, "Public verification attempt") != 6 {
+		t.Fatalf("unexpected retry count: %s", failed)
+	}
+	f.env = append(f.env, "FIXTURE_PROXY_FAILURE=0")
+	if out, err := f.release(t, "finish", state); err != nil {
+		t.Fatalf("finish recovery: %v %s", err, out)
+	}
+}
+
+func (f releaseFixture) fastRetryTimers(t *testing.T) releaseFixture {
+	t.Helper()
+	realSleep, err := exec.LookPath("sleep")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bin := filepath.Join(f.base, "retry-bin")
+	if mkdirErr := os.Mkdir(bin, 0o755); mkdirErr != nil {
+		t.Fatal(mkdirErr)
+	}
+	// Skip retry backoff in fixtures; retain the real 120-second process watchdog.
+	writeFile(
+		t,
+		filepath.Join(bin, "sleep"),
+		"#!/bin/sh\nif [ \"$1\" -lt 60 ]; then exit 0; fi\nexec \"$FIXTURE_SLEEP\" \"$@\"\n",
+		0o755,
+	)
+	f.env = append(f.env, "PATH="+bin+string(os.PathListSeparator)+os.Getenv("PATH"), "FIXTURE_SLEEP="+realSleep)
+	return f
+}
+
+func TestReleaseVerificationDeadline(t *testing.T) {
+	// Arrange: verification blocks; only the watchdog's clock is accelerated.
+	f := newReleaseFixture(t)
+	makefile := filepath.Join(f.repo, "Makefile")
+	body, err := os.ReadFile(makefile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body = []byte(
+		strings.ReplaceAll(string(body), "test-published:\n\t@test ! -f proxy-fails", "test-published:\n\t@sleep 100"),
+	)
+	start := strings.Index(string(body), "test-published:\n")
+	if start < 0 {
+		t.Fatal("missing verification fixture")
+	}
+	writeFile(t, makefile, string(body[:start])+"test-published:\n\t@sleep 100\n", 0o644)
+	f.git(t, "add", "Makefile")
+	f.git(t, "commit", "-qm", "blocking verification")
+	bin := filepath.Join(f.base, "watchdog-bin")
+	if mkdirErr := os.Mkdir(bin, 0o755); mkdirErr != nil {
+		t.Fatal(mkdirErr)
+	}
+	realSleep, err := exec.LookPath("sleep")
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeFile(
+		t,
+		filepath.Join(bin, "sleep"),
+		"#!/bin/sh\ncase \"$1\" in 120) exec \"$FIXTURE_SLEEP\" 0.05 ;; 100) exec \"$FIXTURE_SLEEP\" 100 ;; *) exit 0 ;; esac\n",
+		0o755,
+	)
+	f.env = append(f.env, "PATH="+bin+string(os.PathListSeparator)+os.Getenv("PATH"), "FIXTURE_SLEEP="+realSleep)
+	before := f.snapshot(t)
+	// Act
+	out, runErr := f.release(t, "patch", ".")
+	// Assert: timed-out checks cannot certify the published ref or mutate the caller.
+	if runErr == nil || !strings.Contains(out, "Public verification incomplete") {
+		t.Fatalf("watchdog failed: %v %s", runErr, out)
+	}
+	if strings.Count(out, "Public verification attempt") != 6 {
+		t.Fatalf("watchdog retries lost: %s", out)
+	}
+	if f.snapshot(t) != before {
+		t.Fatal("watchdog mutated caller")
+	}
+	if !strings.Contains(f.tags(t), "refs/tags/v0.0.1") {
+		t.Fatal("publication was not exercised")
 	}
 }

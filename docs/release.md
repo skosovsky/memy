@@ -19,7 +19,7 @@ within five minutes handle proxy delay. A transport error is reconciled before
 retry; unavailable observation or verification is not success.
 
 Recovery records live outside the source checkout and contain validated text
-fields, updated by rename. A mkdir lock guards each repository and record; stale
+fields, including the pinned linter path for resume, updated by rename. A mkdir lock guards each repository and record; stale
 locks require manual inspection. The record path is always printed.
 
 * `scripts/release.sh inspect <state-dir>` observes state and remote refs only.

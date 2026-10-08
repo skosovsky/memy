@@ -67,9 +67,27 @@ func assertCheckStages(t *testing.T, out string) {
 		}
 		last = index
 	}
-	for _, marker := range []string{"fixture-test -race -count=1", "check: exit 1"} {
+	for _, marker := range []string{"fixture-test -mod=readonly -race -count=1", "check: exit 1"} {
 		if !strings.Contains(out, marker) {
 			t.Fatalf("missing strict flags or exit %q\n%s", marker, out)
 		}
+	}
+}
+
+func TestFuzzDiscoveryFailure(t *testing.T) {
+	// Arrange: package discovery succeeds, compilation of its fuzz targets fails.
+	dir := t.TempDir()
+	fakeGo := filepath.Join(dir, "go")
+	writeFile(
+		t,
+		fakeGo,
+		"#!/bin/sh\nif [ \"$1\" = list ]; then echo fixture/package; exit 0; fi\necho 'fixture compilation failure' >&2\nexit 1\n",
+		0o755,
+	)
+	// Act
+	out, err := command(t, rootDir(t), nil, "make", "fuzz", "DEVELOPMENT_MODULES=.", "GO="+fakeGo)
+	// Assert
+	if err == nil || !strings.Contains(out, "fixture compilation failure") {
+		t.Fatalf("fuzz discovery failure lost: %v %s", err, out)
 	}
 }
