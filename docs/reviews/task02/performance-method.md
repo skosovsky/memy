@@ -1,3 +1,6 @@
+Historical report generators have been retired. Raw measurements and generated
+reports below are archived evidence; regeneration is no longer supported.
+
 # Task02 performance method
 
 The comparison uses the task01 commit `9f7b50fa354e6fd74a9def6886850bf50d3aec78` as production baseline. Historical baseline sources and raw observations are preserved. The final matrix must contain every case below, without substituting incomplete maintenance calls for completed operations. Report generation requires terminal PASS output and exactly three samples per case.
