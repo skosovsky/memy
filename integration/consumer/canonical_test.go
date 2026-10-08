@@ -1,3 +1,5 @@
+//go:build e2e
+
 package compatibility_test
 
 import (
@@ -17,7 +19,7 @@ import (
 	"github.com/skosovsky/memy/store/memory"
 )
 
-func TestCanonicalRecallProjectedRagyContextyForget(t *testing.T) {
+func TestE2ECanonicalRecallProjectedRagyContextyForget(t *testing.T) {
 	// Arrange: real canonical engine with offline host ports.
 	ctx := t.Context()
 	scope := memy.Scope{Tenant: "tenant", Namespace: "knowledge", Subject: "user"}
@@ -200,7 +202,7 @@ func TestCanonicalRecallProjectedRagyContextyForget(t *testing.T) {
 	}
 }
 
-func TestPersistentCompiledContextManagedForget(t *testing.T) {
+func TestE2EPersistentCompiledContextManagedForget(t *testing.T) {
 	// Arrange: the real consumer stores a compiled artifact whose text is the full
 	// canonical projection envelope, rather than an untracked payload-only copy.
 	ctx := t.Context()

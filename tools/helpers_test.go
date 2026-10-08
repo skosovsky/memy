@@ -37,9 +37,10 @@ func commandContext(
 		name = os.Getenv("GO")
 	}
 	cmd := exec.CommandContext(ctx, name, args...)
+	isolateProcess(cmd)
 	cmd.WaitDelay = time.Second
 	cmd.Dir = dir
-	cmd.Env = append(os.Environ(), env...)
+	cmd.Env = append(append(os.Environ(), "GOWORK=off"), env...)
 	out, err := cmd.CombinedOutput()
 	return string(out), err
 }
@@ -53,18 +54,20 @@ func mustRun(t *testing.T, dir string, env []string, name string, args ...string
 	return strings.TrimSpace(out)
 }
 
-func writeFile(t *testing.T, name, body string, mode os.FileMode) {
+func read(t *testing.T, path string) []byte {
 	t.Helper()
-	if err := os.WriteFile(name, []byte(body), mode); err != nil {
+	data, err := os.ReadFile(path)
+	if err != nil {
 		t.Fatal(err)
 	}
+	return data
 }
-
-func mustGoContext(ctx context.Context, t *testing.T, dir string, env []string, args ...string) string {
+func write(t *testing.T, path string, data []byte) {
 	t.Helper()
-	out, err := commandContext(ctx, t, dir, env, "go", args...)
-	if err != nil {
-		t.Fatalf("go %v: %v\n%s", args, err, out)
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
 	}
-	return strings.TrimSpace(out)
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
 }

@@ -1,3 +1,5 @@
+//go:build e2e
+
 package checkpoint_test
 
 import (
@@ -22,8 +24,8 @@ import (
 	"github.com/skosovsky/memy/reference"
 )
 
-// TestCheckpointBackendProcess is also the separate service process entry point.
-func TestCheckpointBackendProcess(t *testing.T) {
+// TestE2ECheckpointBackendProcess is also the separate service process entry point.
+func TestE2ECheckpointBackendProcess(t *testing.T) {
 	if os.Getenv("MEMY_CHECKPOINT_SERVICE") != "1" {
 		return
 	}
@@ -83,7 +85,12 @@ type service struct {
 
 func startService(t *testing.T, path string) *service {
 	t.Helper()
-	cmd := exec.CommandContext(t.Context(), os.Args[0], "-test.run=^TestCheckpointBackendProcess$", "-test.timeout=2m")
+	cmd := exec.CommandContext(
+		t.Context(),
+		os.Args[0],
+		"-test.run=^TestE2ECheckpointBackendProcess$",
+		"-test.timeout=2m",
+	)
 	cmd.Env = append(os.Environ(), "MEMY_CHECKPOINT_SERVICE=1", "MEMY_CHECKPOINT_DB="+path)
 	pipe, err := cmd.StdoutPipe()
 	if err != nil {
@@ -119,7 +126,7 @@ func (s *service) stop() {
 	}
 }
 
-func TestRemoteDurablePurgeUnknownReplyRestartAndFence(t *testing.T) {
+func TestE2ERemoteDurablePurgeUnknownReplyRestartAndFence(t *testing.T) {
 	// Arrange: an actual TCP service in a separate OS process writes real SQLite.
 	path := filepath.Join(t.TempDir(), "remote.db")
 	server := startService(t, path)
@@ -205,7 +212,7 @@ func bindRemote(t *testing.T, s *host.Session, remote checkpoint.Remote) {
 	s.Engine = engine
 }
 
-func TestRemoteCanonicalForgetReceiptLossRecovery(t *testing.T) {
+func TestE2ERemoteCanonicalForgetReceiptLossRecovery(t *testing.T) {
 	// Arrange: canonical storage and its registered checkpoint sink live in distinct processes.
 	dir := t.TempDir()
 	backendPath := filepath.Join(t.TempDir(), "remote.db")
@@ -295,7 +302,7 @@ func TestRemoteCanonicalForgetReceiptLossRecovery(t *testing.T) {
 	}
 }
 
-func TestRemoteGatewayStatusAfterDurableCommit(t *testing.T) {
+func TestE2ERemoteGatewayStatusAfterDurableCommit(t *testing.T) {
 	// Arrange: a real backend commits Put before a gateway replaces its status.
 	server := startService(t, filepath.Join(t.TempDir(), "gateway.db"))
 	sc := memy.Scope{Tenant: "tenant", Namespace: "knowledge", Subject: "user"}

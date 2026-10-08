@@ -1,65 +1,81 @@
+//go:build !integration && !e2e
+
 package tools_test
 
 import (
-	"fmt"
-	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
+
+	"golang.org/x/mod/modfile"
 )
 
-func validateInventory(actual, expected, published []string) error {
-	actual = slices.Clone(actual)
-	expected = slices.Clone(expected)
-	slices.Sort(actual)
-	slices.Sort(expected)
-	if !slices.Equal(actual, expected) {
-		return fmt.Errorf("tracked modules %v != development inventory %v", actual, expected)
-	}
-	if !slices.Equal(published, []string{"."}) {
-		return fmt.Errorf("unsupported publishable modules: %v", published)
-	}
-	return nil
-}
-
-func TestModuleInventory(t *testing.T) {
-	// Arrange: Make defines inventory; Git supplies tracked manifests.
+func TestPublishableModuleInventory(t *testing.T) {
+	// Arrange: tracked source is the inventory authority, not ignored build artifacts.
 	root := rootDir(t)
-	expected := strings.Fields(mustRun(t, root, nil, "make", "--no-print-directory", "print-development-modules"))
-	published := strings.Fields(mustRun(t, root, nil, "make", "--no-print-directory", "print-publishable-modules"))
-	tracked := strings.Fields(mustRun(t, root, nil, "git", "ls-files", "--", "go.mod", "**/go.mod"))
-	actual := make([]string, 0, len(tracked))
-	for _, path := range tracked {
-		actual = append(actual, filepath.ToSlash(filepath.Dir(path)))
-	}
-	// Act / Assert
-	if err := validateInventory(actual, expected, published); err != nil {
-		t.Fatal(err)
-	}
-	for _, module := range expected {
-		if _, err := os.Stat(filepath.Join(root, module, "go.mod")); err != nil {
-			t.Fatal(err)
+	publish := strings.Fields(mustRun(t, root, nil, "make", "--no-print-directory", "-s", "modules"))
+	paths := strings.Split(
+		mustRun(
+			t,
+			root,
+			nil,
+			"git",
+			"ls-files",
+			"--cached",
+			"--",
+			"go.mod",
+			"**/go.mod",
+		),
+		"\n",
+	)
+	// Act.
+	found := make([]string, 0, len(paths))
+	for _, path := range paths {
+		if path != "" {
+			found = append(found, filepath.ToSlash(filepath.Dir(path)))
 		}
 	}
+	wantPublish := found
+	// Assert.
+	slices.Sort(wantPublish)
+	slices.Sort(publish)
+	if !slices.Equal(publish, wantPublish) {
+		t.Fatalf("publishable inventory: listed %v; expected %v", publish, wantPublish)
+	}
 }
 
-func TestInventoryRejectsMissingAndPublishedTooling(t *testing.T) {
-	for _, test := range []struct {
-		name                        string
-		actual, expected, published []string
-	}{
-		{"missing", []string{".", "tools", "forgotten"}, []string{".", "tools"}, []string{"."}},
-		{"tooling-published", []string{".", "tools"}, []string{".", "tools"}, []string{".", "tools"}},
-		{"duplicate", []string{".", "tools"}, []string{".", "tools", "tools"}, []string{"."}},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			// Arrange / Act
-			err := validateInventory(test.actual, test.expected, test.published)
-			// Assert
-			if err == nil {
-				t.Fatal("invalid inventory accepted")
-			}
-		})
+func TestGoWorkspaceIsolated(t *testing.T) {
+	// Arrange: an ambient workspace must not decide module resolution for tooling.
+	t.Setenv("GOWORK", "/nonexistent/ambient.go.work")
+	// Act.
+	actual := mustRun(t, t.TempDir(), []string{"GOENV=off"}, "go", "env", "GOWORK")
+	// Assert.
+	if actual != "off" {
+		t.Fatalf("ambient workspace leaked: %s", actual)
+	}
+}
+
+func TestModulePathsMatchDirectories(t *testing.T) {
+	// Arrange.
+	root := rootDir(t)
+	dirs := strings.Fields(mustRun(t, root, nil, "make", "-s", "modules"))
+	rootManifest, err := modfile.Parse("go.mod", read(t, filepath.Join(root, "go.mod")), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Act / Assert.
+	for _, dir := range dirs {
+		manifest, err := modfile.Parse("go.mod", read(t, filepath.Join(root, dir, "go.mod")), nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := rootManifest.Module.Mod.Path
+		if dir != "." {
+			want += "/" + dir
+		}
+		if manifest.Module.Mod.Path != want {
+			t.Fatalf("module %s: got %s, want %s", dir, manifest.Module.Mod.Path, want)
+		}
 	}
 }
