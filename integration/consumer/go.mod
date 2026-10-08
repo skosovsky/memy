@@ -4,7 +4,7 @@ go 1.27.1
 
 require (
 	github.com/skosovsky/contexty v0.13.2
-	github.com/skosovsky/memy v0.3.1
+	github.com/skosovsky/memy v0.4.1
 	github.com/skosovsky/ragy v0.8.0
 	github.com/skosovsky/toolsy/toolkits/memory v0.18.0
 	github.com/skosovsky/toolsy/toolkits/rag v0.18.0
@@ -17,5 +17,3 @@ require (
 	github.com/skosovsky/toolsy v0.18.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 )
-
-replace github.com/skosovsky/memy => ../..
