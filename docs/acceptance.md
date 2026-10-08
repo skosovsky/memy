@@ -1,6 +1,6 @@
 # Acceptance matrix
 
-Current tooling uses `make check`; historical `make validate` commands below
+Current tooling uses `make lint`, `make test`, `make test-integration`, and `make test-e2e`; historical `make validate` commands below
 refer to their frozen snapshots. See [development checks](development.md).
 
 Frozen requirement inventory v1, 2026-10-04, before implementation.

@@ -22,7 +22,10 @@ make race
 make vet
 make lint
 make examples
-make check
+make lint
+make test
+make test-integration
+make test-e2e
 ```
 
 `make test` выполняет свежий verbose race-прогон всех найденных Go modules;
@@ -211,19 +214,19 @@ go get github.com/skosovsky/memy@v0.3.1
 Для проверки и публикации committed source:
 
 ```sh
-make install-tools
-make check
+make lint
+make test
+make test-integration
+make test-e2e
 make release-patch
 # Для несовместимого изменения API до v1:
 make release-break
 ```
 
-Release повторно выполняет `make check` в изолированном checkout выбранного
-commit (`RELEASE_SOURCE`, по умолчанию HEAD), проверяет candidate artifacts,
-запрашивает подтверждение конкретных refs и публикует root tag атомарно.
-После push проверяет remote identity и точную публичную версию.
-`inspect`, `resume` и `finish` работают с сохранённым recovery directory.
-См. [release contract](docs/release.md) и [development checks](docs/development.md).
+Release выполняет lint, unit, integration и e2e в отдельном checkout выбранного
+source. После подтверждения один atomic push публикует source в main и candidate
+в теги всех модулей. Пользовательский checkout остаётся неизменным.
+См. [release runbook](docs/release/runbook.md) и [verification](docs/verification.md).
 
 ## Managed projections
 
@@ -236,15 +239,9 @@ commit (`RELEASE_SOURCE`, по умолчанию HEAD), проверяет cand
 обслуживаются только через повторную canonical lineage validation. Пример не
 предоставляет универсальный production storage backend.
 
-Consumer semantics входят в `make test` через отдельный development-модуль.
-Зависимости peers закреплены; core не получает их импортов.
+Consumer compatibility выполняется через `make test-integration`, lifecycle и
+published baseline — через `make test-e2e`. Peers закреплены в отдельном модуле;
+core не получает их импортов. Все три обнаруженных модуля публикуются.
 
-```sh
-make test
-make test-integration
-make test-published MEMY_REF=v0.3.1
-```
-
-Published baseline и candidate artifacts проверяются отдельно, без пользовательских
-соседних checkout. Публичная проверка запрещает replaces и использует checksum
-verification. Все обязательные проверки входят в `make check`.
+Проверки используют временные artifacts и изолированный module cache.
+Published baseline — v0.3.1; `MEMY_REF` выбирает другую точную версию.
