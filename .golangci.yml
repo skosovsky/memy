@@ -460,6 +460,11 @@ linters:
       - common-false-positives
     # Excluding configuration per-path, per-linter, per-text and per-source.
     rules:
+      # The consumer development module deliberately binds the current root.
+      # Published manifests are checked separately and prohibit all replaces.
+      - path: 'integration/consumer/go\.mod$'
+        text: 'local replacement are not allowed: github.com/skosovsky/memy'
+        linters: [ gomoddirectives ]
       - source: 'TODO'
         linters: [ godot ]
       - text: 'should have a package comment'

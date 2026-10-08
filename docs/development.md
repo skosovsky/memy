@@ -2,7 +2,7 @@
 
 The development modules are `.`, `tools`, and `integration/consumer`; only the
 root module is published. All commands use GOWORK=off. Go 1.27.1 and
- golangci-lint v2.14.0 are required; `make install-tools` installs the pinned linter.
+golangci-lint v2.14.0 are required; `make install-tools` installs the pinned linter.
 
 `make test` runs fresh race tests in every development module. `make lint` checks
 formatting, vet and lint without editing files. `make examples` builds examples.

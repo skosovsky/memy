@@ -1,100 +1,103 @@
 GO ?= go
 GOCACHE ?= /tmp/memy-go-build
 GOLANGCI_LINT_CACHE ?= /tmp/memy-golangci-cache
-GOLANGCI_LINT ?= golangci-lint
-RELEASE_TYPE ?= patch
+GOLANGCI_LINT ?= $(CURDIR)/bin/golangci-lint
+GO_VERSION := 1.27.1
+LINT_VERSION := 2.14.0
+DEVELOPMENT_MODULES := . tools integration/consumer
+PUBLISHABLE_MODULES := .
 TEST_TIMEOUT ?= 30m
-TEST_FLAGS ?= -v -race -count=1 -timeout=$(TEST_TIMEOUT)
+TEST_FLAGS ?= -race -count=1 -timeout=$(TEST_TIMEOUT)
+CHECK_TEST_FLAGS := -race -count=1 -timeout=$(TEST_TIMEOUT)
 FUZZTIME ?= 30s
 FUZZPARALLEL ?= 2
-MODULES := $(shell find . -type d \( -name ".*" -not -name "." -o -name "vendor" \) -prune -o -type f -name "go.mod" -exec dirname {} \;)
-export GOCACHE GOLANGCI_LINT_CACHE
+MEMY_REF ?= v0.3.1
+V ?= 0
+ifeq ($(V),1)
+Q :=
+else
+Q := @
+endif
+export GOWORK := off
+export GOCACHE GOLANGCI_LINT_CACHE GO MEMY_REF
 
-.PHONY: format vet lint fix test race validate examples bench fuzz cover release release-patch release-break release-test consumer-local consumer-published
+.PHONY: install-tools environment inventory print-development-modules print-publishable-modules lint test check examples test-integration test-candidate test-published release-candidate bench fuzz cover release-patch release-break
 
-format:
-	@test -z "$$(gofmt -l .)"
+print-development-modules:
+	@echo $(DEVELOPMENT_MODULES)
+print-publishable-modules:
+	@echo $(PUBLISHABLE_MODULES)
 
-vet:
-	@for dir in $(MODULES); do \
-		(cd "$$dir" && $(GO) vet ./...) || exit 1; \
-	done
+install-tools:
+	$(Q)mkdir -p bin
+	$(Q)GOBIN="$(CURDIR)/bin" $(GO) install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v$(LINT_VERSION)
+
+environment:
+	$(Q)test "$$( $(GO) env GOVERSION )" = "go$(GO_VERSION)" || { echo 'Go $(GO_VERSION) required'; exit 1; }
+	$(Q)test "$$( $(GO) env CGO_ENABLED )" = 1 || { echo 'CGO required for SQLite and race tests'; exit 1; }
+	$(Q)command -v git >/dev/null && command -v bash >/dev/null && command -v tar >/dev/null && command -v "$$( $(GO) env CC | cut -d ' ' -f 1 )" >/dev/null
+	$(Q)"$(GOLANGCI_LINT)" version | awk '/version $(LINT_VERSION)( |$$)/ { found=1 } END { exit !found }'
+
+inventory:
+	$(Q)cd tools && $(GO) test -count=1 -run '^TestModuleInventory$$' ./...
 
 lint:
-	@for dir in $(MODULES); do \
-		echo "golangci-lint - $$dir"; \
-		(cd "$$dir" && $(GOLANGCI_LINT) run --allow-serial-runners ./...) || exit 1; \
-	done
-
-fix:
-	@if [ -f "go.work" ]; then $(GO) work sync; fi
-	@for dir in $(MODULES); do \
-		echo "fix & tidy - $$dir"; \
-		(cd "$$dir" && $(GO) fix ./... && $(GO) mod tidy) || exit 1; \
-		(cd "$$dir" && $(GOLANGCI_LINT) run --fix --allow-serial-runners ./...) || exit 1; \
-	done
+	$(Q)status=0; for dir in $(DEVELOPMENT_MODULES); do \
+		echo "lint - $$dir"; \
+		(cd "$$dir" && test -z "$$(gofmt -l .)") || status=1; \
+		(cd "$$dir" && $(GO) vet -tags=integration ./...) || status=1; \
+		(cd "$$dir" && "$(GOLANGCI_LINT)" run --allow-serial-runners --build-tags integration ./...) || status=1; \
+	done; exit $$status
 
 test:
-	@for dir in $(MODULES); do \
+	$(Q)status=0; for dir in $(DEVELOPMENT_MODULES); do \
 		echo "test - $$dir"; \
-		(cd "$$dir" && $(GO) test $(TEST_FLAGS) ./...) || exit 1; \
-	done
+		(cd "$$dir" && $(GO) test $(TEST_FLAGS) ./...) || status=1; \
+	done; exit $$status
 
-race: test
-
-validate: format vet lint test examples release-test
+check:
+	$(Q)$(MAKE) --no-print-directory environment || exit $$?
+	$(Q)$(MAKE) --no-print-directory inventory || exit $$?
+	$(Q)status=0; for stage in lint test examples test-integration; do \
+		echo "check - $$stage"; \
+		if $(MAKE) --no-print-directory $$stage TEST_FLAGS='$(CHECK_TEST_FLAGS)'; then echo "$$stage: PASS"; else echo "$$stage: FAIL"; status=1; fi; \
+	done; echo "check: exit $$status"; exit $$status
 
 examples:
-	$(GO) run ./examples/lifecycle
-	$(GO) run ./examples/quality
-	$(GO) run ./examples/retrieval
-	$(GO) run ./examples/quality-integration
-	$(GO) run ./examples/managed-projections
+	$(Q)build=$$(mktemp -d "$${TMPDIR:-/tmp}/memy-examples.XXXXXXXX"); trap 'rm -rf "$$build"' EXIT HUP INT TERM; \
+	status=0; for name in lifecycle quality retrieval quality-integration managed-projections; do \
+		echo "build example - $$name"; $(GO) build -o "$$build/$$name" "./examples/$$name" || status=1; \
+	done; exit $$status
+
+test-integration:
+	$(Q)status=0; for target in test-candidate test-published; do \
+		$(MAKE) --no-print-directory $$target || status=1; \
+	done; exit $$status
+
+test-candidate:
+	$(Q)cd tools && $(GO) test -tags=integration -race -count=1 -timeout=$(TEST_TIMEOUT) -run '^TestCandidateArtifacts$$' ./...
+
+release-candidate:
+	$(Q)MEMY_CANDIDATE_SOURCE="$(RELEASE_SOURCE)" MEMY_CANDIDATE_VERSION="$(RELEASE_VERSION)" $(MAKE) --no-print-directory test-candidate
+
+test-published:
+	$(Q)cd tools && $(GO) test -tags=integration -race -count=1 -timeout=$(TEST_TIMEOUT) -run '^TestPublishedConsumer$$' ./...
 
 bench:
-	@for dir in $(MODULES); do \
-		echo "bench - $$dir"; \
-		(cd "$$dir" && $(GO) test -bench=. -run='^$$' -benchmem ./...) || exit 1; \
-	done
+	$(Q)for dir in $(DEVELOPMENT_MODULES); do (cd "$$dir" && $(GO) test -bench=. -run='^$$' -benchmem ./...) || exit 1; done
 
 fuzz:
-	@for dir in $(MODULES); do \
-		echo "fuzz - $$dir"; \
-		(cd "$$dir" && \
-			packages=$$($(GO) list -tags=fuzz ./...) && \
-			for pkg in $$packages; do \
-				targets=$$($(GO) test -tags=fuzz -list '^Fuzz' "$$pkg") || exit 1; \
-				for target in $$targets; do \
-					case "$$target" in Fuzz*) \
-						$(GO) test -tags=fuzz -run='^$$' -fuzz="^$$target$$" \
-							-fuzztime=$(FUZZTIME) -parallel=$(FUZZPARALLEL) "$$pkg" || exit 1 ;; \
-					esac; \
-				done; \
-			done \
-		) || exit 1; \
+	$(Q)for dir in $(DEVELOPMENT_MODULES); do \
+		(cd "$$dir" && for pkg in $$($(GO) list ./...); do \
+			for target in $$($(GO) test -list '^Fuzz' "$$pkg"); do \
+				case "$$target" in Fuzz*) $(GO) test -run='^$$' -fuzz="^$$target$$" -fuzztime=$(FUZZTIME) -parallel=$(FUZZPARALLEL) "$$pkg" || exit 1 ;; esac; \
+			done; done) || exit 1; \
 	done
 
 cover:
-	@for dir in $(MODULES); do \
-		echo "cover - $$dir"; \
-		(cd "$$dir" && $(GO) test -coverprofile=coverage.out ./... && $(GO) tool cover -func=coverage.out) || exit 1; \
-	done
+	$(Q)for dir in $(DEVELOPMENT_MODULES); do (cd "$$dir" && $(GO) test -coverprofile=coverage.out ./... && $(GO) tool cover -func=coverage.out) || exit 1; done
 
-release-test:
-	python3 scripts/release_test.py
-
-release: validate
-	./scripts/release.sh "$(RELEASE_TYPE)" "$(MODULES)"
-
-release-patch: validate
-	./scripts/release.sh patch "$(MODULES)"
-
-release-break: validate
-	./scripts/release.sh break "$(MODULES)"
-
-# Optional external composition; not a dependency of offline core validation.
-consumer-local:
-	python3 scripts/consumer_checks.py local
-
-consumer-published:
-	python3 scripts/consumer_checks.py published --memy-ref "$(MEMY_REF)"
+release-patch:
+	$(Q)bash scripts/release.sh patch
+release-break:
+	$(Q)bash scripts/release.sh break

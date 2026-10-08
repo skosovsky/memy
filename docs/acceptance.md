@@ -1,5 +1,8 @@
 # Acceptance matrix
 
+Current tooling uses `make check`; historical `make validate` commands below
+refer to their frozen snapshots. See [development checks](development.md).
+
 Frozen requirement inventory v1, 2026-10-04, before implementation.
 Source: `.cursor/tasks/task1.md`. Each row must be fully implemented and
 verified to count; partial and unverified rows count zero. Rows cannot be

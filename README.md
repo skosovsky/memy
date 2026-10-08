@@ -22,7 +22,7 @@ make race
 make vet
 make lint
 make examples
-make validate
+make check
 ```
 
 `make test` выполняет свежий verbose race-прогон всех найденных Go modules;
@@ -208,21 +208,22 @@ SHA256 `b39c2bda626b751dfbd035669d6e67852d8e25898ce547819e2ed82c5e9880e1`) по�
 go get github.com/skosovsky/memy@v0.1.0
 ```
 
-Для публикации committed HEAD с настроенным `origin` (tracked-изменения должны быть закоммичены):
+Для проверки и публикации committed source:
 
 ```sh
-make release # patch по умолчанию; также доступен make release-patch
-# Для несовместимого изменения API:
-make release RELEASE_TYPE=break # также доступен make release-break
+make install-tools
+make check
+make release-patch
+# Для несовместимого изменения API до v1:
+make release-break
 ```
 
-Targets сначала выполняют `make validate`, включая local-only release fixtures.
-Single-module script рассчитывает версию по опубликованным tags, запрашивает
-подтверждение и публикует один exact tag из disposable clone. Untracked-файлы
-и посторонние tags не публикуются; исходный checkout сохраняется, включая
-detached HEAD. Для major 0 break увеличивает minor; major-переходы требуют
-отдельного semantic import-version изменения и отклоняются. Неизвестный исход
-push сохраняет recovery clone. См. [release contract](docs/release.md).
+Release повторно выполняет `make check` в изолированном checkout выбранного
+commit (`RELEASE_SOURCE`, по умолчанию HEAD), проверяет candidate artifacts,
+запрашивает подтверждение конкретных refs и публикует root tag атомарно.
+После push проверяет remote identity и точную публичную версию.
+`inspect`, `resume` и `finish` работают с сохранённым recovery directory.
+См. [release contract](docs/release.md) и [development checks](docs/development.md).
 
 ## Managed projections
 
@@ -235,15 +236,15 @@ push сохраняет recovery clone. См. [release contract](docs/release.md
 обслуживаются только через повторную canonical lineage validation. Пример не
 предоставляет универсальный production storage backend.
 
-Optional external consumer suite не добавляет зависимости в core:
+Consumer semantics входят в `make test` через отдельный development-модуль.
+Зависимости peers закреплены; core не получает их импортов.
 
 ```sh
-python3 scripts/consumer_checks.py local --siblings ..
-python3 scripts/consumer_checks.py published --memy-ref <published-tag>
+make test
+make test-integration
+make test-published MEMY_REF=v0.3.1
 ```
 
-Первый режим использует текущие локальные consumer checkout либо клонирует
-проверенные ревизии из `testdata/consumer/revisions.json` с проверкой commit;
-default branch не заменяет выбранный совместимый checkout. Второй режим
-разрешает опубликованные modules при `GOWORK=off` и проверяет отсутствие replace.
-Manifest фиксирует выбранные consumer revisions; CI хранит его как artifact.
+Published baseline и candidate artifacts проверяются отдельно, без пользовательских
+соседних checkout. Публичная проверка запрещает replaces и использует checksum
+verification. Все обязательные проверки входят в `make check`.
