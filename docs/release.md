@@ -1,31 +1,37 @@
-# Local release preparation and exact publication
+# Isolated shell release
 
-The script supports this single-module repository only (MODULES = .). Release
-files have an empty edit allowlist: no go.mod rewrite or release commit is needed;
-the new lightweight tag points at the initial committed HEAD; tag signing is
-explicitly disabled for this representation. Attached and detached HEAD are
-supported. Tracked staged/unstaged changes are rejected; unrelated untracked
-files are neither copied nor published. The original HEAD, index, worktree and
-local refs remain unchanged, including on failure.
+`make release-patch` selects the next remote patch version. `make release-break`
+increments minor before v1; later major transitions require an explicit reviewed
+import-path migration. RELEASE_SOURCE defaults to HEAD and resolves to a commit.
+Only the root module is publishable. Development modules never enter its ZIP.
 
-Prepare in a disposable clone without importing local tags. Determine the next
-version from the push destination's published semantic version tags, never local
-unpublished tags. patch increments patch; break on major zero increments minor.
-Major transitions beyond v0 require an explicit semantic import-version change
-and are rejected by this script. A patch on an already published major >=2
-requires a matching /vN root module path. No generic multi-module release framework is
-provided. Only one tag is published with an exact refspec; no multi-ref transaction
-is claimed. Remote advancement between discovery and publication fails safely.
+The Bash script rejects tracked/index changes and ambiguous destinations, creates
+an isolated source checkout and runs its fresh `make check`. Candidate artifact
+and consumer checks run before confirmation. This single-module release does not
+rewrite manifests or create an empty commit: candidate SHA equals source SHA.
+Only the exact lightweight root tag is pushed, atomically, without force or
+fallback. The original checkout, index and refs are preserved.
 
-The interactive confirmation authorizes publication of the displayed version
-and commit. States are local-prepared, published, rejected or unknown. A failed
-push is reconciled by querying the exact remote tag: matching commit means
-published, absent/different tag means rejected, failed observation means unknown.
-For unknown outcome, retain the prepared clone and print its recovery path and
-exact tag/commit. Observe that remote ref before retrying or deleting the clone;
-do not blindly delete refs after transport failure. Definite failure removes the
-disposable preparation only, leaving original refs intact.
+Confirmation displays source/candidate SHA, version, destination and refs. After
+push, exact remote identity and exact-version consumer resolution through
+proxy.golang.org with checksum verification are required. Six bounded attempts
+within five minutes handle proxy delay. A transport error is reconciled before
+retry; unavailable observation or verification is not success.
 
-Fixtures use temporary repositories and local bare remotes, including rejecting
-hooks; they never publish a real release. Run python3 scripts/release_test.py.
-The implementation uses portable Bash/Git operations and no BSD sed or sort -V.
+Recovery records live outside the source checkout and contain validated text
+fields, updated by rename. A mkdir lock guards each repository and record; stale
+locks require manual inspection. The record path is always printed.
+
+* `scripts/release.sh inspect <state-dir>` observes state and remote refs only.
+* `scripts/release.sh resume <state-dir>` continues the same version/candidate,
+  revalidates its source and artifacts and confirms before a possible push.
+* `scripts/release.sh finish <state-dir>` verifies an already published candidate;
+  it never pushes.
+
+States: prepared, publishing, published-unverified, complete, conflict, unknown.
+Incomplete records and prepared clones are retained. Different remote identities
+block recovery; tags are never deleted automatically. Unsupported legacy records
+require recovery using the previous tooling, not automatic migration.
+
+Go fixtures exercise isolation, failures and recovery against local remotes.
+Implementation acceptance does not authorize a production release.
