@@ -1,0 +1,44 @@
+ok  	github.com/skosovsky/memy/tools	0.405s
+check - lint
+lint - .
+0 issues.
+lint - tools
+0 issues.
+lint - integration/consumer
+0 issues.
+lint: PASS
+check - test
+test - .
+ok  	github.com/skosovsky/memy	608.790s
+?   	github.com/skosovsky/memy/conformance	[no test files]
+ok  	github.com/skosovsky/memy/examples/lifecycle	1.905s
+?   	github.com/skosovsky/memy/examples/managed-projections	[no test files]
+ok  	github.com/skosovsky/memy/examples/managed-projections/checkpoint	2.105s
+ok  	github.com/skosovsky/memy/examples/managed-projections/host	5.001s
+ok  	github.com/skosovsky/memy/examples/quality	17.706s
+?   	github.com/skosovsky/memy/examples/quality-integration	[no test files]
+?   	github.com/skosovsky/memy/examples/retrieval	[no test files]
+ok  	github.com/skosovsky/memy/internal/kv	2.390s
+ok  	github.com/skosovsky/memy/internal/membershipproof	1.572s
+ok  	github.com/skosovsky/memy/internal/quality	96.799s
+?   	github.com/skosovsky/memy/internal/workcost	[no test files]
+ok  	github.com/skosovsky/memy/reference	1.704s
+ok  	github.com/skosovsky/memy/store/memory	1.610s
+ok  	github.com/skosovsky/memy/store/sqlite	3.285s
+test - tools
+ok  	github.com/skosovsky/memy/tools	45.392s
+test - integration/consumer
+ok  	github.com/skosovsky/memy/integration/consumer	1.794s
+test: PASS
+check - examples
+build example - lifecycle
+build example - quality
+build example - retrieval
+build example - quality-integration
+build example - managed-projections
+examples: PASS
+check - test-integration
+ok  	github.com/skosovsky/memy/tools	51.265s
+ok  	github.com/skosovsky/memy/tools	64.209s
+test-integration: PASS
+check: exit 0

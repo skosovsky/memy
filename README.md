@@ -205,7 +205,7 @@ SHA256 `b39c2bda626b751dfbd035669d6e67852d8e25898ce547819e2ed82c5e9880e1`) по�
 ## Установка и релиз
 
 ```sh
-go get github.com/skosovsky/memy@v0.1.0
+go get github.com/skosovsky/memy@v0.3.1
 ```
 
 Для проверки и публикации committed source:
