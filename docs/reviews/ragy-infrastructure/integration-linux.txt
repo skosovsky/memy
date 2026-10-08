@@ -1,0 +1,30 @@
+
+[integration] .
+ok  	github.com/skosovsky/memy	1.132s [no tests to run]
+?   	github.com/skosovsky/memy/conformance	[no test files]
+ok  	github.com/skosovsky/memy/examples/lifecycle	1.095s [no tests to run]
+?   	github.com/skosovsky/memy/examples/managed-projections	[no test files]
+ok  	github.com/skosovsky/memy/examples/managed-projections/checkpoint	1.083s [no tests to run]
+ok  	github.com/skosovsky/memy/examples/managed-projections/host	1.083s [no tests to run]
+ok  	github.com/skosovsky/memy/examples/quality	1.091s [no tests to run]
+?   	github.com/skosovsky/memy/examples/quality-integration	[no test files]
+?   	github.com/skosovsky/memy/examples/retrieval	[no test files]
+ok  	github.com/skosovsky/memy/internal/kv	1.113s [no tests to run]
+ok  	github.com/skosovsky/memy/internal/membershipproof	1.089s [no tests to run]
+ok  	github.com/skosovsky/memy/internal/quality	1.130s [no tests to run]
+?   	github.com/skosovsky/memy/internal/workcost	[no test files]
+ok  	github.com/skosovsky/memy/reference	1.082s [no tests to run]
+ok  	github.com/skosovsky/memy/store/memory	1.071s [no tests to run]
+ok  	github.com/skosovsky/memy/store/sqlite	2.492s
+
+[integration] integration/consumer
+go: downloading github.com/skosovsky/toolsy/toolkits/rag v0.18.0
+go: downloading github.com/skosovsky/toolsy/toolkits/memory v0.18.0
+go: downloading github.com/skosovsky/ragy v0.8.0
+go: downloading github.com/skosovsky/contexty v0.13.2
+go: downloading github.com/skosovsky/toolsy v0.18.0
+go: downloading github.com/google/jsonschema-go v0.4.3
+ok  	github.com/skosovsky/memy/integration/consumer	1.203s
+
+[integration] tools
+ok  	github.com/skosovsky/memy/tools	211.221s

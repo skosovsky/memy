@@ -17,22 +17,18 @@ in-memory adapter используют только standard library. Driver pin
 
 ```sh
 go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
-make test
-make race
-make vet
-make lint
-make examples
 make lint
 make test
 make test-integration
 make test-e2e
 ```
 
-`make test` выполняет свежий verbose race-прогон всех найденных Go modules;
-timeout по умолчанию — 30 минут (`TEST_TIMEOUT`), дополнительные параметры
-переопределяются через `TEST_FLAGS`. `make fix` запускает go fix/tidy и
-автоматические исправления строгого lint. Используется обычный GOPATH Go;
-`GOCACHE` и `GOLANGCI_LINT_CACHE` можно переопределить.
+`make test` выполняет свежий race-прогон обычных тестов всех найденных модулей.
+Integration и e2e запускаются отдельными целями с соответствующими build tags
+и префиксами тестов; их timeout — 30 минут. Unit-тесты используют стандартный
+timeout Go. Инструменты берутся из PATH; версии закреплены в CI.
+`make fix` запускает go fix, форматирование и автоматические lint fixes.
+Все команды используют GOWORK=off. См. [verification](docs/verification.md).
 
 Offline quality protocol v2 проверяет два typed domain: preferences и знания о
 процедурах/наблюдаемых результатах. Candidate, host review, фактические revisions,
@@ -42,7 +38,8 @@ canonical state и полный JSON-контекст оцениваются о�
 `go run ./examples/quality-integration` заменяет consumer ports и выполняет те же
 checkpoints. Оба примера scripted; результат не является LLM benchmark.
 
-`make examples` запускает lifecycle, quality, retrieval и quality-integration.
+Examples компилируются при `make test`; запускать их можно штатным `go run`.
+`go run ./examples/lifecycle` запускает lifecycle.
 Lifecycle выполняет полный offline сценарий на временном SQLite-файле:
 extraction, acceptance одного proposal, commit, corrected revision, close/reopen,
 canonical read в новой сессии, search visibility, typed projection и forget

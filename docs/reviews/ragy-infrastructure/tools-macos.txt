@@ -1,0 +1,2 @@
+0 issues.
+ok  	github.com/skosovsky/memy/tools	50.832s

@@ -1,0 +1,24 @@
+
+[test] .
+ok  	github.com/skosovsky/memy	539.827s
+?   	github.com/skosovsky/memy/conformance	[no test files]
+ok  	github.com/skosovsky/memy/examples/lifecycle	1.839s
+?   	github.com/skosovsky/memy/examples/managed-projections	[no test files]
+ok  	github.com/skosovsky/memy/examples/managed-projections/checkpoint	1.701s
+ok  	github.com/skosovsky/memy/examples/managed-projections/host	3.484s
+ok  	github.com/skosovsky/memy/examples/quality	12.361s
+?   	github.com/skosovsky/memy/examples/quality-integration	[no test files]
+?   	github.com/skosovsky/memy/examples/retrieval	[no test files]
+ok  	github.com/skosovsky/memy/internal/kv	2.569s
+ok  	github.com/skosovsky/memy/internal/membershipproof	2.106s
+ok  	github.com/skosovsky/memy/internal/quality	62.159s
+?   	github.com/skosovsky/memy/internal/workcost	[no test files]
+ok  	github.com/skosovsky/memy/reference	1.765s
+ok  	github.com/skosovsky/memy/store/memory	2.104s
+ok  	github.com/skosovsky/memy/store/sqlite	1.798s
+
+[test] integration/consumer
+?   	github.com/skosovsky/memy/integration/consumer	[no test files]
+
+[test] tools
+ok  	github.com/skosovsky/memy/tools	49.088s

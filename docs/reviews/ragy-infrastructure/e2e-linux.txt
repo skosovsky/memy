@@ -1,0 +1,24 @@
+
+[e2e] .
+ok  	github.com/skosovsky/memy	1.133s [no tests to run]
+?   	github.com/skosovsky/memy/conformance	[no test files]
+ok  	github.com/skosovsky/memy/examples/lifecycle	1.079s [no tests to run]
+?   	github.com/skosovsky/memy/examples/managed-projections	[no test files]
+ok  	github.com/skosovsky/memy/examples/managed-projections/checkpoint	2.242s
+ok  	github.com/skosovsky/memy/examples/managed-projections/host	1.086s [no tests to run]
+ok  	github.com/skosovsky/memy/examples/quality	1.112s [no tests to run]
+?   	github.com/skosovsky/memy/examples/quality-integration	[no test files]
+?   	github.com/skosovsky/memy/examples/retrieval	[no test files]
+ok  	github.com/skosovsky/memy/internal/kv	1.087s [no tests to run]
+ok  	github.com/skosovsky/memy/internal/membershipproof	1.117s [no tests to run]
+ok  	github.com/skosovsky/memy/internal/quality	1.140s [no tests to run]
+?   	github.com/skosovsky/memy/internal/workcost	[no test files]
+ok  	github.com/skosovsky/memy/reference	1.095s [no tests to run]
+ok  	github.com/skosovsky/memy/store/memory	1.087s [no tests to run]
+ok  	github.com/skosovsky/memy/store/sqlite	1.083s [no tests to run]
+
+[e2e] integration/consumer
+ok  	github.com/skosovsky/memy/integration/consumer	1.538s
+
+[e2e] tools
+ok  	github.com/skosovsky/memy/tools	190.913s

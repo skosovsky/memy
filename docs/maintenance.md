@@ -2,7 +2,7 @@
 
 ## Current configuration — 2026-10-08
 
-Go checks use three explicit development modules and one publishable root module.
+Go checks and releases use all automatically discovered modules: the root, tools, and integration/consumer.
 Run `make lint`, `make test`, `make test-integration`, and `make test-e2e`; see [verification](verification.md).
 Release is a shell state machine verified by Go fixtures; Python tooling has
 been removed. Examples are built, and their Go tests run with the other tests.

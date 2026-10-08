@@ -302,7 +302,7 @@ linters:
       min-complexity: 20
 
     gomoddirectives:
-      # Root go.work + nested modules (adapters/*, contracts/*) use `replace ... => ../..`;
+      # The consumer module binds the current root with `replace ... => ../..`;
       # `make lint` runs golangci per module with cwd = that directory, so path-based issue excludes for go.mod do not apply.
       replace-local: true
 
