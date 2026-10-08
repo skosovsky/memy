@@ -35,6 +35,7 @@ formatters:
       # A list of prefixes, which, if set, checks import paths
       # with the given prefixes are grouped after 3rd-party packages.
       # Default: []
+      # Project-specific import grouping; keep shared lint rules unchanged.
       local-prefixes:
         - github.com/skosovsky/memy
 
@@ -226,11 +227,6 @@ linters:
       # Default: false
       forbid-mutex: true
 
-    gomoddirectives:
-      # The publishable root has no local replacements; the consumer exception is narrow.
-      # Default: false
-      replace-local: false
-
     errcheck:
       # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
       # Such cases aren't reported by default.
@@ -247,7 +243,7 @@ linters:
     exhaustruct_v5:
       # List of regular expressions to match type names that should be excluded from processing.
       # Anonymous structs can be matched by '<anonymous>' alias.
-      # Has precedence over `enforce-patterns`.
+      # Has precedence over `include`.
       # Each regular expression must match the full type name, including package path.
       # For example, to match type `net/http.Cookie` regular expression should be `.*/http\.Cookie`,
       # but not `http\.Cookie`.
@@ -304,6 +300,11 @@ linters:
       # Minimal code complexity to report.
       # Default: 30 (but we recommend 10-20)
       min-complexity: 20
+
+    gomoddirectives:
+      # Root go.work + nested modules (adapters/*, contracts/*) use `replace ... => ../..`;
+      # `make lint` runs golangci per module with cwd = that directory, so path-based issue excludes for go.mod do not apply.
+      replace-local: true
 
     gocritic:
       # Settings passed to gocritic.
@@ -460,11 +461,6 @@ linters:
       - common-false-positives
     # Excluding configuration per-path, per-linter, per-text and per-source.
     rules:
-      # The consumer development module deliberately binds the current root.
-      # Published manifests are checked separately and prohibit all replaces.
-      - path: 'integration/consumer/go\.mod$'
-        text: 'local replacement are not allowed: github.com/skosovsky/memy'
-        linters: [ gomoddirectives ]
       - source: 'TODO'
         linters: [ godot ]
       - text: 'should have a package comment'
@@ -481,7 +477,9 @@ linters:
       - path: '.*_test\.go$'
         linters: [ forbidigo ]
       - path: 'examples/'
-        linters: [ forbidigo ]
+        linters:
+          - forbidigo
+          - exhaustruct_v5
       - path: '_test\.go'
         linters:
           - bodyclose
