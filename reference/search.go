@@ -240,7 +240,9 @@ func (c Composite[Q]) Search(
 	}
 	slices.SortFunc(combined.Candidates, candidateOrder)
 	if len(combined.Candidates) > options.MaxCandidates {
-		combined.Candidates = combined.Candidates[:options.MaxCandidates]
+		bounded := make([]memy.Candidate, options.MaxCandidates)
+		copy(bounded, combined.Candidates[:options.MaxCandidates])
+		combined.Candidates = bounded
 		combined.CandidatesTruncated = true
 	}
 	return combined, nil

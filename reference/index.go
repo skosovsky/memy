@@ -7,12 +7,8 @@ import (
 	"sync"
 
 	"github.com/skosovsky/memy"
+	"github.com/skosovsky/memy/internal/workcost"
 )
-
-type indexedKey struct {
-	scope memy.Scope
-	ref   memy.RevisionRef
-}
 
 // Index is a deterministic scoped index with explicit visibility lag. Writes
 // must use Engine.WithDerivedWrite; direct calls are privileged adapter access.
@@ -20,8 +16,8 @@ type Index[Q any] struct {
 	mu           sync.Mutex
 	name         string
 	match        func(Q, memy.Candidate) bool
-	pending      map[indexedKey]memy.Candidate
-	visible      map[indexedKey]memy.Candidate
+	pending      map[memy.Scope]map[memy.RevisionRef]memy.Candidate
+	visible      map[memy.Scope]map[memy.RevisionRef]memy.Candidate
 	changed      chan struct{}
 	failure      error
 	purgeFailure error
@@ -36,8 +32,8 @@ func NewIndex[Q any](name string, match func(Q, memy.Candidate) bool) *Index[Q] 
 	return &Index[Q]{
 		name:    name,
 		match:   match,
-		pending: make(map[indexedKey]memy.Candidate),
-		visible: make(map[indexedKey]memy.Candidate),
+		pending: make(map[memy.Scope]map[memy.RevisionRef]memy.Candidate),
+		visible: make(map[memy.Scope]map[memy.RevisionRef]memy.Candidate),
 		changed: make(chan struct{}), mu: sync.Mutex{}, failure: nil, purgeFailure: nil,
 	}
 }
@@ -68,7 +64,10 @@ func (i *Index[Q]) Stage(ctx context.Context, scope memy.Scope, candidate memy.C
 		return i.failure
 	}
 	candidate.Signals = nil
-	i.pending[indexedKey{scope, memy.RevisionRef{RecordID: candidate.RecordID, Revision: candidate.Revision}}] = candidate
+	if i.pending[scope] == nil {
+		i.pending[scope] = make(map[memy.RevisionRef]memy.Candidate)
+	}
+	i.pending[scope][memy.RevisionRef{RecordID: candidate.RecordID, Revision: candidate.Revision}] = candidate
 	return nil
 }
 
@@ -80,16 +79,22 @@ func (i *Index[Q]) Acknowledge(ctx context.Context, token memy.VisibilityToken) 
 	}
 	i.mu.Lock()
 	defer i.mu.Unlock()
-	key := indexedKey{token.Scope, memy.RevisionRef{RecordID: token.RecordID, Revision: token.Revision}}
-	if _, ok := i.visible[key]; ok {
+	key := memy.RevisionRef{RecordID: token.RecordID, Revision: token.Revision}
+	if _, ok := i.visible[token.Scope][key]; ok {
 		return nil
 	}
-	candidate, ok := i.pending[key]
+	candidate, ok := i.pending[token.Scope][key]
 	if !ok {
 		return memy.ErrNotFound
 	}
-	i.visible[key] = candidate
-	delete(i.pending, key)
+	if i.visible[token.Scope] == nil {
+		i.visible[token.Scope] = make(map[memy.RevisionRef]memy.Candidate)
+	}
+	i.visible[token.Scope][key] = candidate
+	delete(i.pending[token.Scope], key)
+	if len(i.pending[token.Scope]) == 0 {
+		delete(i.pending, token.Scope)
+	}
 	close(i.changed)
 	i.changed = make(chan struct{})
 	return nil
@@ -141,7 +146,7 @@ func (i *Index[Q]) Search(
 		}
 		minimumSatisfied := true
 		if options.Minimum != nil {
-			_, minimumSatisfied = i.visible[indexedKey{scope, memy.RevisionRef{RecordID: options.Minimum.RecordID, Revision: options.Minimum.Revision}}]
+			_, minimumSatisfied = i.visible[scope][memy.RevisionRef{RecordID: options.Minimum.RecordID, Revision: options.Minimum.Revision}]
 		}
 		if minimumSatisfied {
 			result := i.visibleResult(scope, query, options.MaxCandidates)
@@ -189,22 +194,34 @@ func (i *Index[Q]) visibleResult(scope memy.Scope, query Q, maximum int) memy.Se
 		Candidates: make([]memy.Candidate, 0), CandidatesTruncated: false,
 		Coverage: []memy.Coverage{{Backend: i.name, Status: coverageReady, MinimumSatisfied: true}},
 	}
-	for key, candidate := range i.pending {
-		if key.scope == scope && (i.match == nil || i.match(query, candidate)) {
+	for _, candidate := range i.pending[scope] {
+		workcost.SearchCandidate()
+		if i.match == nil || i.match(query, candidate) {
 			result.Coverage[0].Status = coveragePending
 			break
 		}
 	}
-	for key, candidate := range i.visible {
-		if key.scope == scope && (i.match == nil || i.match(query, candidate)) {
+	// Use the selected scope only. The heap's root is the worst retained
+	// candidate, so arbitrary pure matchers still see every scoped candidate.
+	limit := min(maximum, len(i.visible[scope]))
+	result.Candidates = make([]memy.Candidate, 0, limit)
+	for _, candidate := range i.visible[scope] {
+		workcost.SearchCandidate()
+		if i.match != nil && !i.match(query, candidate) {
+			continue
+		}
+		if len(result.Candidates) < limit {
 			result.Candidates = append(result.Candidates, candidate)
+			candidateUp(result.Candidates, len(result.Candidates)-1)
+			continue
+		}
+		result.CandidatesTruncated = true
+		if candidateOrder(candidate, result.Candidates[0]) < 0 {
+			result.Candidates[0] = candidate
+			candidateDown(result.Candidates)
 		}
 	}
 	slices.SortFunc(result.Candidates, candidateOrder)
-	if len(result.Candidates) > maximum {
-		result.Candidates = result.Candidates[:maximum]
-		result.CandidatesTruncated = true
-	}
 	for n := range result.Candidates {
 		result.Candidates[n].Signals = []memy.SearchSignal{
 			{Backend: i.name, Rank: n + 1, Score: result.Candidates[n].Score},
@@ -238,15 +255,49 @@ func (i *Index[Q]) Purge(ctx context.Context, batch memy.PurgeBatch) (memy.Purge
 	for _, id := range batch.Records {
 		selected[id] = true
 	}
-	for _, values := range []map[indexedKey]memy.Candidate{i.visible, i.pending} {
-		for key := range values {
-			if key.scope == batch.Scope &&
-				(selected[key.ref.RecordID] || batch.Selector.Kind == memy.SelectScope || batch.Selector.Kind == memy.SelectSubject) {
-				delete(values, key)
+	for _, scopes := range []map[memy.Scope]map[memy.RevisionRef]memy.Candidate{i.visible, i.pending} {
+		values := scopes[batch.Scope]
+		for ref := range values {
+			if selected[ref.RecordID] || batch.Selector.Kind == memy.SelectScope ||
+				batch.Selector.Kind == memy.SelectSubject {
+				delete(values, ref)
 			}
+		}
+		if len(values) == 0 {
+			delete(scopes, batch.Scope)
 		}
 	}
 	close(i.changed)
 	i.changed = make(chan struct{})
 	return memy.PurgeAck{Sink: i.name, OperationID: batch.OperationID, Epoch: batch.Epoch, Chunk: batch.Chunk}, nil
+}
+
+// candidateUp maintains a max heap under candidateOrder (worst first).
+func candidateUp(values []memy.Candidate, child int) {
+	for child > 0 {
+		parent := (child - 1) / 2
+		if candidateOrder(values[child], values[parent]) <= 0 {
+			return
+		}
+		values[child], values[parent] = values[parent], values[child]
+		child = parent
+	}
+}
+
+func candidateDown(values []memy.Candidate) {
+	parent := 0
+	for {
+		child := 2*parent + 1
+		if child >= len(values) {
+			return
+		}
+		if right := child + 1; right < len(values) && candidateOrder(values[right], values[child]) > 0 {
+			child = right
+		}
+		if candidateOrder(values[parent], values[child]) >= 0 {
+			return
+		}
+		values[parent], values[child] = values[child], values[parent]
+		parent = child
+	}
 }

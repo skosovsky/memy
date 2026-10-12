@@ -45,7 +45,7 @@ is introduced.
 | D34 | Define matrix | Composite discards candidates from errored/degraded/unavailable children even with AllowDegraded; usable healthy children may survive. Minimum and cancellation never degrade. |
 | D35 | Change docs | ScoreRanker sorts a shallow slice copy; nested payload/provenance/signals retain their ownership. Engine separately detaches callback inputs and validates canonical selections. |
 | D36 | Measure and preserve | JSONPacking benchmarks at 100/1000/10000 expose full-body quadratic cost. Keep the exact offline policy; no unproven payload-sum optimization or production throughput claim. |
-| D37 | Preserve with cost | Reference Index gathers matching metadata under its mutex. MaxCandidates limits returned data; internal CPU/heap is not bounded by it. Production top-k belongs to adapters. |
+| D37 | Change | Reference Index traverses only the exact scope under its mutex and retains at most MaxCandidates metadata using deterministic top-K selection. Arbitrary pure matchers still require a full selected-scope scan. See performance-memory.md for cost and ownership guarantees. |
 | D38 | Preserve | Composite calls children sequentially in deterministic ID order. Latencies accumulate; each child receives the candidate cap. Parallel calls are not a required guarantee. |
 | D39 | Preserve profile | Reference minimum visibility requires a caller deadline, including already-ready tokens. Eventual rejects minima; other adapters may expose their own documented compliant waiting policy. |
 | D40 | Preserve | Omitted refs are revalidated because omission metadata is disclosure. A forgotten omitted ref invalidates the complete measured delivery. |

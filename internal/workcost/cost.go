@@ -5,6 +5,7 @@ package workcost
 import "sync/atomic"
 
 type Counters struct {
+	SearchCandidates  atomic.Int64
 	DecodedDocs       atomic.Int64
 	DecodedBytes      atomic.Int64
 	MemoryCopiedBytes atomic.Int64
@@ -56,5 +57,12 @@ func Value(n int) {
 	if c := active.Load(); c != nil {
 		c.SQLValueRows.Add(1)
 		c.SQLValueBytes.Add(int64(n))
+	}
+}
+
+// SearchCandidate counts every visited search metadata entry before filtering.
+func SearchCandidate() {
+	if c := active.Load(); c != nil {
+		c.SearchCandidates.Add(1)
 	}
 }

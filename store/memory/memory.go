@@ -14,6 +14,7 @@ import (
 
 type scopeState struct {
 	gate       chan struct{}
+	users      int // callbacks and gate waiters; protected by Store.mu
 	values     map[string]memy.Value
 	index      kv.Index
 	generation memy.Version
@@ -53,7 +54,7 @@ func (*Store) Capabilities() memy.StoreCapabilities {
 	}
 }
 
-func (s *Store) acquire(ctx context.Context, scope memy.Scope) (*scopeState, error) {
+func (s *Store) acquire(ctx context.Context, key string) (*scopeState, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -62,26 +63,44 @@ func (s *Store) acquire(ctx context.Context, scope memy.Scope) (*scopeState, err
 		s.mu.Unlock()
 		return nil, memy.ErrClosed
 	}
-	state := s.scopes[scope.Key()]
+	state := s.scopes[key]
 	if state == nil {
 		state = &scopeState{
 			gate:       make(chan struct{}, 1),
+			users:      0,
 			values:     make(map[string]memy.Value),
 			index:      kv.Index{},
 			generation: 0,
 		}
-		s.scopes[scope.Key()] = state
+		s.scopes[key] = state
 	}
+	state.users++
 	s.mu.Unlock()
 	select {
 	case state.gate <- struct{}{}:
 		if s.closed.Load() {
-			<-state.gate
+			s.release(key, state, true)
 			return nil, memy.ErrClosed
 		}
 		return state, nil
 	case <-ctx.Done():
+		s.release(key, state, false)
 		return nil, ctx.Err()
+	}
+}
+
+// release retains the registered gate until the last callback or waiter leaves.
+// A successful write advances generation, including deletion of an absent key;
+// such scopes retain their CAS tombstones and cursor generation until Close.
+func (s *Store) release(key string, state *scopeState, held bool) {
+	if held {
+		<-state.gate
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	state.users--
+	if !s.closed.Load() && state.users == 0 && state.generation == 0 && len(state.values) == 0 {
+		delete(s.scopes, key)
 	}
 }
 
@@ -107,16 +126,17 @@ func (s *Store) run(ctx context.Context, scope memy.Scope, writable bool, fn fun
 	if fn == nil {
 		return memy.ErrInvalid
 	}
-	state, err := s.acquire(ctx, scope)
+	key := scope.Key()
+	state, err := s.acquire(ctx, key)
 	if err != nil {
 		return err
 	}
-	defer func() { <-state.gate }()
+	defer s.release(key, state, true)
 	bucket := kv.New(
 		ctx,
 		state.values,
 		&state.index,
-		kv.Binding{Secret: s.secret[:], Scope: scope.Key(), Generation: state.generation},
+		kv.Binding{Secret: s.secret[:], Scope: key, Generation: state.generation},
 		writable,
 	)
 	defer bucket.Seal()
@@ -145,6 +165,7 @@ func (s *Store) Close() error {
 		for _, state := range states {
 			state.gate <- struct{}{}
 			state.values = nil
+			state.index = kv.Index{}
 			<-state.gate
 		}
 	})
